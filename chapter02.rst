@@ -168,7 +168,7 @@ Per scaricare l'ultima Django, leggi la seguente procedura:
    directory include alcune utility di gestione come ad esempio
    ``django-admin.py``.
 
-.. admonition:: Trucco:
+.. admonition:: Consiglio:
 
     Se i file ``.pth``  sono una novità per te, puoi imparare qualcosa di più
     sul loro conto alla pagina
