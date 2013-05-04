@@ -80,11 +80,11 @@ connessione al database.
 
 Con una pagina "una tantum", come questa, il metodo scritta-da-zero non è
 necessariamente un male. Per prima cosa, questo codice è semplice da comprendere
- - anche uno sviluppatore alle prime armi è in grado di leggere queste 16 righe
- di Python e di capire tutto ciò che fa, dall'inizio alla fine. Non c'è
- nient'altro da imparare, nessun altro codice da leggere. E 'anche semplice da
- implementare: basta salvare il codice in un file che termina con ".cgi",
- caricare il file su un server web e visitare la pagina con un browser.
+-- anche uno sviluppatore alle prime armi è in grado di leggere queste 16 righe
+di Python e di capire tutto ciò che fa, dall'inizio alla fine. Non c'è
+nient'altro da imparare, nessun altro codice da leggere. E 'anche semplice da
+implementare: basta salvare il codice in un file che termina con ".cgi",
+caricare il file su un server web e visitare la pagina con un browser.
 
 Ma nonostante la sua semplicità, questo approccio presenta una serie di problemi
 e fastidi. Ponetevi queste domande:
@@ -233,7 +233,7 @@ percorso classico dello sviluppatore web è più o meno il seguente:
    l'applicazione della fase 2;
 4. Refattorizzare il codice in modo che l'applicazione 1 condivida il codice con
    l'applicazione 2;
-5. Ripeter le fasi 2-4 diverse volte;
+5. Ripetere le fasi 2-4 diverse volte;
 6. Realizzare che hai creato un framework.
 
 Questo è esattamente come Django stesso è stato creato!

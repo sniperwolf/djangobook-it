@@ -1,215 +1,229 @@
-==========================
-Chapter 2: Getting Started
-==========================
+=========================
+Capitolo 2: Come iniziare
+=========================
 
-Installing Django is a multi-step process, due to the multiple moving parts in
-modern Web development environments. In this chapter, we'll walk you through
-how to install the framework and its few dependencies.
+Installare Django è un processo multi-fase, a causa delle parti multiple mobili
+in moderni ambienti di sviluppo web. In questo capitolo, ti guideremo attraverso
+l'installazione del framework e le sue poche dipendenze.
 
-Because Django is "just" Python code, it runs anywhere Python does -- including
-on some cell phones! But this chapter just covers the common scenarios for
-Django installations. We'll assume you're installing it either on a
-desktop/laptop machine or a server.
+Poiché Django è "solo" codice Python, funziona ovunque gira Python -- tra cui
+alcuni telefoni cellulari! Ma questo capitolo riguarda solo gli scenari comuni
+in cui installare Django. Qui si suppone che si voglia installare Django su un
+computer desktop/laptop o un server.
 
-Later, in Chapter 12, we'll cover how to deploy Django to a production site.
+Più tardi, nel capitolo 12, vedremo come distribuire Django su un sito di
+produzione.
 
-Installing Python
+Installare Python
 =================
 
-Django itself is written purely in Python, so the first step in installing the
-framework is to make sure you have Python installed.
+Django stesso è scritto in puro Python, quindi il primo passo per
+l'installazione del framework è quello di assicurarsi di avere installato Python.
 
-Python Versions
----------------
+Versioni di Python
+------------------
 
-The core Django framework (version 1.4+) works with any Python version from 2.5
-to 2.7, inclusive. Django's optional GIS (Geographic Information Systems)
-support requires Python 2.5 to 2.7.
+Il nucleo di Django (versione 1.4 +) funziona con qualsiasi versione di Python
+dalla 2.5 alla 2.7 compresa. Il sistema opzionale GIS (Geographic Information
+Systems) di Django richiede Python dalla versione 2.5 alla 2.7.
 
-If you're not sure which version of Python to install and you have complete
-freedom over the decision, pick the latest one in the 2.x series: version 2.7.
-Although Django works equally well with any version from 2.5 to 2.7, the later
-versions of Python have performance improvements and additional language
-features you might like to use in your applications. Plus, certain third-party
-Django add-ons that you might want to use might require a version newer than
-Python 2.5, so using a later version of Python keeps your options open.
+Se non siete sicuri di quale versione di Python installare ed hai la possibilità
+di prendere una qualunque decisione, scegli quello più recente della serie 2.x:
+la versione 2.7. Anche Django funziona altrettanto bene con qualsiasi versione
+2.5-2.7, le versioni di Python hanno miglioramenti delle prestazioni ed alcune
+caratteristiche aggiunte che si potrebbero voler utilizzare per le proprie
+applicazioni. Inoltre, alcuni componenti aggiuntivi di Django che si potrebbe
+voler utilizzare, potrebbero richiedere una versione più recente della 2.5,
+quindi usare una versione più recente di Python mantiene aperte diverse opzioni.
 
-.. admonition:: Django and Python 3.x
+.. admonition:: Django e Python 3.x
 
-    At the time of writing, Python 3.3 has been released, but Django
-    only supports it experimentally. This is because the Python 3.x series 
-    introduces a substantial number of backwards-incompatible changes to the
-    language itself, and, as a result, many major Python libraries and
-    frameworks, including Django (as of version 1.4), have not yet caught up.
+    Al momento della scrittura, Python 3.3 è stato rilasciato, ma Django
+    la supporta solo sperimentalmente. Questo perché fa parte della serie Python
+    3.x, che introduce un numero significativo di modifiche non retrocompatibili
+    al linguaggio stesso, e, di conseguenza, molte grandi librerie Python e
+    framework, tra cui Django (dalla versione 1.4), non hanno ancora raggiunto.
 
-    Django 1.5 is slated to support Python 2.6, 2.7, and 3.2.  However,
-    support for Python 3.2 is considered a "preview", which means the
-    Django developers are not yet confident enough to promise
-    stability in production.  For that, they suggest you wait until
-    Django 1.6.
+    Django 1.5 è previsto per supportare Python 2.6, 2.7 e 3.2. tuttavia,
+    il supporto per la 3.2 è considerata un "anteprima", il che significa che gli
+    sviluppatori non sono ancora abbastanza sicuri da promettere stabilità nella
+    produzione. Pertanto, si suggerisce attendere Django 1.6 prima di passare a
+    Python 3.x.
 
-Installation
-------------
+Installazione
+-------------
 
-If you're on Linux or Mac OS X, you probably have Python already installed.
-Type ``python`` at a command prompt (or in Applications/Utilities/Terminal, in
-OS X). If you see something like this, then Python is installed::
+Se siete su Linux o Mac OS X, probabilmente avete già installato Python.
+Digita ``python`` al prompt dei comandi (o in Applicazioni/Utility/Terminale, in
+OS X). Se vedi qualcosa di simile, allora Python è installato::
 
     Python 2.7.3rc2 (default, Apr 22 2012, 22:30:17)
     [GCC 4.6.3] on linux2
     Type "help", "copyright", "credits" or "license" for more information.
     >>>
 
-Otherwise, you'll need to download and install Python. It's fast and easy, and
-detailed instructions are available at http://www.python.org/download/
+In caso contrario, sarà necessario scaricare e installare Python. E' veloce e
+semplice, e le istruzioni dettagliate sono disponibili all'indirizzo
+http://www.python.org/download/
 
-Installing Django
+Installare Django
 =================
 
-At any given time, two distinct versions of Django are available to you: the
-latest official release and the bleeding-edge development version. The version you
-decide to install depends on your priorities. Do you want a stable and tested
-version of Django, or do you want a version containing the latest features,
-perhaps so you can contribute to Django itself, at the expense of stability?
+In qualsiasi momento, due versioni distinte di Django sono a tua
+disposizione: l'ultima release ufficiale e la versione di sviluppo bleeding-edge.
+La versione da installare dipende dalle tue priorità. Vuoi una versione
+stabile e testata di Django, o vuoi una versione con tutte le ultime
+caratteristiche, magari per poter contribuire a Django stesso, a spese della
+stabilità?
 
-We'd recommend sticking with an official release, but it's important to know
-that the development version exists, because you'll find it mentioned
-in the documentation and by members of the community.
+Vi consigliamo di iniziare con una release ufficiale, ma è importante sapere
+che la versione di sviluppo esiste, perché lo troverete citato
+nella documentazione e dai membri della comunità.
 
-Installing an Official Release
-------------------------------
+Installare la Release Ufficiale
+-------------------------------
 
-Official releases have a version number, such as 1.4.2, 1.4.1 or 1.4, and the latest
-one is always available at http://www.djangoproject.com/download/.
+Le release ufficiali hanno un numero di versione, come ad esempio 1.4.2, 1.4.1 o
+1.4, e l'ultima è sempre disponibile all'indirizzo
+http://www.djangoproject.com/download/.
 
-If you're on a Linux distribution that includes a package of Django, it's a
-good idea to use the distributor's version. That way, you'll get security
-updates along with the rest of your system packages.
+Se siete su una distribuzione Linux che include un pacchetto di Django, è un
+buona idea utilizzare la versione del distributore. In questo modo, avrai la
+sicurezza di aggiornare Django con il resto dei tuoi pacchetti di sistema.
 
-If you don't have access to a prepackaged version, you can download and install
-the framework manually. To do so, first download the tarball, which will be
-named something like ``Django-1.4.2.tar.gz``. (It doesn't matter which
-local directory you download this file into; the installation process will put
-Django's files in the right place.) Then, unzip it and run ``setup.py install``,
-as you do with most Python libraries.
+Se non si ha accesso a una versione preconfezionata, è possibile scaricare e
+installare il framework manualmente. Per fare ciò, prima scaricare il tarball,
+che avrà un nome simile a ``Django-1.4.2.tar.gz`` (Non importa in quale
+directory locale si scarica questo file, il processo di installazione metterà
+tutti i file di Django al posto giusto). Poi, decomprimerlo ed eseguire
+``setup.py install``, come si fa con la maggior parte delle librerie Python.
 
-Here's how that process looks on Unix systems:
+Ecco come si presenta questo processo nei sistemi Unix:
 
 #. ``tar xzvf Django-1.4.2.tar.gz``
 #. ``cd Django-*``
 #. ``sudo python setup.py install``
 
-On Windows, we recommend using 7-Zip (http://www.djangoproject.com/r/7zip/)
-to unzip ``.tar.gz`` files. Once you've unzipped the file, start up a DOS
-shell (the "Command Prompt") with administrator privileges and run the
-following command from within the directory whose name starts with ``Django-``::
+In Windows, si consiglia di utilizzare 7-Zip (http://www.djangoproject.com/r/7zip/)
+per decomprimere i file ``.tar.gz``. Una volta decompresso il file, avviare una
+shell DOS (il "Prompt dei comandi") con i privilegi di amministratore ed
+eseguire il seguente comando all'interno della directory il cui nome inizia con
+``Django-``::
 
     python setup.py install
 
-In case you're curious: Django's files will be installed into your Python
-installation's ``site-packages`` directory -- a directory where Python looks
-for third-party libraries. Usually it's in a place like
+Nel caso tu sia curioso: i file di Django saranno installati nella tua directory
+``site-packages`` di Python -- una directory in cui Python cerca per trovare le
+librerie di terze parti. Di solito è in un posto come
 ``/usr/lib/python2.7/site-packages``.
 
-Installing the "Development" Version
+Installare la Versione "Development"
 ------------------------------------
 
-Django uses Git (http://git-scm.com) for its source control. The latest and
-greatest Django development version available from Django's official Git
-repository (https://github.com/django/django). You should consider installing
-this version if you want to work on the bleeding edge, or if you want to
-contribute code to Django itself.
+Django utilizza Git (http://git-scm.com) per il controllo del codice sorgente.
+L'ultima e più grande versione di sviluppo Django è disponibile dalla repository
+Git ufficiale di Django (https://github.com/django/django). Si dovrebbe prendere
+in considerazione l'installazione di questa versione se si vuole lavorare sulle
+ultime novità, o se si vuole contribuire al codice di Django stesso.
 
-Git is a free, open source distributed revision-control system, and the Django
-team uses it to manage changes to the Django codebase. You can download and
-install Git from http://git-scm.com/download but it is easier to install with
-your operating system's package manager. You can use Git to grab the very latest
-Django source code and, at any given time, you can update your local version of
-the Django code to get the latest changes and improvements made by Django
-developers.
+Git è un sistema libero, open source per la distribuzione, la revisione ed il
+controllo, ed il team di Django lo utilizza per gestire le modifiche al codice
+di base. È possibile scaricare e installare Git dall'indirizzo
+http://git-scm.com/download, ma è più semplice da installare con il gestore dei
+pacchetti del sistema operativo (su usi Linux). È possibile utilizzare Git per
+scaricare il codice di Django più recente e, in un qualunque momento, è
+possibile aggiornare la versione in locale del codice di Django per ottenere gli
+ultimi cambiamenti e miglioramenti fatti dagli sviluppatori.
 
-When using the development version, keep in mind there's no guarantee things
-won't be broken at any given moment. With that said, though, some members of the
-Django team run production sites on the development version, so they have an
-incentive to keep it stable.
+Quando si utilizza la versione di sviluppo, è bene tenere a mente che non ci
+sono garanzie che qualcosa vada storta in un particolare momento. Detto questo,
+però, alcuni membri della team usando su siti di produzione la versione di
+sviluppo, in modo da avere un incentivo per mantenerlo stabile.
 
-To grab the latest Django, follow these steps:
+Per scaricare l'ultima Django, leggi la seguente procedura:
 
-#. Make sure you have Git installed. You can get the
-   software free from http://git-scm.com/, and you can find
-   excellent documentation at http://git-scm.com/documentation.
+#. Assicurarsi di avere installato Git. È possibile il software gratuito
+    all'indirizzo http://git-scm.com/, mentre una documentazione eccellente si
+    trova all'indirizzo http://git-scm.com/documentation.
 
-#. Clone the repository using the command ``git clone https://github.com/django/django djmaster``
+#. Clonare il repository con il comando
+    ``git clone https://github.com/django/django djmaster``
 
-#. Locate your Python installation's ``site-packages`` directory. Usually
-   it's in a place like ``/usr/lib/python2.7/site-packages``. If you have
-   no idea, type this command from a command prompt::
+#. Individuare la directory ``site-packages`` nella tua installazione di Python.
+    Solitamente è in un posto simile a ``/usr/lib/python2.7/site-packages``.
+    Se non hai alcuna idea, digita questo comando dal prompt dei comandi::
 
        python -c 'import sys, pprint; pprint.pprint(sys.path)'
 
-   The resulting output should include your ``site-packages`` directory.
+    L'output risultante dovrebbe includere il tuo ``site-packages``.
 
-#. Within the ``site-packages`` directory, create a file called
-   ``djmaster.pth`` and edit it to contain the full path to your ``djmaster``
-   directory to it. For example, the file could just contain this line::
+#. All'interno di ``site-packages``, creare un file chiamato
+    ``djmaster.pth``e modificarlo in modo che contenga il percorso completo
+    alla tua directory ``djmaster``. Ad esempio, il file potrebbe semplicemente
+    contenere questa riga::
 
        /path/to/djmaster
 
-#. Place ``djmaster/django/bin`` on your system PATH. This directory
-   includes management utilities such as ``django-admin.py``.
+#. Localizza ``djmaster/django/bin`` sul tuo percorso di sistema. Questa
+   directory include alcune utility di gestione come ad esempio
+   ``django-admin.py``.
 
-.. admonition:: Tip:
+.. admonition:: Trucco:
 
-    If ``.pth`` files are new to you, you can learn more about them at
+    Se i file ``.pth``  sono una novità per te, puoi imparare qualcosa di più
+    sul loro conto alla pagina
     http://www.djangoproject.com/r/python/site-module/.
 
-After downloading from Git and following the preceding steps, there's no
-need to run ``python setup.py install``-- you've just done the work by hand!
+Dopo aver scaricato il tutto da Git e seguendo i passaggi precedenti, non è
+necessario eseguire ``python setup.py install`` -- hai appena fatto il lavoro a
+mano!
 
-Because the Django code changes often with bug fixes and feature additions,
-you'll probably want to update it every once in a while. To update the code,
-just run the command ``git pull origin master`` from within the ``djmaster``
-directory. When you run that command, Git will contact
-https://github.com/django/django, determine whether any of Django's code has
-changed, and update your local version of the code with any changes that have
-been made since you last updated. It's quite slick.
+Poiché il codice Django cambia spesso con correzioni di bug e aggiunte,
+ti consigliamo di aggiornarlo di tanto in tanto. Per aggiornare il codice,
+basta eseguire il comando ``git pull origin master`` dall'interno della
+directory ``djmaster`` Quando si esegue questo comando, Git si metterà in
+contatto con https://github.com/django/django per determinare se qualche parte
+di codice è cambiata e quindi aggiornare la versione locale con le eventuali
+modifiche che sono state compiuti dopo l'ultimo aggiornamento. E 'abbastanza
+semplice.
 
-Finally, if you use Django development version, you should know how to figure
-out which version of Django you're running. Knowing your version number is
-important if you ever need to reach out to the community for help, or if you
-submit improvements to the framework. In these cases, you should tell people the
-revision, also known as a "commit," that you're using. To find out your current
-commit, type "git log -1" from within the ``django`` directory, and look for the
-identifier after "commit". This number changes each time Django is changed,
-whether through a bug fix, feature addition, documentation improvement or
-anything else.
+Infine, se si utilizza la versione di sviluppo Django, si dovrebbe sapere come
+con quale versione di Django si sta lavorando. Conoscere il proprio numero di
+versione è importante se mai avessi bisogno di entrare in contatto con la
+comunità per chiedere aiuto, o volessi presentare miglioramenti al framework.
+In questi casi, si dovrebbe comunicare la revisione, detto anche "commit", della
+versione in uso. Per scoprire l'attuale commit della tua versione, basta
+digitare "git log -1" all'interno della directory ``django``, e cercare
+l'identificatore dopo "commit". Questo numero cambia ogni volta che Django è
+viene modificato, o per di una correzione di bug, o per l'aggiunta di nuove
+feature, o per il miglioramento documentazione o qualsiasi altra cosa.
 
-Testing the Django installation
-===============================
+Testare l'installazione di Django
+=================================
 
-For some post-installation positive feedback, take a moment to test whether the
-installation worked. In a command shell, change into another directory (e.g.,
-*not* the directory that contains the ``django`` directory) and start the
-Python interactive interpreter by typing ``python``. If the installation was
-successful, you should be able to import the module ``django``:
+Per capire se tutto è filato liscio, prenditi un momento per verificare se la
+installazione ha fatto il suo lavoro. In una shell dei comandi, cambiare
+directory (ad esempio, *non* la directory che contiene ``django``) e avviare
+l'interprete interattivo di Python digitando ``python``. Se l'installazione ha
+avuto successo, dovresti essere in grado di importare il modulo ``django``:
 
     >>> import django
     >>> django.VERSION
     (1, 4, 2, 'final', 0)
 
-.. admonition:: Interactive Interpreter Examples
+.. admonition:: Esempi con l'interprete interattivo
 
-    The Python interactive interpreter is a command-line program that lets you
-    write a Python program interactively. To start it, run the command
-    ``python`` at the command line.
+    L'interprete interattivo di Python è un programma a riga di comando che
+    permette di scrivere un programma Python interattivamente. Per avviarlo,
+    eseguire il comando ``python`` dalla riga di comando.
 
-    Throughout this book, we feature example Python interactive interpreter
-    sessions. You can recognize these examples by the triple
-    greater-than signs (``>>>``), which designate the interpreter's prompt. If
-    you're copying examples from this book, don't copy those greater-than signs.
+    In questo libro, useremo scrivere esempi funzionali usando questo interprete.
+    È possibile riconoscere questi esempi dal triplo segno di maggiore (``>>>``),
+    che simbolizza il prompt dell'interprete. Se vuoi copiare gli esempi di
+    questo libro, non copiare quei segni di maggiore.
 
-    Multiline statements in the interactive interpreter are padded with three
-    dots (``...``). For example::
+    Dichiarazioni multilinea nell'interprete interattivo sono aggiunti con tre
+    puntini (``...``). Per esempio::
 
         >>> print """This is a
         ... string that spans
@@ -222,10 +236,10 @@ successful, you should be able to import the module ``django``:
         >>> my_function('hello')
         hello
 
-    Those three dots at the start of the additional lines are inserted by the
-    Python shell -- they're not part of our input. We include them here to be
-    faithful to the actual output of the interpreter. If you copy our examples
-    to follow along, don't copy those dots.
+    Quei tre puntini all'inizio delle linee aggiuntive vengono inserite dalla
+    Shell di Python -. quindi sono parte del nostro input. Noi li includiamo qui
+    per esser fedeli all'effettivo output dell'interprete. Se vuoi copiare i
+    nostri esempi a seguire, non copiare quei puntini.
 
 Setting Up a Database
 =====================
