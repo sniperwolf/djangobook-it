@@ -241,162 +241,170 @@ avuto successo, dovresti essere in grado di importare il modulo ``django``:
     per esser fedeli all'effettivo output dell'interprete. Se vuoi copiare i
     nostri esempi a seguire, non copiare quei puntini.
 
-Setting Up a Database
-=====================
+Creare ed impostare un Database
+===============================
 
-At this point, you could very well begin writing a Web application with Django,
-because Django's only hard-and-fast prerequisite is a working Python
-installation. However, odds are you'll be developing a *database-driven* Web
-site, in which case you'll need to configure a database server.
+A questo punto, si potrebbe benissimo iniziare a scrivere un'applicazione web
+con Django, perché il solo prerequisito di Django è una installazione
+funzionante di Python. Tuttavia, è probabile che tu debba sviluppare un sito web
+*basato su database*, nel qual caso è necessario configurare un database server.
 
-If you just want to start playing with Django, skip ahead to the
-"Starting a Project" section -- but keep in mind that all the examples in this
-book assume you have a working database set up.
+Se si desidera solo iniziare a giocare con Django, salta alla sezione successiva
+"Avviare un Progetto" -- ma tieni presente che tutti gli esempi in questo
+libro suppongono che tu abbia creato un database sul quale lavorare.
 
-Django supports four database engines:
+Django supporta quattro tipi di database engine:
 
 * PostgreSQL (http://www.postgresql.org/)
 * SQLite 3 (http://www.sqlite.org/)
 * MySQL (http://www.mysql.com/)
 * Oracle (http://www.oracle.com/)
 
-For the most part, all the engines here work equally well with the core Django
-framework. (A notable exception is Django's optional GIS support, which is much
-more powerful with PostgreSQL than with other databases.) If you're not tied to
-any legacy system and have the freedom to choose a database backend, we
-recommend PostgreSQL, which achieves a fine balance between cost, features,
-speed and stability.
+Per la gran parte, tutti i motori qui elencati funzionano altrettanto bene con
+il nucleo Django framework (un'eccezione di rilievo va sollevata per il supporto
+opzionale GIS di Django, che è molto più potente con PostgreSQL che con altri
+database). Se non sei legato ad un particolare sistema legacy ed hai libertà di
+scegliere un qualunque database backend, ti raccomandiamo PostgreSQL, che si
+basa su un giusto equilibrio tra costi, caratteristiche, velocità e stabilità.
 
-Setting up the database is a two-step process:
+L'impostazione del database è un processo che si svolge in due fasi:
 
-* First, you'll need to install and configure the database server itself.
-  This process is beyond the scope of this book, but each of the four
-  database backends has rich documentation on its Web site. (If you're on
-  a shared hosting provider, odds are that they've set this up for you
-  already.)
+* In primo luogo, è necessario installare e configurare il database server
+  stesso. Questo processo va oltre lo scopo di questo libro, ma ciascuno dei
+  quattro database qui elencati ha ricca documentazione sul suo sito web.
+  (Se sei su un hosting condiviso, è molto probabile che il tuo fornitore abbia
+  già impostato tutto questo per te).
 
-* Second, you'll need to install the Python library for your particular
-  database backend. This is a third-party bit of code that allows Python to
-  interface with the database. We outline the specific, per-database
-  requirements in the following sections.
+* In secondo luogo, è necessario installare la libreria Python per il tuo
+  particolare database backend. Questo è fatto tramite codice di terze parti che
+  permette a Python di relazionarsi con il database. Descriveremo tutte le
+  specifiche da soddisfare per ogni database nelle seguenti sezioni.
 
-If you're just playing around with Django and don't want to install a database
-server, consider using SQLite. SQLite is unique in the list of supported
-databases in that it doesn't require either of the above steps. It merely reads
-and writes its data to a single file on your filesystem, and Python versions 2.5
-and higher include built-in support for it.
+Se stai solo giocando con Django e non si desidera installare un database
+server, considera l'utilizzo di SQLite. SQLite è unico nella lista dei database
+supportati che non richiede nessuno dei due passaggi precedenti. Esso si limita
+a leggere e scrivere i dati su un unico file nel filesystem e le versioni di
+Python dalla 2.5 lo supportano nativamente.
 
-On Windows, obtaining database driver binaries can be frustrating. If you're
-eager to jump in, we recommend using Python 2.7 and its built-in support for
-SQLite.
+Su Windows, ottenere i file binari per i database può essere frustrante. Se vuoi
+saltare queste fasi, si consiglia di utilizzare Python 2.7 con SQLite.
+(N.d.T. Gli utenti Windows hanno la possibilità di usare ActiveState Python, una
+versione modificata di Python che integra in sé un sistema di gestione dei
+pacchetti/moduli simile a pip che salta la fase di compilazione dei sorgenti
+poiché prende tutto da una vasta repository di utili file binari. Questa
+repository contiene tutti i moduli che sono descritti di seguito, compreso il
+mitico ``MySQLdb``).
 
-Using Django with PostgreSQL
+Usare Django con PostgreSQL
 ----------------------------
 
-If you're using PostgreSQL, you'll need to install either the ``psycopg`` or
-``psycopg2`` package from http://www.djangoproject.com/r/python-pgsql/. We
-recommend ``psycopg2``, as it's newer, more actively developed and can be
-easier to install. Either way, take note of whether you're using version 1 or
-2; you'll need this information later.
+Se stai usando PostgreSQL, è necessario installare sia il pacchetto ``psycopg``
+o ``psycopg2`` dall'indirizzo http://www.djangoproject.com/r/python-pgsql/. Noi
+raccomandiamo ``psycopg2``, poiché più recente, più attivamente sviluppato e più
+semplice da installare. In entrambi i casi, ricorda se stai utilizzando la
+versione 1 o la 2; avrai bisogno di questa informazioni in futuro.
 
-If you're using PostgreSQL on Windows, you can find precompiled binaries of
-``psycopg`` at http://www.djangoproject.com/r/python-pgsql/windows/.
+Se stai usando PostgreSQL su Windows, si possono trovare binari precompilati di
+``psycopg`` all'indirizzo http://www.djangoproject.com/r/python-pgsql/windows/.
 
-If you're on Linux, check whether your distribution's package-management
-system offers a package called "python-psycopg2", "psycopg2-python",
-"python-postgresql" or something similar.
+Se sei su Linux, verifica che il gestore di pacchetti presente nella tua
+distribuzione offra un pacchetto chiamato "python-psycopg2", "psycopg2-python",
+"python-PostgreSQL" o qualcosa di simile.
 
-Using Django with SQLite 3
+Usare Django con SQLite 3
 --------------------------
 
-You're in luck: no database-specific installation is required, because Python
-ships with SQLite support. Skip ahead to the next section.
+Sei fortunato: non è richiesta alcuna installazione specifica del database,
+perché Python supporta nativamente SQLite. Salta alla sezione successiva.
 
-Using Django with MySQL
+Usare Django con MySQL
 -----------------------
 
-Django requires MySQL 4.0 or above. The 3.x versions don't support nested
-subqueries and some other fairly standard SQL statements.
+Django richiede MySQL 4.0 o superiore. Le versioni 3.x non supportano le
+subquery annidate e alcune altre istruzioni SQL abbastanza standard.
 
-You'll also need to install the ``MySQLdb`` package from
+Hai anche bisogno di installare il pacchetto ``MySQLdb`` dall'indirizzo
 http://www.djangoproject.com/r/python-mysql/.
 
-If you're on Linux, check whether your distribution's package-management system
-offers a package called "python-mysql", "python-mysqldb", "mysql-python" or
-something similar.
+Se sei su Linux, verifica che il sistema di gestione dei pacchetti presente
+nella tua distribuzione offra un pacchetto chiamato "python-mysql",
+"python-mysqldb", "mysql-python" o qualcosa di simile.
 
-Using Django with Oracle
+Usare Django con Oracle
 ------------------------
 
-Django works with Oracle Database Server versions 9i and higher.
+Django lavora con le versioni 9i e superiori dei server database Oracle.
 
-If you're using Oracle, you'll need to install the ``cx_Oracle`` library,
-available at http://cx-oracle.sourceforge.net/. Use version 4.3.1 or higher, but
-avoid version 5.0 due to a bug in that version of the driver.  Version 5.0.1
-resolved the bug, however, so you can choose a higher version as well.
+Se si utilizza Oracle, è necessario installare la libreria ``cx_Oracle``,
+disponibile all'indirizzo http://cx-oracle.sourceforge.net/. Utilizza la
+versione 4.3.1 o superiore, ma evita la versione 5.0 per via di un bug presente
+in questa versione del driver. La versione 5.0.1 ha risolto il bug, in modo da
+poter scegliere una versione superiore qualunque.
 
-Using Django Without a Database
+Usare Django senza Database
 -------------------------------
 
-As mentioned earlier, Django doesn't actually require a database. If you just
-want to use it to serve dynamic pages that don't hit a database, that's
-perfectly fine.
+Come accennato in precedenza, Django in realtà non richiede un database.
+Se vuoi usarlo solo per fornire pagine dinamiche che non necessitano database,
+funziona bene allo stesso modo.
 
-With that said, bear in mind that some of the extra tools bundled with Django
-*do* require a database, so if you choose not to use a database, you'll miss
-out on those features. (We highlight these features throughout this book.)
+Detto questo, tieni a mente che alcuni degli strumenti extra compresi in Django
+*richiedono* un database, quindi se si sceglie questa strada, ti perdi queste
+caratteristiche (che evidenziamo in questo libro).
 
-Starting a Project
-==================
+Avviare un Progetto
+===================
 
-Once you've installed Python, Django and (optionally) your database
-server/library, you can take the first step in developing a Django application
-by creating a *project*.
+Una volta installato Python, Django e (opzionalmente) la libreria del database
+server, si può compiere il primo passo nello sviluppo di una applicazione con la
+creazione di un *progetto*.
 
-A project is a collection of settings for an instance of Django, including
-database configuration, Django-specific options and application-specific
-settings.
+Un progetto è quell'insieme di impostazioni di un'istanza di Django, comprese le
+opzioni di configurazione, database specifici per Django e le impostazioni delle
+terze delle applicazioni.
 
-If this is your first time using Django, you'll have to take care of some
-initial setup. Create a new directory to start working in, perhaps something
-like ``/home/username/djcode/``.
+Se questa è la prima volta che si usa Django, bisogna compiere alcune
+configurazione iniziale. Creare una nuova directory per iniziare a lavorare,
+qualcosa come ``/home/username/djcode/``.
 
-.. admonition:: Where Should This Directory Live?
+.. admonition:: Dove mettere tutta la roba per andare online?
 
-    If your background is in PHP, you're probably used to putting code under the
-    Web server's document root (in a place such as ``/var/www``). With Django,
-    you don't do that. It's not a good idea to put any of this Python code
-    within your Web server's document root, because in doing so you risk the
-    possibility that people will be able to view your raw source code over the
-    Web. That's not good.
+    Se sei un programmatore PHP, probabilmente sei abituato a mettere il codice
+    nella root del server Web (un posto come /var/www). Con Django, non farlo.
+    Non è una buona idea mettere tutto questo codice Python all'interno di
+    document root del server Web, perché così facendo si rischia la possibilità
+    che qualcuno sia in grado di visualizzare il codice sorgente grezzo/raw sul
+    web. E questo non va bene.
 
-    Put your code in some directory **outside** of the document root.
+    Inserire il codice in una directory **al di fuori** della root dei documenti.
 
-Change into the directory you created, and run the command
-``django-admin.py startproject mysite``. This will create a ``mysite``
-directory in your current directory.
+Spostarsi nella directory appena creata, ed eseguire il comando
+``django-admin.py startproject mysite``. Questo creerà una directory ``mysite``
+nella directory corrente.
 
 .. note::
 
-    ``django-admin.py`` should be on your system path if you installed Django
-    via its ``setup.py`` utility.
+    ``django-admin.py`` dovrebbe essere presente sul tuo percorso di sistema se
+    hai installato Django attraverso ``setup.py`` o pip.
 
-    If you're using the development version, you'll find ``django-admin.py`` in
-    ``djmaster/django/bin``. Because you'll be using ``django-admin.py``
-    often, consider adding it to your system path. On Unix, you can do so by
-    symlinking from ``/usr/local/bin``, using a command such as ``sudo ln -s
-    /path/to/django/bin/django-admin.py /usr/local/bin/django-admin.py``. On
-    Windows, you'll need to update your ``PATH`` environment variable.
+    Se stai utilizzando la versione di sviluppo, troverai ``django-admin.py`` in
+    ``djmaster/django/bin``. Poiché userai spesso ``django-admin.py``, può
+    essere comodo aggiungerlo al percorso di sistema. Su Unix, è possibile farlo
+    con un collegamento simbolico da ``/usr/local/bin`` usando un comando come
+    ``sudo ln -s /path/to/django/bin/django-admin.py /usr/local/bin/django-admin.py``.
+    In Windows, è necessario aggiornare la variabile d'ambiente ``PATH``.
 
-    If you installed Django from a packaged version for your Linux
-    distribution, ``django-admin.py`` might be called ``django-admin`` instead.
+    Se Django è stato installato da una versione impacchettata di una
+    distribuzione Linux, ``django-admin.py`` potrebbe essere chiamato
+    ``django-admin``.
 
-If you see a "permission denied" message when running
-``django-admin.py startproject``, you'll need to change the file's permissions.
-To do this, navigate to the directory where ``django-admin.py`` is installed
-(e.g., ``cd /usr/local/bin``) and run the command ``chmod +x django-admin.py``.
+Se viene visualizzato il messaggio di un "permission denied" ("permesso negato"
+in inglese) durante l'esecuzione di ``django-admin.py startproject``, è
+necessario modificare le autorizzazioni del file. Per fare ciò, passare alla
+directory in cui è installato ``django-admin.py`` (ad esempio,
+``cd /usr/local/bin``) ed eseguire il comando ``chmod +x django-admin.py``.
 
-The ``startproject`` command creates a directory containing five files::
+Il comando ``startproject`` crea una directory che contiene cinque file::
 
     mysite/
         manage.py
@@ -406,67 +414,72 @@ The ``startproject`` command creates a directory containing five files::
             urls.py
             wsgi.py
 
-.. note:: Doesn't match what you see?
+.. note:: Non corrisponde a ciò che vedi?
 
-    The default project layout recently changed. If you're seeing a
-    "flat" layout (with no inner ``mysite/`` directory), you're probably using
-    a version of Django that doesn't match this tutorial version. This book covers
-    Django 1.4 and above, so if you're using an older version you probably want to
-    consult Django's official documentation.
+    Il layout di progetto predefinito è recentemente cambiato. Se stai vedendo
+    un layout "piatto" (senza ``mysite`` come directory interna), probabilmente
+    stai usando una versione di Django che non corrisponde alla versione usata
+    nel tutorial. Questo libro tratta Django 1.4 e superiori, quindi se stai
+    usando una versione precedente, è meglio consultare la documentazione
+    ufficiale di Django.
 
-    The documentation for Django 1.X version is available at https://docs.djangoproject.com/en/1.X/.
+    La documentazione per la versione 1.x Django è disponibile
+    presso https://docs.djangoproject.com/en/1.X/.
 
-These files are as follows:
+Questi file sono i seguenti:
 
-* ``mysite/``: The outer ``mysite/`` directory is just a container for your project.
-  Its name doesn't matter to Django; you can rename it to anything you like.
+* ``mysite/``: La directory ``mysite/`` è solo un contenitore per il
+  tuo progetto. Il suo nome non importa a Django, è possibile rinominarlo
+  in qualcosa che ti piace senza provocare danni.
 
-* ``manage.py``: A command-line utility that lets you interact with this
-  Django project in various ways. Type ``python manage.py help`` to get a
-  feel for what it can do. You should never have to edit this file; it's
-  created in this directory purely for convenience.
+* ``manage.py``: È un programma da riga di comando che permette di interagire
+  con questo progetto Django in vari modi. Digita ``python manage.py help``
+  per avere un'idea di quello che può fare; non dovrebbe mai essere necessario
+  modificare questo file, è creato in questa directory solo per convenienza.
 
-* ``mysite/mysite/``: The inner ``mysite/`` directory is the actual Python package
-  for your project. Its name is the Python package name you'll need to use to
-  import anything inside it (e.g. ``import mysite.settings``).
+* ``mysite/mysite/``: La directory interna ``mysite/`` è il pacchetto Python
+  effettivo per il progetto. Il suo nome è il nome del "pacchetto" ed è
+  necessario utilizzare questo nome per importare qualsiasi cosa al suo
+  interno (ad esempio, ``import mysite.settings``).
 
-* ``__init__.py``: A file required for Python to treat the ``mysite``
-  directory as a package (i.e., a group of Python modules). It's an empty
-  file, and generally you won't add anything to it.
+* ``__init__.py``: Un file richiesto da Python per trattare la directory
+  ``mysite`` come un pacchetto (ad esempio, un gruppo di moduli Python). E' un
+  file vuoto, e generalmente non si aggiunge nulla.
 
-* ``settings.py``: Settings/configuration for this Django project. Take a
-  look at it to get an idea of the types of settings available, along with
-  their default values.
+* ``settings.py``: Sono le impostazioni/configurazioni per questo progetto.
+  Dai un'occhiata a questo per avere un'idea dei tipi di impostazioni disponibili,
+  insieme ai loro valori di default.
 
-* ``urls.py``: The URLs for this Django project. Think of this as the
-  "table of contents" of your Django-powered site.
+* ``urls.py``: Il gestore di URL per questo progetto Django. Pensa a questo come
+  il "sommario" del tuo sito Django-powered.
 
-* ``wsgi.py``: An entry-point for WSGI-compatible webservers to serve your project.
-  See How to deploy with WSGI (https://docs.djangoproject.com/en/1.4/howto/deployment/wsgi/) for more details.
+* ``wsgi.py``: un entry-point per i server web compatibili con WSGI. Sul suo
+  utilizzo, leggere "How to deploy with WSGI" (https://docs.djangoproject.com/en/1.4/howto/deployment/wsgi/)
+  per maggiori dettagli.
 
-Despite their small size, these files already constitute a working Django
-application.
+Nonostante le piccole dimensioni, questi file già costituiscono una applicazione
+Django su cui lavorare.
 
-Running the Development Server
-------------------------------
+Avviare il Server per lo Sviluppo
+---------------------------------
 
-For some more post-installation positive feedback, let's run the Django
-development server to see our barebones application in action.
+Per ottenere un feedback sull'effettiva funzionalità del progetti, eseguiamo il
+server di sviluppo per vedere la nostra applicazione in azione.
 
-The Django development server (also called the "runserver" after the command
-that launches it) is a built-in, lightweight Web server you can use while
-developing your site. It's included with Django so you can develop your site
-rapidly, without having to deal with configuring your production server (e.g.,
-Apache) until you're ready for production. The development server watches your
-code and automatically reloads it, making it easy for you to change your code
-without needing to restart anything.
+Il server di sviluppo Django (chiamato "runserver" come il comando che lo
+lancia) è un web server integrato leggero, che è possibile utilizzare durante lo
+sviluppo del sito. E' incluso con Django in modo da poter sviluppare il tuo sito
+rapidamente, senza avere a che fare con la configurazione del server di
+produzione (ad esempio, Apache) fino a quando non si è pronti per la produzione.
+Il server di sviluppo interpreta il codice caricandolo automaticamente, rendendo
+più facile modificare il codice senza bisogno di riavviare nulla.
 
-To start the server, change into your project container directory (``cd mysite``),
-if you haven't already, and run this command::
+Per avviare il server, passa alla directory che contiene il progetto
+(``cd mysite``), se già non lo sei, ed esegui questo comando::
 
     python manage.py runserver
 
-You'll see something like this::
+Vedrai qualcosa di simile a questo::
 
     Validating models...
     0 errors found.
@@ -475,45 +488,51 @@ You'll see something like this::
     Development server is running at http://127.0.0.1:8000/
     Quit the server with CONTROL-C.
 
-This launches the server locally, on port 8000, accessible only to connections
-from your own computer. Now that it's running, visit http://127.0.0.1:8000/
-with your Web browser. You might see a different Django version depending on
-which version of Django you have installed. You'll see a "Welcome to Django" page shaded in a
-pleasant pastel blue. It worked!
+Questo lancia il server in locale, sulla porta 8000, accessibile tramite
+semplice connessione dal proprio computer. Ora che è in esecuzione, visita
+l'indirizzo http://127.0.0.1:8000/ con un browser web qualunque. Si potrebbe
+vedere una versione di Django diversa a seconda della versione di Django
+installata. Vedrai una pagina "Welcome to Django" ombreggiato in un piacevole
+blu pastello. Ha funzionato!
 
-One final, important note about the development server is worth mentioning
-before proceeding. Although this server is convenient for development, resist
-the temptation to use it in anything resembling a production environment. The
-development server can handle only a single request at a time reliably, and it
-has not gone through a security audit of any sort. When the time comes to
-launch your site, see Chapter 12 for information on how to deploy Django.
+Una ultima, importante nota sul server di sviluppo che vale la pena ricordare
+prima di procedere. Anche se questo server è conveniente per lo sviluppo,
+bisogna resistere alla tentazione di usarlo in qualcosa di simile ad un ambiente
+di produzione. Il server di sviluppo è in grado di gestire una sola richiesta
+alla volta in maniera affidabile, e non è testabile a livello sicurezza di
+qualsiasi tipo. Quando arriva il momento di lanciare il tuo sito, leggi il
+Capitolo 12 per conoscere le informazioni per distribuire Django.
 
-.. admonition:: Changing the Development Server's Host or Port
+.. admonition:: Modificare Host del server di sviluppo o la porta
 
-    By default, the ``runserver`` command starts the development server on port
-    8000, listening only for local connections. If you want to change the
-    server's port, pass it as a command-line argument::
+    Per impostazione predefinita, il comando ``runserver`` avvia il server di
+    sviluppo sulla porta 8000, tipica delle connessioni locali. Se si desidera
+    cambiare la porta del server, basta passarla come argomento della riga di
+    comando::
 
         python manage.py runserver 8080
 
-    By specifying an IP address, you can tell the server to allow non-local
-    connections. This is especially helpful if you'd like to share a
-    development site with other members of your team. The IP address
-    ``0.0.0.0`` tells the server to listen on any network interface::
+    Specificando un indirizzo IP, è possibile diffondere Django attraverso
+    connessioni non locali. Ciò è particolarmente utile se vuoi condividere un
+    sito di sviluppo con gli altri membri della tua squadra. L'indirizzo IP
+    ``0.0.0.0`` indica al server di inviare a tutto qualsiasi interfaccia di
+    rete::
 
         python manage.py runserver 0.0.0.0:8000
 
-    When you've done this, other computers on your local network will be able
-    to view your Django site by visiting your IP address in their Web browsers,
-    e.g., http://192.168.1.103:8000/ . (Note that you'll have to consult your
-    network settings to determine your IP address on the local network. Unix
-    users, try running "ifconfig" in a command prompt to get this information.
-    Windows users, try "ipconfig".)
+    Fatto questo, gli altri computer della rete locale saranno in grado di
+    visualizzare il tuo sito Django, visitando il tuo indirizzo IP con un
+    browser, ad esempio, http://192.168.1.103:8000/. (Per informazioni più
+    specifiche, consultare le proprie impostazioni di rete per determinare
+    l'indirizzo IP sulla rete locale. Gli utenti Unix, possono provare
+    "ifconfig" nel prompt dei comandi per ottenere queste informazioni comando.
+    Gli utenti di Windows, possono provare con "ipconfig")
 
-What's Next?
-============
+Cosa c'è adesso?
+================
 
-Now that you have everything installed and the development server running,
-you're ready to :doc: learn the basics `Chapter 3`_, of serving Web pages with Django.
+Ora che abbiamo installato tutto ed abbiamo il server di sviluppo in esecuzione,
+si è pronti ad :doc: imparare le basi nel `Capitolo 3`_, di servire le pagine web con
+Django.
 
 .. _Chapter 3: chapter03.html
