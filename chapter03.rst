@@ -288,87 +288,89 @@ vedere il testo "Hello world" -- La tua view in Django.
 
 Evviva! Hai creato la tua prima pagina web Django-powered.
 
-.. admonition:: Regular Expressions
+..admonition:: Espressioni regolari
 
-    *Regular expressions* (or *regexes*) are a compact way of specifying
-    patterns in text. While Django URLconfs allow arbitrary regexes for
-    powerful URL matching, you'll probably only use a few regex symbols in
-    practice. Here's a selection of common symbols:
+    Le *espressioni regolari* (o regex) sono un modo compatto di specificare dei
+    pattern nel testo. Mentre gli URLconf consentono di scrivere regex
+    arbitrarie per fare qualunque magheggio con gli URL, probabilmente userai
+    solo pochi simboli regex nella pratica. Ecco una selezione di simboli comuni:
 
     ============  ==========================================================
-    Symbol        Matches
+    Simboli        Corrispondenza
     ============  ==========================================================
-    ``.`` (dot)   Any single character
+    ``.`` (punto) Qualsiasi carattere singolo
 
-    ``\d``        Any single digit
+    ``\d``        Qualsiasi cifra singola
 
-    ``[A-Z]``     Any character between ``A`` and ``Z`` (uppercase)
+    ``[A-Z]``     Qualsiasi carattere tra ``A`` e ``Z`` (maiuscolo)
 
-    ``[a-z]``     Any character between ``a`` and ``z`` (lowercase)
+    ``[a-z]``     Qualsiasi carattere tra ``a`` e ``z`` (minuscolo)
 
-    ``[A-Za-z]``  Any character between ``a`` and ``z`` (case-insensitive)
+    ``[A-Za-z]``  Qualsiasi carattere tra ``a`` e ``z`` (maiuscole e minuscole)
 
-    ``+``         One or more of the previous expression (e.g., ``\d+``
-                  matches one or more digits)
+    ``+``         Uno o più elementi dell'espressione anteposta ad esso
+                  (ad esempio, ``\d+`` corrisponde ad una o più cifre)
 
-    ``[^/]+``     One or more characters until (and not including) a
-                  forward slash
+    ``[^/]+``     Uno o più caratteri fino (e non incluso) allo slash
 
-    ``?``         Zero or one of the previous expression (e.g., ``\d?``
-                  matches zero or one digits)
+    ``?``         Zero o una delle espressioni anteposta (ad esempio, ``\d?``
+                  corrisponde a zero o una cifra)
 
-    ``*``         Zero or more of the previous expression (e.g., ``\d*``
-                  matches zero, one or more than one digit)
+    ``*``         Zero o più dell'espressione anteposta (ad esempio, ``\d*``
+                  corrisponde a zero o una o più d'una cifra)
 
-    ``{1,3}``     Between one and three (inclusive) of the previous
-                  expression (e.g., ``\d{1,3}`` matches one, two or three
-                  digits)
+    ``{1,3}``     Tra uno e tre (compreso) dell'espressione anteposta (ad
+                  esempio, ``\d{1,3}`` corrisponde a uno, due o tre cifre)
     ============  ==========================================================
 
-    For more on regular expressions, see http://www.djangoproject.com/r/python/re-module/.
+    Per ulteriori informazioni sulle espressioni regolari, leggere la pagina
+    all'indirizzo http://www.djangoproject.com/r/python/re-module/.
 
-A Quick Note About 404 Errors
------------------------------
+Breve nota sui errori 404
+-------------------------
 
-At this point, our URLconf defines only a single URLpattern: the one that
-handles requests to the URL ``/hello/``. What happens when you request a
-different URL?
+A questo punto, il nostro URLconf definisce un solo urlPattern: quello che
+gestisce le richieste per l'URL ``/hello/``. Cosa succede quando si richiede un
+URL diverso?
 
-To find out, try running the Django development server and visiting a page such
-as ``http://127.0.0.1:8000/goodbye/`` or
-``http://127.0.0.1:8000/hello/subdirectory/``, or even ``http://127.0.0.1:8000/``
-(the site "root"). You should see a "Page not found" message (see Figure 3-1).
-Django displays this message because you requested a URL that's not defined in
-your URLconf.
+Per scoprirlo, prova ad eseguire il server di sviluppo e visitare una pagina
+come ``http://127.0.0.1:8000/goodbye/`` o ``http://127.0.0.1:8000/hello/subdirectory/``,
+o anche ``http://127.0.0.1:8000/`` (la "root" del sito web). Si dovrebbe ricevere
+un errore con il messaggio "Page not found" (vedi Figura 3-1). Django mostra
+questo messaggio perché hai richiesto un URL che non è definito in URLconf.
 
 .. figure:: graphics/chapter03/404.png
-   :alt: Screenshot of Django's 404 page.
+   :alt: Screenshot della pagina 404 di Django.
 
-   Figure 3-1. Django's 404 page
+   Figura 3-1. Pagina 404 di Django
 
-The utility of this page goes beyond the basic 404 error message. It also tells
-you precisely which URLconf Django used and every pattern in that URLconf. From
-that information, you should be able to tell why the requested URL threw a 404.
+L'utilità di questa pagina va oltre il messaggio di errore 404 di base. Ci dice
+anche con precisione quali URLconf ha usato Django e ogni modello in
+quell'URLconf. Da queste informazioni, si dovrebbe essere in grado di dire
+perché l'URL richiesto ha provocato un errore 404.
 
-Naturally, this is sensitive information intended only for you, the Web
-developer. If this were a production site deployed live on the Internet, you
-wouldn't want to expose that information to the public. For that reason, this
-"Page not found" page is only displayed if your Django project is in *debug
-mode*. We'll explain how to deactivate debug mode later. For now, just know
-that every Django project is in debug mode when you first create it, and if the
-project is not in debug mode, Django outputs a different 404 response.
+Naturalmente, si tratta di informazioni sensibili destinato solo per te,
+sviluppatore web. Se fossimo su un sito di produzione distribuito su Internet,
+non vorremmo esporre tali informazioni al pubblico. Per questo motivo, questa
+pagina "Pagina non trovata" viene mostrata solo se il progetto Django è in
+*modalità di debug*. Spiegheremo come disattivare la modalità di debug in seguito.
+Per ora, è sufficiente sapere che ogni progetto Django è in modalità di debug
+quando viene creato per la prima volta, e se il progetto non è in modalità di
+debug, Django genera delle pagine di risposta di 404 differenti.
 
-A Quick Note About The Site Root
---------------------------------
+Breve nota sulla root del sito
+------------------------------
 
-As explained in the last section, you'll see a 404 error message if you view
-the site root -- ``http://127.0.0.1:8000/``. Django doesn't add magically
-anything to the site root; that URL is not special-cased in any way. It's up to
-you to assign it to a URLpattern, just like every other entry in your URLconf.
+Come spiegato nel paragrafo precedente, viene mostrato un messaggio di errore
+404 se si naviga verso la root del sito -- ``http://127.0.0.1:8000/``. Django non
+aggiunge magicamente nulla alla root del sito, l'URL non è speciale o diverso in
+alcun modo da qualunque altro. Sta a noi assegnarlo ad un urlPattern, proprio
+come ogni altra voce della URLconf.
 
-The URLpattern to match the site root is a bit unintuitive, though, so it's
-worth mentioning. When you're ready to implement a view for the site root, use
-the URLpattern ``'^$'``, which matches an empty string. For example::
+Però, l'urlPattern da abbinare alla radice del sito è poco intuitivo, vale
+quindi la pena specificare meglio. Quando si è pronti ad implementare una
+view/vista per la root principale del sito, utilizzare l'urlPattern ``'^$'``,
+che corrisponde a una stringa vuota. Per esempio::
 
     from mysite.views import hello, my_homepage_view
 
@@ -377,77 +379,79 @@ the URLpattern ``'^$'``, which matches an empty string. For example::
         # ...
     )
 
-How Django Processes a Request
-==============================
 
-Before continuing to our second view function, let's pause to learn a little
-more about how Django works. Specifically, when you view your "Hello world"
-message by visiting ``http://127.0.0.1:8000/hello/`` in your Web browser, what
-does Django do behind the scenes?
+Come Django Elabora una richiesta
+=================================
 
-It all starts with the *settings file*. When you run ``python manage.py
-runserver``, the script looks for a file called ``settings.py`` in the inner
-``mysite`` directory. This file contains all sorts of configuration for this
-particular Django project, all in uppercase: ``TEMPLATE_DIRS``, ``DATABASES``,
-etc. The most important setting is called ``ROOT_URLCONF``. ``ROOT_URLCONF``
-tells Django which Python module should be used as the URLconf for this Web
-site.
+Prima di continuare con le view, facciamo una pausa per imparare un po' di più
+come funziona Django. In particolare, quando viene mostrato il messaggio
+"Hello world" visitando ``http://127.0.0.1:8000/hello/`` nel browser, cosa fa
+Django dietro le quinte?
 
-Remember when ``django-admin.py startproject`` created the files
-``settings.py`` and ``urls.py``? The autogenerated ``settings.py`` contains a
-``ROOT_URLCONF`` setting that points to the autogenerated ``urls.py``. Open the
-``settings.py`` file and see for yourself; it should look like this::
+Tutto inizia con il *file delle impostazioni*. Quando si esegue ``python
+manage.py runserver``, lo script cerca un file chiamato settings.py nella
+directory miosito interna. Questo file contiene tutti i tipi di configurazione
+per questo particolare progetto Django, tutto in maiuscolo, ``TEMPLATE_DIRS``,
+``DATABASES`` ecc. L'impostazione più importante è chiamata ``ROOT_URLCONF``.
+``ROOT_URLCONF`` dice a Django quale modulo Python dovrebbe essere usato come
+URLconf per questo sito web.
+
+Ricordate quando ``django-admin.py startproject`` ha creato il file ``settings.py``
+e ``urls.py``? Il ``settings.py`` autogenerato contiene un'impostazione ``ROOT_URLCONF``
+che punta al file ``urls.py`` generato automaticamente. Apri il file ``settings.py``
+e guarda di persona, dovrebbe essere qualcosa di simile a questo::
 
     ROOT_URLCONF = 'mysite.urls'
 
-This corresponds to the file ``mysite/urls.py``.
+Questo corrisponde al file ``mysite/urls.py``.
 
-When a request comes in for a particular URL -- say, a request for ``/hello/``
--- Django loads the URLconf pointed to by the ``ROOT_URLCONF`` setting. Then it
-checks each of the URLpatterns in that URLconf, in order, comparing the
-requested URL with the patterns one at a time, until it finds one that matches.
-When it finds one that matches, it calls the view function associated with that
-pattern, passing it an ``HttpRequest`` object as the first parameter. (We'll
-cover the specifics of ``HttpRequest`` later.)
+Quando arriva una richiesta per un URL specifico - per esempio, una richiesta
+per ``/hello/`` --  Django carica la URLconf dall'impostazione ``ROOT_URLCONF``.
+Infine controlla ciascuna delle URLpatterns in tale URLconf, in ordine dall'alto
+verso il basso, confrontando l'URL richiesto con i modelli di uno alla volta,
+fino a che non ne trova uno che corrisponde. Quando ne trova uno che corrisponde,
+chiama la funzione di visualizzazione associata a tale modello, passandogli un
+oggetto ``HttpRequest`` come primo parametro. (parleremo delle specifiche ``HttpRequest``
+più tardi).
 
-As we saw in our first view example, a view function must return an
-``HttpResponse``. Once it does this, Django does the rest, converting the
-Python object to a proper Web response with the appropriate HTTP headers and
-body (i.e., the content of the Web page).
+Come abbiamo visto nella nostra prima view, ad esempio, le funzioni per la
+visualizzazione devono restituire un ``HttpResponse``. Una volta che lo fa,
+Django fa il resto, convertendo l'oggetto Python in una giusta risposta web, con
+intestazioni HTTP appropriate e corpo (ad esempio, il contenuto della pagina
+web).
 
-In summary:
+In sintesi:
 
-1. A request comes in to ``/hello/``.
-2. Django determines the root URLconf by looking at the ``ROOT_URLCONF``
-   setting.
-3. Django looks at all of the URLpatterns in the URLconf for the first one
-   that matches ``/hello/``.
-4. If it finds a match, it calls the associated view function.
-5. The view function returns an ``HttpResponse``.
-6. Django converts the ``HttpResponse`` to the proper HTTP response, which
-   results in a Web page.
+1. Arriva una richiesta per ``/hello/``.
+2. Django determina la root degli URLconf, cercando nell'impostazione ``ROOT_URLCONF``.
+3. Django legge tutti gli URLpatterns nell'URLconf e sceglie il primo che corrisponde a / ciao /.
+4. Se trova una corrispondenza, chiama la funzione di visualizzazione associata.
+5. La funzione di visualizzazione restituisce un ``HttpResponse``.
+6. Django converte l'``HttpResponse`` nella risposta HTTP corretta, che risulta
+in una pagina web.
 
-You now know the basics of how to make Django-powered pages. It's quite simple,
-really -- just write view functions and map them to URLs via URLconfs.
+Ora conosci le basi per creare pagine Django-powered. E' abbastanza semplice,
+in realtà -- basta solo scrivere le funzioni di visualizzazione ed il file
+URLconf con gli url.
 
-Your Second View: Dynamic Content
-=================================
+La tua seconda View: Contenuto Dinamico
+=======================================
 
-Our "Hello world" view was instructive in demonstrating the basics of how
-Django works, but it wasn't an example of a *dynamic* Web page, because the
-content of the page are always the same. Every time you view ``/hello/``,
-you'll see the same thing; it might as well be a static HTML file.
+La nostra view  "Hello world" è stata istruttiva nel mostrare le basi di come
+funziona Django, ma non è stato un esempio di una pagina Web dinamica, perché il
+contenuto della pagina è sempre lo stesso. Ogni volta che si richiede ``/hello/``,
+vedremo la stessa cosa, come se fosse un normale file HTML statico.
 
-For our second view, let's create something more dynamic -- a Web page that
-displays the current date and time. This is a nice, simple next step, because
-it doesn't involve a database or any user input -- just the output of your
-server's internal clock. It's only marginally more exciting than "Hello world,"
-but it'll demonstrate a few new concepts.
+Per la nostra seconda view, creiamo qualcosa di più dinamico -- una pagina Web
+che visualizza la data e l'ora attuali. Questo è passo semplice perché non
+comporta l'uso di un database o di qualsiasi input dell'utente -- mostriamo solo
+dati già in nostro possesso. E' poco più emozionante di "Hello world," ma
+dimostrerà alcuni nuovi concetti.
 
-This view needs to do two things: calculate the current date and time, and
-return an ``HttpResponse`` containing that value. If you have experience with
-Python, you know that Python includes a ``datetime`` module for calculating
-dates. Here's how to use it::
+Questa view ha bisogno di fare due cose: calcolare la data e l'ora corrente e
+restituire un ``HttpResponse`` contenente tale valore. Se avete esperienza con
+Python, si sa che include un modulo ``datetime`` per calcolare le date. Ecco come
+usarlo::
 
     >>> import datetime
     >>> now = datetime.datetime.now()
@@ -456,15 +460,15 @@ dates. Here's how to use it::
     >>> print now
     2008-12-13 14:09:39.002731
 
-That's simple enough, and it has nothing to do with Django. It's just Python
-code. (We want to emphasize that you should be aware of what code is "just
-Python" vs. code that is Django-specific. As you learn Django, we want you to
-be able to apply your knowledge to other Python projects that don't necessarily
-use Django.)
+Questo è abbastanza semplice e non ha nulla a che fare con Django. E' solo
+codice Python. (Vogliamo sottolineare che si dovrebbe essere consapevoli di ciò
+che è codice "solo Python" rispetto a ciò che è specifico di Django. Mentre
+impari ad utilizzare Django, vorremmo che tu sia in grado di applicare le tue
+conoscenze ad altri progetti Python che non usano necessariamente Django).
 
-To make a Django view that displays the current date and time, then, we just
-need to hook this ``datetime.datetime.now()`` statement into a view and return
-an ``HttpResponse``. Here's how that looks::
+Per fare una view che mostra la data e l'ora correnti, quindi, abbiamo solo
+bisogno di collegare l'istruzione ``datetime.datetime.now()`` in una view e
+restituire il suo risultato in un ``HttpResponse``. Ecco come dovrebbe sembrare::
 
     from django.http import HttpResponse
     import datetime
@@ -474,9 +478,10 @@ an ``HttpResponse``. Here's how that looks::
         html = "<html><body>It is now %s.</body></html>" % now
         return HttpResponse(html)
 
-As with our ``hello`` view function, this should live in ``views.py``. Note
-that we've hidden the ``hello`` function from this example for brevity, but for
-the sake of completeness, here's what the entire ``views.py`` looks like::
+Come con la nostra funzione di visualizzazione ``hello``, questo dovrebbe stare
+all'interno di ``views.py``. Si noti che abbiamo nascosto la funzione ``hello``
+da questo esempio per brevità, ma per amor di completezza, ecco come somiglia
+l'intera ``views.py``::
 
     from django.http import HttpResponse
     import datetime
@@ -489,39 +494,38 @@ the sake of completeness, here's what the entire ``views.py`` looks like::
         html = "<html><body>It is now %s.</body></html>" % now
         return HttpResponse(html)
 
-(From now on, we won't display previous code in code examples, except when
-necessary. You should be able to tell from context which parts of an example
-are new vs. old.)
+(D'ora in poi, noi non mostreremo più il codice di esempi precedenti, se non
+necessario. Si dovrebbe essere in grado di capire dal contesto se le parti di
+un esempio sono nuove o vecchie).
 
-Let's step through the changes we've made to ``views.py`` to accommodate
-the ``current_datetime`` view.
+Stiliamo un sommario dei cambiamenti che abbiamo apportato a ``views.py`` per
+mostrare la vista/view ``current_datetime``.
 
-* We've added an ``import datetime`` to the top of the module, so we can
-  calculate dates.
+* Abbiamo aggiunto un datetime import alla parte superiore del modul ``views.py``,
+  in modo da poter calcolare le date.
 
-* The new ``current_datetime`` function calculates the current date and
-  time, as a ``datetime.datetime`` object, and stores that as the local
-  variable ``now``.
+* La nuova funzione ``current_datetime`` calcola la data e l'ora corrente, come
+  un oggetto ``datetime.datetime``, e funziona come la variabile locale ``now``.
 
-* The second line of code within the view constructs an HTML response using
-  Python's "format-string" capability. The ``%s`` within the string is a
-  placeholder, and the percent sign after the string means "Replace the
-  ``%s`` in the preceding string with the value of the variable ``now``."
-  The ``now`` variable is technically a ``datetime.datetime`` object, not
-  a string, but the ``%s`` format character converts it to its string
-  representation, which is something like ``"2008-12-13 14:09:39.002731"``.
-  This will result in an HTML string such as
-  ``"<html><body>It is now 2008-12-13 14:09:39.002731.</body></html>"``.
+* La seconda riga di codice all'interno della vista costruisce una risposta HTML
+  con la funzionalità di formattazione delle stringhe integrata in Python. Il
+  ``%s`` all'interno della stringa è un "segnaposto", mentre il segno di
+  percentuale dopo la stringa significa "Sostituire il ``%s`` nella stringa
+  precedente con il valore della variabile". La variabile ora è tecnicamente un
+  oggetto datetime.datetime, non una stringa , ma il ``%s`` converte
+  implicitamente nella rappresentazione l'oggetto in stringa, che è qualcosa
+  come ``"2008-12-13 14:09:39.002731"``. Questo si traduce in una stringa HTML
+  come ``"<html><body>It is now 2008-12-13 14:09:39.002731.</body></html>"``.
 
-  (Yes, our HTML is invalid, but we're trying to keep the example simple
-  and short.)
+  (Sì, il nostro codice HTML non è valido, ma stiamo cercando di mantenere
+  l'esempio semplice e breve).
 
-* Finally, the view returns an ``HttpResponse`` object that contains the
-  generated response -- just as we did in ``hello``.
+* Infine, la vista restituisce un oggetto ``HttpResponse`` che contiene la risposta
+  generata -- proprio come abbiamo fatto in ``hello``.
 
-After adding that to ``views.py``, add the URLpattern to ``urls.py`` to tell
-Django which URL should handle this view. Something like ``/time/`` would make
-sense::
+Dopo aver aggiunto tutto questo a ``views.py``, ci tocca aggiungere un
+urlPattern di ``urls.py`` per dire a Django quale URL dovrebbe gestire questa
+view. Qualcosa di simile a ``/time/`` potrebbe avere un senso::
 
     from django.conf.urls.defaults import patterns, include, url
     from mysite.views import hello, current_datetime
@@ -531,50 +535,52 @@ sense::
         url(r'^time/$', current_datetime),
     )
 
-We've made two changes here. First, we imported the ``current_datetime``
-function at the top. Second, and more importantly, we added a URLpattern
-mapping the URL ``/time/`` to that new view. Getting the hang of this?
+Abbiamo fatto due cambiamenti qui. Prima, abbiamo importato la funzione
+``current_datetime`` in alto. In secondo luogo, ancor più importante, abbiamo
+aggiunto il collegamento fra urlPattern e URL ``/time/`` a quella nuova view.
+Come vedere tutto questo di questo?
 
-With the view written and URLconf updated, fire up the ``runserver`` and visit
-``http://127.0.0.1:8000/time/`` in your browser. You should see the current
-date and time.
+Con la view scritta e l'URLconf aggiornato, lanciare il comando ``runserver`` e
+visitare ``http://127.0.0.1:8000/time/`` nel browser. Si dovrebbero vedere la
+data e l'ora correnti.
 
-.. admonition:: Django's Time Zone
+.. admonition:: Il fuso orario di Django
 
-    Depending on your computer, the date and time may be a few hours off.
-    That's because Django is time zone-aware and defaults to the
-    ``America/Chicago`` time zone. (It has to default to *something*, and that's
-    the time zone where the original developers live.) If you live elsewhere,
-    you'll want to change it in ``settings.py``. See the comment in that file
-    for a link to an up-to-date list of worldwide time zone options.
+    A seconda del computer, data e ora possono avere un paio d'ore di differenza.
+    Questo perché Django ha come impostazioni predefinite il fuso orario
+    ``America/Chicago``. (Per un qualche difetto con cui bisogna fare i conti,
+    questo è il fuso orario in cui vivono gli sviluppatori originali). Se si
+    vive altrove, ti consigliamo di cambiarla da ``settings.py``. Leggi la
+    pagina segnalata per avere una idea di tutti i fuso orario del mondo.
 
-URLconfs and Loose Coupling
-===========================
+URLconfs e Accoppiamento Lasco
+==============================
 
-Now's a good time to highlight a key philosophy behind URLconfs and behind
-Django in general: the principle of *loose coupling*. Simply put, loose coupling
-is a software-development approach that values the importance of making pieces
-interchangeable. If two pieces of code are loosely coupled, then changes made to
-one of the pieces will have little or no effect on the other.
+Ora è un buon momento per evidenziare una filosofia chiave dietro gli URLconf e
+dietro Django in generale: il *principio di accoppiamento lasco*. In poche parole,
+l'accoppiamento lasco è un approccio allo sviluppo software che valorizza
+l'importanza di costruire pezzi intercambiabili. Se due pezzi di codice non sono
+accoppiati fra loro, poi le modifiche apportate a uno dei pezzi avranno poco o
+nessun effetto sull'altro.
 
-Django's URLconfs are a good example of this principle in practice. In a Django
-web application, the URL definitions and the view functions they call are
-loosely coupled; that is, the decision of what the URL should be for a given
-function, and the implementation of the function itself, reside in two separate
-places. This lets you switch out one piece without affecting the other.
+Gli URLconf di Django sono un buon esempio di questo principio nella pratica. In
+una applicazione web Django, le definizioni di URL e le view che le richiamano
+sono debolmente accoppiate, cioè la decisione di ciò che l'URL deve essere per
+una data funzione, e l'attuazione della funzione stessa, risiede in due luoghi
+separati. Ciò consente di manipolare un unico pezzo senza influenzare l'altro.
 
-For example, consider our ``current_datetime`` view. If we wanted to change the
-URL for the application -- say, to move it from ``/time/`` to
-``/current-time/`` -- we could make a quick change to the URLconf, without
-having to worry about the view itself. Similarly, if we wanted to change the
-view function -- altering its logic somehow -- we could do that without
-affecting the URL to which the function is bound.
+Per esempio, consideriamo la nostra view ``current_datetime``. Se volessimo
+modificare l'URL per l'applicazione -- per esempio, per spostarla da ``/time/``
+a ``/current-time/`` -- potremmo fare una rapida modifica al'URLconf, senza
+doverci preoccupare della vista stessa. Allo stesso modo, se volessimo cambiare
+la funzione di visualizzazione -- alterarne la logica in qualche modo --
+potremmo farlo senza intaccare l'URL a cui è legata la funzione.
 
-Furthermore, if we wanted to expose the current-date functionality at
-*several* URLs, we could easily take care of that by editing the URLconf,
-without having to touch the view code. In this example, our
-``current_datetime`` is available at two URLs. It's a contrived example, but
-this technique can come in handy::
+Inoltre, se avessimo voluto mostrare la funzionalità ``current_datetime`` a
+*diversi* URL, potremmo semplicemente modificare l'URLconf, senza dover toccare
+il codice della view. In questo esempio, il nostro ``current_datetime`` è
+disponibile a due URL. E' un esempio forzato, ma questa tecnica può tornare
+utile::
 
     urlpatterns = patterns('',
         url(r'^hello/$', hello),
@@ -582,27 +588,28 @@ this technique can come in handy::
         url(r'^another-time-page/$', current_datetime),
     )
 
-URLconfs and views are loose coupling in action. We'll continue to point out
-examples of this important philosophy throughout this book.
+Le URLconf e le view sono sciolti accoppiamento in azione. Continueremo a
+sottolineare degli esempi di questa importante filosofia in questo libro.
 
-Your Third View: Dynamic URLs
-=============================
+La tua terza view: URL dinamici
+===============================
 
-In our ``current_datetime`` view, the contents of the page -- the current
-date/time -- were dynamic, but the URL (``/time/``) was static. In most dynamic
-Web applications, though, a URL contains parameters that influence the output
-of the page. For example, an online bookstore might give each book its own URL,
-like ``/books/243/`` and ``/books/81196/``.
+A nostro avviso la vista ``current_datetime``, il contenuto della pagina --
+la data/ora di oggi -- erano dinamica, ma l'URL (``/time/``) era statico. Nella
+maggior parte delle applicazioni web dinamiche, però, un URL contiene parametri
+che influenzano l'output della pagina. Ad esempio, una libreria online potrebbe
+dare ad ogni libro il proprio URL, come ``/books/243/`` e ``/books/81196/``.
 
-Let's create a third view that displays the current date and time offset by a
-certain number of hours. The goal is to craft a site in such a way that the page
-``/time/plus/1/`` displays the date/time one hour into the future, the page
-``/time/plus/2/`` displays the date/time two hours into the future, the page
-``/time/plus/3/`` displays the date/time three hours into the future, and so
-on.
+Creiamo un terzo punto di vista che mostra la data e l'ora correnti compensato
+da un certo numero di ore. L'obiettivo è quello di predisporre un sito web in
+modo tale che la pagina ``/time/plus/1/`` mostri la data/ora di un'ora nel
+futuro, la pagina ``/time/plus/2/`` mostra la data/ora di due ore nel futuro, la
+pagina ``/time/plus/3/`` mostra la data/ora di tre ore nel futuro, e così
+via.
 
-A novice might think to code a separate view function for each hour offset,
-which might result in a URLconf like this::
+Un principiante potrebbe pensare di codificare una funzione di visualizzazione
+separata per ogni ora di offset, che potrebbe tradursi in una URLconf come
+questo::
 
     urlpatterns = patterns('',
         url(r'^time/$', current_datetime),
@@ -612,29 +619,30 @@ which might result in a URLconf like this::
         url(r'^time/plus/4/$', four_hours_ahead),
     )
 
-Clearly, this line of thought is flawed. Not only would this result in redundant
-view functions, but also the application is fundamentally limited to supporting
-only the predefined hour ranges -- one, two, three or four hours. If we decided
-to create a page that displayed the time *five* hours into the future, we'd
-have to create a separate view and URLconf line for that, furthering the
-duplication. We need to do some abstraction here.
+Chiaramente, questa linea di pensiero è scorretta. Non solo questo risultato è
+fatta da funzioni ridondanti, ma anche l'applicazione è fondamentalmente
+limitata a sostenere solo le gamme di ore predefinite - uno, due, tre o quattro
+ore. Volendo creare una pagina che mostra il tempo di *cinque* ore nel futuro,
+dovremmo creare una vista separata ed una nuova linea di URLconf per questo,
+favorire la duplicazione. Abbiamo bisogno di fare un po' di astrazione qui.
 
-.. admonition:: A Word About Pretty URLs
+.. admonition:: Una parola riguardo ai "Pretty URL"
 
-    If you're experienced in another Web development platform, such as PHP or
-    Java, you may be thinking, "Hey, let's use a query string parameter!" --
-    something like ``/time/plus?hours=3``, in which the hours would be
-    designated by the ``hours`` parameter in the URL's query string (the part
-    after the ``?``).
+    Se siete esperti in un'altra piattaforma di sviluppo web, come PHP o Java,
+    si potrebbe pensare: "Ehi, usiamo un parametro di stringa di query!" --
+    qualcosa come ``/time/plus?hours=3``, in cui le ``hours`` sarebbero
+    designate dal parametro ore nella stringa di query dell'URL (la parte dopo
+    il ``?``).
 
-    You *can* do that with Django (and we'll tell you how in Chapter 7), but
-    one of Django's core philosophies is that URLs should be beautiful. The URL
-    ``/time/plus/3/`` is far cleaner, simpler, more readable, easier to recite
-    to somebody aloud and . . . just plain prettier than its query string
-    counterpart. Pretty URLs are a characteristic of a quality Web application.
+    È *possibile* farlo con Django (e ti diremo come nel Capitolo 7), ma una
+    delle filosofie di base di Django è che gli URL dovrebbe essere belli.
+    L'URL ``/time/plus/3/`` è molto più pulito, più semplice, più leggibile,
+    più facile da dire ad alta voce e qualcuno... semplicemente più bella
+    rispetto al suo omologo di una stringa di query. I pretty URL sono una
+    caratteristica di un'applicazione Web di qualità.
 
-    Django's URLconf system encourages pretty URLs by making it easier to use
-    pretty URLs than *not* to.
+    Il sistema URLconf di Django incoraggia la creazione di URL di questo tipo,
+    rendendoli più semplici da usare rispetto agli altri che *non* lo sono.
 
 How, then do we design our application to handle arbitrary hour offsets? The
 key is to use *wildcard URLpatterns*. As we mentioned previously, a URLpattern
