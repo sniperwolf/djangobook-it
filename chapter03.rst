@@ -288,7 +288,7 @@ vedere il testo "Hello world" -- La tua view in Django.
 
 Evviva! Hai creato la tua prima pagina web Django-powered.
 
-..admonition:: Espressioni regolari
+.. admonition:: Espressioni regolari
 
     Le *espressioni regolari* (o regex) sono un modo compatto di specificare dei
     pattern nel testo. Mentre gli URLconf consentono di scrivere regex
