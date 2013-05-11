@@ -1,148 +1,147 @@
-==============================================================
-Chapter 18: Integrating with Legacy Databases and Applications
-==============================================================
+============================================================
+Capitolo 18: Integrazione con database legacy e applicazioni
+============================================================
 
-Django is best suited for so-called green-field development -- that is, starting
-projects from scratch, as if you were constructing a building on a fresh field
-of green grass. But despite the fact that Django favors from-scratch projects,
-it's possible to integrate the framework into legacy databases and
-applications. This chapter explains a few integration strategies.
+Django è più adatto per il cosiddetto sviluppo green-field -- cioè, a partire
+progetti da zero, come se si stesse costruendo un edificio su un campo fresco
+di erba verde. Ma nonostante il suo favorire i progetti da-zero, è possibile
+integrare il framework in database legacy e applicazioni già esistenti. Questo
+capitolo spiega alcune strategie di integrazione.
 
-Integrating with a Legacy Database
-==================================
+L'integrazione con un database legacy
+=====================================
 
-Django's database layer generates SQL schemas from Python code -- but with
-a legacy database, you already have the SQL schemas. In such a case,
-you'll need to create models for your existing database tables. For this
-purpose, Django comes with a tool that can generate model code by reading your
-database table layouts. This tool is called ``inspectdb``, and you can call it
-by executing the command ``manage.py inspectdb``.
+Il livello di database di Django genera schemi SQL da codice Python -- ma con
+un database legacy, hai già degli schemi SQL. In tal caso, hai bisogno di creare
+modelli per le tabelle di database esistenti. Per questo scopo, Django è dotato
+di uno strumento in grado di generare del codice per un modello leggendo il tuo
+layout delle tabelle di database. Questo strumento si chiama ``inspectdb``, e si
+può richiamare eseguendo il comando ``manage.py inspectdb``.
 
-Using ``inspectdb``
--------------------
+Utilizzare ``inspectdb``
+------------------------
 
-The ``inspectdb`` utility introspects the database pointed to by your settings
-file, determines a Django model representation for each of your tables, and
-prints the Python model code to standard output.
+L'utilità ``inspectdb`` controlla il database a cui puntano le impostazioni
+dei file, determina una rappresentazione in un modello Django per ogni tabella,
+e stampa tale modello in codice Python standard output.
 
-Here's a walk-through of a typical legacy database integration process from
-scratch. The only assumptions are that Django is installed and that you have a
-legacy database.
+Ecco una guida passo per passo di un tipico processo di integrazione con database
+legacy da configurare. Le uniche ipotesi sono che Django sia installato e che si
+dispone di un database legacy.
 
-1. Create a Django project by running
-   ``django-admin.py startproject mysite`` (where ``mysite`` is your
-   project's name). We'll use ``mysite`` as the project name in this
-   example.
+1. Creare un progetto Django eseguendo ``django-admin.py startproject mysite``
+   (dove ``mysite`` è il nome del progetto). Useremo ``mysite`` come nome del
+   progetto in questo esempio.
 
-2. Edit the settings file in that project, ``mysite/settings.py``,
-   to tell Django what your database connection parameters are and what
-   the name of the database is. Specifically, provide the
-   ``DATABASE_NAME``, ``DATABASE_ENGINE``, ``DATABASE_USER``,
-   ``DATABASE_PASSWORD``, ``DATABASE_HOST``, and ``DATABASE_PORT`` settings.
-   (Note that some of these settings are optional. Refer to Chapter 5 for
-   more information.)
+2. Modificare il file di impostazioni del progetto, ``mysite/settings.py``,
+   per dire a Django quali sono i parametri di connessione al database e quale è
+   il nome del database. In particolare, bisogna specificare le impostazioni per
+   ``DATABASE_NAME``, ``DATABASE_ENGINE``, ``DATABASE_USER``, ``DATABASE_PASSWORD``,
+   ``DATABASE_HOST``, and ``DATABASE_PORT``. (Da notare che alcune di queste
+   impostazioni sono opzionali. Fare riferimento al Capitolo 5 per
+   ulteriori informazioni).
 
-3. Create a Django application within your project by running
-   ``python mysite/manage.py startapp myapp`` (where ``myapp`` is your
-   application's name). We'll use ``myapp`` as the application name here.
+3. Creare un'applicazione Django all'interno del progetto eseguendo
+   ``python mysite/manage.py startapp myapp`` (dove ``myapp`` è il nome dell'
+   applicazione). Useremo ``myapp`` come nome dell'applicazione.
 
-4. Run the command ``python mysite/manage.py inspectdb``. This will
-   examine the tables in the ``DATABASE_NAME`` database and print the
-   generated model class for each table. Take a look at the output to get
-   an idea of what ``inspectdb`` can do.
+4. Eseguire il comando ``python mysite/manage.py inspectdb``. Questo esamina
+   le tabelle nel database ``DATABASE_NAME`` e stampa un modello generato per
+   ogni tabella. Dai un'occhiata all'output per avere un'idea di quello che
+   ``inspectdb`` può fare.
 
-5. Save the output to the ``models.py`` file within your application by using
-   standard shell output redirection::
+5. Salvare l'output sul file ``models.py`` all'interno dell'applicazione
+   utilizzando lo standard output shell::
 
        python mysite/manage.py inspectdb > mysite/myapp/models.py
 
-6. Edit the ``mysite/myapp/models.py`` file to clean up the generated
-   models and make any necessary customizations. We'll give
-   some hints for this in the next section.
+6. Modificare il file ``mysite/myapp/models.py`` per ripulire i modelli
+   generati e fare tutte le personalizzazioni necessarie. Daremo alcuni
+   suggerimenti per fare questo nella prossima sezione.
 
 Cleaning Up Generated Models
 ----------------------------
 
-As you might expect, the database introspection isn't perfect, and you'll need
-to do some light cleanup of the resulting model code. Here are a few pointers
-for dealing with the generated models:
+Ripulitura modelli generati
+----------------------------
 
-1. Each database table is converted to a model class (i.e., there is a
-   one-to-one mapping between database tables and model classes). This means
-   that you'll need to refactor the models for any many-to-many join tables
-   into ``ManyToManyField`` objects.
+Come ci si potrebbe aspettare, l'introspezione del database non è perfetta, e
+avrai bisogno di fare un po' di pulizia del codice del modello risultante. Qui
+descriviamo alcune metodologie per trattare con i modelli generati::
 
-2. Each generated model has an attribute for every field, including
-   ``id`` primary key fields. However, recall that Django automatically
-   adds an ``id`` primary key field if a model doesn't have a primary key.
-   Thus, you'll want to remove any lines that look like this::
+1. Ogni tabella del database viene convertita in una classe del modello (cioè,
+    c'è una corrispondenza uno-a-uno tra le tabelle del database e le classi del
+    modello). Questo significa che avrai bisogno di un refactoring sui modelli
+    per fare le tabelle molti-a-molti create tramite join in oggetti ``ManyToManyField``.
+
+2. Ogni modello generato ha un attributo per ogni campo, compreso la chiave
+   primaria ``id``. Tuttavia, ricorda che Django aggiunge automaticamente una
+   chiave ``id`` primaria, se un modello ne ne ha una. Pertanto, ti consigliamo
+   di rimuovere tutte le righe che somigliano a questa::
 
        id = models.IntegerField(primary_key=True)
 
-   Not only are these lines redundant, but also they can cause problems if your
-   application will be adding *new* records to these tables.
+    Non solo queste linee sono ridondanti, ma possono anche causare problemi se
+    la tua applicazione aggiunga *nuovi* record a queste tabelle.
 
-3. Each field's type (e.g., ``CharField``, ``DateField``) is determined by
-   looking at the database column type (e.g., ``VARCHAR``, ``DATE``). If
-   ``inspectdb`` cannot map a column's type to a model field type, it will
-   use ``TextField`` and will insert the Python comment
-   ``'This field type is a guess.'`` next to the field in the generated
-   model. Keep an eye out for that, and change the field type accordingly
-   if needed.
+3. Ogni tipo di campo (ad esempio, ``CharField``, ``DateField``) è determinato
+   guardando il tipo di colonna del database (ad esempio, ``VARCHAR``, ``DATA``).
+   Se ``inspectdb`` non può mappare il tipo di una colonna di un tipo di campo modello,
+   utilizzerà ``TextField`` ed inserirà il commento ``'This field type is a guess.'``
+   accanto al campo generato per il modello. Presta attenzione a questo commento,
+   e, di conseguenza, cambia il tipo di campo, se necessario.
 
-   If a field in your database has no good Django equivalent, you can
-   safely leave it off. The Django model layer is not required to include
-   every field in your table(s).
+   Se un campo del database non ha buon equivalente in Django, è possibile
+   tranquillamente lasciarlo fuori. I modelli di Django non sono tenuti ad
+   includere ogni campo della tabella.
 
-4. If a database column name is a Python reserved word (such as ``pass``,
-   ``class``, or ``for``), ``inspectdb`` will append ``'_field'`` to the
-   attribute name and set the ``db_column`` attribute to the real field
-   name (e.g., ``pass``, ``class``, or ``for``).
+4. Se il nome della colonna di database è una parola riservata di Python (come
+   ``pass``, ``class``, o ``for``) ``inspectdb`` aggiungerà `` '_field' ``
+   all'attributo del nome e imposterà l'attributo ``db_column`` il nome del
+   campo reale (ad esempio, ``pass``, ``class``, o ``for``).
 
-   For example, if a table has an ``INT`` column called ``for``, the generated
-   model will have a field like this::
+   Ad esempio, se una tabella ha una colonna ``INT`` chiamata ``for``, il
+   modello generato avrà un campo così::
 
        for_field = models.IntegerField(db_column='for')
 
-   ``inspectdb`` will insert the Python comment
-   ``'Field renamed because it was a Python reserved word.'`` next to the
-   field.
+   ``inspectdb`` inserirà il commento Python
+   ``'Field renamed because it was a Python reserved word.'`` accanto al campo.
 
-5. If your database contains tables that refer to other tables (as most
-   databases do), you might need to rearrange the order of the generated
-   models so that models that refer to other models are ordered properly.
-   For example, if model ``Book`` has a ``ForeignKey`` to model ``Author``,
-   model ``Author`` should be defined before model ``Book``.  If you need
-   to create a relationship on a model that has not yet been defined, you
-   can use a string containing the name of the model, rather than the model
-   object itself.
 
-6. ``inspectdb`` detects primary keys for PostgreSQL, MySQL, and SQLite.
-   That is, it inserts ``primary_key=True`` where appropriate. For other
-   databases, you'll need to insert ``primary_key=True`` for at least one
-   field in each model, because Django models are required to have a
-   ``primary_key=True`` field.
+5. Se il database contiene tabelle che fanno riferimento ad altre tabelle (come
+   fanno la maggior parte dei Database), potrebbe essere necessario modificare
+   l'ordine dei modelli generati in modo che i suddetti facciano riferimento
+   agli altri modelli correttamente. Per esempio, se il modello ``Book`` ha una
+   ``ForeignKey`` al modello ``Author``, il modello ``Author`` deve essere
+   definito prima del modello ``Book``. Se hai bisogno di creare una relazione
+   con un modello che non è ancora stato definito, si può utilizzare una stringa
+   contenente il nome del modello, piuttosto che l'oggetto modello stesso.
 
-7. Foreign-key detection only works with PostgreSQL and with certain types
-   of MySQL tables. In other cases, foreign-key fields will be generated as
-   ``IntegerField``s, assuming the foreign-key column was an ``INT``
-   column.
+6. ``inspectdb`` rileva le chiavi primarie per PostgreSQL, MySQL e SQLite.
+    Cioè, inserisce ``primary_key=True`` nel caso appropriato. Per altri
+    database, è necessario inserire ``primary_key=True`` per almeno un campo in
+    ciascun modello, perché i modelli Django devono avere almeno uno di questi campi.
 
-Integrating with an Authentication System
-=========================================
+7. L'ndividuazione di chiave funziona solo con PostgreSQL e con alcuni tipi
+    di tabelle MySQL. In altri casi, i campi di chiave verranno generati come
+    ``IntegerField``, assumendo che la colonna di chiave esterna è un ``INT``.
 
-It's possible to integrate Django with an existing authentication system --
-another source of usernames and passwords or authentication methods.
+Integrazione con un Sistema di Autenticazione
+=============================================
 
-For example, your company may already have an LDAP setup that stores a username
-and password for every employee. It would be a hassle for both the network
-administrator and the users themselves if users had separate accounts in LDAP
-and the Django-based applications.
+È possibile integrare Django con un sistema di autenticazione già esistente --
+un'altra fonte di nomi utente e password o metodi di autenticazione.
 
-To handle situations like this, the Django authentication system lets you
-plug in other authentication sources. You can override Django's default
-database-based scheme, or you can use the default system in tandem with other
-systems.
+Ad esempio, la società può già avere una configurazione LDAP che memorizza un
+nome utente e password per ogni dipendente. Sarebbe una seccatura sia per l'
+amministratore di rete che per gli utenti stessi, avere account separati fra LDAP
+e applicazioni basate su Django.
+
+Per gestire situazioni come questa, il sistema di autenticazione Django consente
+di collegare altre fonti di autenticazione. È possibile eseguire l'override del
+sistema di default di Django, oppure è possibile utilizzare il sistema
+di default in accoppiata con altri sistemi.
 
 Specifying Authentication Backends
 ----------------------------------
