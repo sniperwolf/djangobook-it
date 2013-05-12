@@ -143,67 +143,70 @@ di collegare altre fonti di autenticazione. È possibile eseguire l'override del
 sistema di default di Django, oppure è possibile utilizzare il sistema
 di default in accoppiata con altri sistemi.
 
-Specifying Authentication Backends
-----------------------------------
+Specificare un Backend di Autenticazione
+----------------------------------------
 
-Behind the scenes, Django maintains a list of "authentication backends" that it
-checks for authentication. When somebody calls
-``django.contrib.auth.authenticate()`` (as described in Chapter 14), Django
-tries authenticating across all of its authentication backends. If the first
-authentication method fails, Django tries the second one, and so on, until all
-backends have been attempted.
+Dietro le quinte, Django mantiene una lista di "backend di autenticazione" che
+controlla per l'autenticazione. Quando qualcuno chiama
+``django.contrib.auth.authenticate()`` (come descritto nel capitolo 14), Django
+cerca prova l'autenticazione in tutti i suoi backend di autenticazione. Se il
+primo metodo di autenticazione non va a buon fine, Django tenta il seconda, e
+ così via, finché tutti backend non siano stati provati.
 
-The list of authentication backends to use is specified in the
-``AUTHENTICATION_BACKENDS`` setting. This should be a tuple of Python path
-names that point to Python classes that know how to authenticate. These classes
-can be anywhere on your Python path.
+La lista dei backend di autenticazione da utilizzare è specificata
+nell'impostazione ``AUTHENTICATION_BACKENDS``. Questa dovrebbe essere una tupla
+del nome del percorso Python che fa riferimento alle classi Python che sanno
+come autenticare. Queste classi possono essere ovunque sul tuo percorso Python.
 
-By default, ``AUTHENTICATION_BACKENDS`` is set to the following::
+Per impostazione predefinita, ``AUTHENTICATION_BACKENDS`` è impostato come segue::
 
     ('django.contrib.auth.backends.ModelBackend',)
 
-That's the basic authentication scheme that checks the Django users database.
+Questo è lo schema di autenticazione di base che controlla il database utenti di
+Django.
 
-The order of ``AUTHENTICATION_BACKENDS`` matters, so if the same username and
-password are valid in multiple backends, Django will stop processing at the
-first positive match.
+L'ordine del ``AUTHENTICATION_BACKENDS`` ha un senso, quindi se lo stesso nome
+utente e la password sono validi in diversi backend, Django si ferma
+nell'elaborazione al primo riscontro positivo.
 
-Writing an Authentication Backend
----------------------------------
+Scrivere un backend di autenticazione
+-------------------------------------
 
-An authentication backend is a class that implements two methods:
-``get_user(id)`` and ``authenticate(**credentials)``.
+Un backend di autenticazione è una classe che implementa due metodi:
+``get_user (id)`` e ``authenticate(**credentials)``.
 
-The ``get_user`` method takes an ``id`` -- which could be a username, database
-ID, or whatever -- and returns a ``User`` object.
+Il metodo ``get_user``  prende un ``id`` -- che può essere un nome utente, un ID
+di un database o qualsiasi altra cosa -- e restituisce un oggetto ``User``.
 
-The  ``authenticate`` method takes credentials as keyword arguments. Most of
-the time it looks like this::
+Il metodo `authenticate`` prende le credenziali come argomenti chiave. Somiglia a
+questo::
 
     class MyBackend(object):
         def authenticate(self, username=None, password=None):
             # Check the username/password and return a User.
 
-But it could also authenticate a token, like so::
+Ma potrebbe autenticare anche un token, come il seguente::
 
     class MyBackend(object):
         def authenticate(self, token=None):
             # Check the token and return a User.
 
-Either way, ``authenticate`` should check the credentials it gets, and it
-should return a ``User`` object that matches those credentials, if the
-credentials are valid. If they're not valid, it should return ``None``.
+Altrimenti, ``authenticate`` può controllare le credenziali che gli si passa e
+restituire un oggetto ``User`` che corrisponde con quelle credenziali, se quelle
+sono valide. Se non lo sono, dovrebbe restituire un ``None``.
 
-The Django admin system is tightly coupled to Django's own database-backed
-``User`` object described in Chapter 14. The best way to deal with this is to
-create a Django ``User`` object for each user that exists for your backend
-(e.g., in your LDAP directory, your external SQL database, etc.). Either you can
-write a script to do this in advance or your ``authenticate`` method can do it
-the first time a user logs in.
 
-Here's an example backend that authenticates against a username and password
-variable defined in your ``settings.py`` file and creates a Django ``User``
-object the first time a user authenticates::
+Il sistema admin di Django è strettamente accoppiato al proprio oggetto ``User``
+presente nel database, come descritto nel capitolo 14. Il modo migliore per
+affrontare questo problema è creare un oggetto ``User`` per ogni utente che
+esiste per sul tuo backend (ad esempio, nella directory LDAP, il database SQL
+esterno, ecc.) In entrambi i casi è possibile scrivere uno script per far fare
+questo in anticipo o il tuo metodo ``authenticate`` lo può fare la prima volta
+che un utente esegue il login.
+
+Ecco un esempio di backend che autentica le variabili che rappresentano nome
+utente e password variabile definita nel tuo ``settings.py`` e crea un oggetto
+Django ``User`` la prima volta che un utente esegue l'autenticazione::
 
     from django.conf import settings
     from django.contrib.auth.models import User, check_password
@@ -240,21 +243,22 @@ object the first time a user authenticates::
             except User.DoesNotExist:
                 return None
 
-For more on authentication backends, see the official Django documentation.
+Per altri backend di autenticazione, leggi la documentazione ufficiale di Django.
 
-Integrating with Legacy Web Applications
+Integrazione con Applicazioni Web Legacy
 ========================================
 
-It's possible to run a Django application on the same Web server as an
-application powered by another technology. The most straightforward way of
-doing this is to use Apache's configuration file, ``httpd.conf``, to delegate
-different URL patterns to different technologies. (Note that Chapter 12 covers
-Django deployment on Apache/mod_python, so it might be worth reading that
-chapter first before attempting this integration.)
+E 'possibile eseguire un'applicazione Django sullo stesso server Web come
+un'applicazione alimentato da un'altra tecnologia. Il modo più diretto per farlo
+è usare il file di configurazione di Apache, ``httpd.conf``, per delegare
+diversi URL pattern in diverse tecnologie. (Da notare che il capitolo 12 copre
+la distribuzione di Django su Apache/mod_python, quindi potrebbe valere la pena
+leggere che capitolo prima di provare con questa integrazione).
 
-The key is that Django will be activated for a particular URL pattern only if
-your ``httpd.conf`` file says so. The default deployment explained in Chapter
-12 assumes you want Django to power every page on a particular domain::
+La chiave è che Django sarà attivato per un particolare pattern di URL solo se
+il tuo file ``httpd.conf`` dice così. L'implementazione predefinita è spiegata
+nel capitolo 12 e si presuppone che si desidera dare a Django il potere di
+alimentare tutte le pagina su un particolare dominio::
 
     <Location "/">
         SetHandler python-program
@@ -263,14 +267,15 @@ your ``httpd.conf`` file says so. The default deployment explained in Chapter
         PythonDebug On
     </Location>
 
-Here, the ``<Location "/">`` line means "handle every URL, starting at the
-root," with Django.
+Qui, la linea ``<Location "/">`` significa "gestisci ogni URL, a partire dalla
+root, con Django".
 
-It's perfectly fine to limit this ``<Location>`` directive to a certain
-directory tree. For example, say you have a legacy PHP application that powers
-most pages on a domain and you want to install a Django admin site at
-``/admin/`` without disrupting the PHP code. To do this, just set the
-``<Location>`` directive to ``/admin/``::
+E' perfettamente corretto limitare questa direttiva ``<Location>`` ad un ben
+determinato albero di directory. Ad esempio, supponiamo di avere un'applicazione
+PHP ereditata che ha il potere di gestire la maggior parte delle pagine di un
+dominio e si desidera installare il pannello di amministratore di Django su
+``/admin/`` senza smettere di far funzionare il codice PHP. Per fare ciò, è
+sufficiente impostare la direttiva ``<Location>`` a ``/admin/``::
 
     <Location "/admin/">
         SetHandler python-program
@@ -279,23 +284,23 @@ most pages on a domain and you want to install a Django admin site at
         PythonDebug On
     </Location>
 
-With this in place, only the URLs that start with ``/admin/`` will activate
-Django. Any other page will use whatever infrastructure already existed.
+Con tutto questo, solo gli URL che iniziano con ``/admin/`` attiveranno
+Django. Qualsiasi altra pagina utilizzerà qualsiasi infrastruttura già esistente.
 
-Note that attaching Django to a qualified URL (such as ``/admin/`` in this
-section's example) does not affect the Django URL parsing. Django works with the
-absolute URL (e.g., ``/admin/people/person/add/``), not a "stripped" version of
-the URL (e.g., ``/people/person/add/``). This means that your root URLconf
-should include the leading ``/admin/``.
+Si noti che il collegamento Django ad un URL specifico (ad esempio ``/admin/``
+in questo esempio) non influenza l'URL parsing di Django. Django si basa
+sull'URL assoluto (ad esempio, ``/admin/people/person/add/``), non su una
+versione "spogliata" (ad esempio, ``/people/person/add/``). Questo significa che
+il tuo URLconf di base dovrebbe includere all'inizio ``/admin/``.
 
-What's Next?
-============
+Cosa c'è adesso?
+================
 
-If you're a native English speaker, you might not have noticed one of the
-coolest features of Django's admin site: it's available in more than 50
-different languages! This is made possible by Django's internationalization
-framework (and the hard work of Django's volunteer translators). The
-`next chapter`_ explains how to use this framework to provide localized Django
-sites.
+Se sei un madrelingua inglese, potresti non aver notato una delle
+caratteristiche più interessanti del pannello di amministrazione di Django: è
+disponibile in più di 50 lingue diverse! Ciò è reso possibile
+dall'internazionalizzazione del framework Django (e il duro lavoro dei traduttori
+volontari di Django). Nel `prossimo capitolo`_ spiega come utilizzare questo
+framework per fornire una versione localizzata dei siti web Django.
 
-.. _next chapter: chapter19.html
+.. _prossimo capitolo: chapter19.html
