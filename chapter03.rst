@@ -644,10 +644,11 @@ favorire la duplicazione. Abbiamo bisogno di fare un po' di astrazione qui.
     Il sistema URLconf di Django incoraggia la creazione di URL di questo tipo,
     rendendoli più semplici da usare rispetto agli altri che *non* lo sono.
 
-How, then do we design our application to handle arbitrary hour offsets? The
-key is to use *wildcard URLpatterns*. As we mentioned previously, a URLpattern
-is a regular expression; hence, we can use the regular expression pattern
-``\d+`` to match one or more digits::
+Come possiamo allora riprogettare la nostra applicazione per gestire offset
+arbitrari? La chiave è quella di utilizzare gli *URLpattern jolly*. Come
+abbiamo accennato in precedenza, un urlPattern è un'espressione regolare, di
+conseguenza, siamo in grado di utilizzare il modello di espressione regolare
+``\d+`` per poter abbinare una o più cifre::
 
     urlpatterns = patterns('',
         # ...
@@ -655,37 +656,39 @@ is a regular expression; hence, we can use the regular expression pattern
         # ...
     )
 
-(We're using the ``# ...`` to imply there might be other URLpatterns that we
-trimmed from this example.)
+(Stiamo usando il ``# ...`` per dire che potrebbero esserci altri URLpattern
+che abbiamo rimosso da questo esempio).
 
-This new URLpattern will match any URL such as ``/time/plus/2/``,
-``/time/plus/25/``, or even ``/time/plus/100000000000/``. Come to think of it,
-let's limit it so that the maximum allowed offset is 99 hours. That means we
-want to allow either one- or two-digit numbers -- and in regular expression
-syntax, that translates into ``\d{1,2}``::
+Questo nuovo urlPattern corrisponderà a qualsiasi URL, da ``/time/plus/2/``, a
+``/time/plus/25/`` o anche ``/time/plus/100000000000/``. Vale la pena pensarci
+bene, cerchiamo di limitare il tutto in modo che il massimo consentito sia di
+99 ore. Questo significa che vogliamo consentire l'inserimento di uno o due
+valori numerici - o nella sintassi delle espressioni regolari, che si traduce
+in ``\d{1,2}``::
 
     url(r'^time/plus/\d{1,2}/$', hours_ahead),
 
 .. note::
 
-    When building Web applications, it's always important to consider the most
-    outlandish data input possible, and decide whether or not the application
-    should support that input. We've curtailed the outlandishness here by
-    limiting the offset to 99 hours.
+    Quando si creano applicazioni Web, è sempre importante considerare l'input
+    dati più stravagante possibile, e decidere se l'applicazione deve supportare
+    o meno tale ingresso. Abbiamo ridotto le possibilità qui limitando l'offset
+    a 99 ore.
 
-Now that we've designated a wildcard for the URL, we need a way of passing that
-wildcard data to the view function, so that we can use a single view function
-for any arbitrary hour offset. We do this by placing parentheses around the
-data in the URLpattern that we want to save. In the case of our example, we
-want to save whatever number was entered in the URL, so let's put parentheses
-around the ``\d{1,2}``, like this::
+Ora che abbiamo indicato un jolly per l'URL, abbiamo bisogno di un modo di
+trasmettere tali dati "jolly" per la funzione di visualizzazione, in modo da
+poter utilizzare una singola funzione di visualizzazione per ogni ora offset
+arbitrario. Lo facciamo mettendo tra parentesi i dati degli urlPattern che
+vogliamo salvare. Nel caso del nostro esempio, vogliamo salvare qualsiasi numero
+presente nell'URL, quindi cerchiamo di mettere tra parentesi la ``\d{1,2}``,
+come questo:
 
     url(r'^time/plus/(\d{1,2})/$', hours_ahead),
 
-If you're familiar with regular expressions, you'll be right at home here;
-we're using parentheses to *capture* data from the matched text.
+Se hai familiarità con le espressioni regolari, ti troverai a casa e sai che
+stiamo usando le parentesi per acquisire i dati dal testo corrispondente.
 
-The final URLconf, including our previous two views, looks like this::
+L'URLconf finale, comprese le nostre precedenti view, si presentano così::
 
     from django.conf.urls.defaults import *
     from mysite.views import hello, current_datetime, hours_ahead
@@ -696,11 +699,11 @@ The final URLconf, including our previous two views, looks like this::
         url(r'^time/plus/(\d{1,2})/$', hours_ahead),
     )
 
-With that taken care of, let's write the ``hours_ahead`` view.
+Fatto questo, scriviamo la view ``hours_ahead``.
 
-``hours_ahead`` is very similar to the ``current_datetime`` view we wrote
-earlier, with a key difference: it takes an extra argument, the number of hours
-of offset. Here's the view code::
+``hours_ahead`` è molto simile alla view ``current_datetime`` che abbiamo
+scritto in precedenza, con una differenza fondamentale: ci vuole un argomento in
+più, il numero di ore da aggiungere. Ecco il codice::
 
     from django.http import Http404, HttpResponse
     import datetime
@@ -714,109 +717,110 @@ of offset. Here's the view code::
         html = "<html><body>In %s hour(s), it will be %s.</body></html>" % (offset, dt)
         return HttpResponse(html)
 
-Let's step through this code one line at a time:
+Analizziamo questo codice una riga alla volta:
 
-* The view function, ``hours_ahead``, takes *two* parameters: ``request``
-  and ``offset``.
+* La funzione di visualizzazione, ``hours_ahead`` accetta *due* parametri:
+  ``request`` e ``offset``.
 
-  * ``request`` is an ``HttpRequest`` object, just as in ``hello`` and
-    ``current_datetime``. We'll say it again: each view *always* takes an
-    ``HttpRequest`` object as its first parameter.
+  * La ``request`` è un oggetto ``HttpRequest``, proprio come in ``hello`` e
+    ``current_datetime``. Lo scriviamo ancora: ogni view ha *sempre* un oggetto
+    ``HttpRequest`` come primo parametro.
 
-  * ``offset`` is the string captured by the parentheses in the
-    URLpattern. For example, if the requested URL were ``/time/plus/3/``,
-    then ``offset`` would be the string ``'3'``. If the requested URL were
-    ``/time/plus/21/``, then ``offset`` would be the string ``'21'``. Note
-    that captured values will always be *strings*, not integers, even if
-    the string is composed of only digits, such as ``'21'``.
+  * ``offset`` è la stringa catturata dalle parentesi nell'urlPattern. Ad
+    esempio, se l'URL richiesto era ``/time/plus/3/``, la stringa ``offset`` è
+    ``'3'``. Se l'URL richiesto era ``/time/plus/21/``, l'offset è la stringa
+    ``'21'``. Si noti che i valori acquisiti saranno sempre stringhe, non interi,
+    anche se la stringa è composta da solo cifre, ad esempio ``'21'``.
 
-    (Technically, captured values will always be *Unicode objects*, not
-    plain Python bytestrings, but don't worry about this distinction at
-    the moment.)
+    (Tecnicamente, i valori acquisiti saranno sempre gli oggetti Unicode, non
+    semplici stringhe di byte Python, ma non preoccuparti di questa distinzione
+    al momento).
 
-    We decided to call the variable ``offset``, but you can call it
-    whatever you'd like, as long as it's a valid Python identifier. The
-    variable name doesn't matter; all that matters is that it's the second
-    argument to the function, after ``request``. (It's also possible to
-    use keyword, rather than positional, arguments in an URLconf. We cover
-    that in Chapter 8.)
+    Abbiamo deciso di chiamare la variabile ``offset``, ma si può chiamare come vuoi,
+    a patto che si tratti di un identificatore Python valido. Il nome della
+    variabile non importa, ciò che davvero conta è che sia il secondo argomento
+    della funzione, dopo ``request``. (E 'anche possibile utilizzare una parole
+    chiave, piuttosto che una variabile posizionale in un URLconf. Lo vedremo
+    nel capitolo 8).
 
-* The first thing we do within the function is call ``int()`` on ``offset``.
-  This converts the string value to an integer.
+* La prima cosa che facciamo all'interno della funzione è chiamare ``int()`` su
+  ``offset``. Questo converte la stringa in un intero.
 
-  Note that Python will raise a ``ValueError`` exception if you call
-  ``int()`` on a value that cannot be converted to an integer, such as the
-  string ``'foo'``. In this example, if we encounter the ``ValueError``, we
-  raise the exception ``django.http.Http404``, which, as you can imagine,
-  results in a 404 "Page not found" error.
+  Si noti che Python solleva un'eccezione ``ValueError`` se si chiama ``int()``
+  su un valore che non può essere convertito in un intero, come ad esempio la
+  stringa ``'foo'``. In questo esempio, se incontriamo la ``ValueError``,
+  solleviamo l'eccezione ``django.http.Http404``, che, come puoi immaginare, si
+  traduce in un errore 404, "Page not found".
 
-  Astute readers will wonder: how could we ever reach the ``ValueError``
-  case, anyway, given that the regular expression in our URLpattern --
-  ``(\d{1,2})`` -- captures only digits, and therefore ``offset`` will only
-  ever be a string composed of digits? The answer is, we won't, because
-  the URLpattern provides a modest but useful level of input validation,
-  *but* we still check for the ``ValueError`` in case this view function
-  ever gets called in some other way. It's good practice to implement view
-  functions such that they don't make any assumptions about their
-  parameters. Loose coupling, remember?
+  I lettori più attenti si chiederanno: come potremmo mai raggiungere il caso
+  ``ValueError``, in ogni caso, dato che l'espressione regolare nel nostro
+  urlPattern -- ``(\d{1,2})`` -- raccoglie solo cifre, e pertanto l'``offset``
+  sarà sempre e solo essere una stringa composta da cifre? La risposta è, non lo
+  faremo, perché l'urlPattern fornisce un livello modesto, *ma* utile, di
+  convalida dell'input, ma dobbiamo ancora verificare il ``ValueError`` nel caso
+  in cui questa funzione di visualizzazione venga chiamata in qualche altro modo.
+  E' buona norma implementare funzioni tali che non facciano alcuna ipotesi
+  riguardo i loro parametri. Accoppiamento lasco, ricordi?
 
-* In the next line of the function, we calculate the current date/time and
-  add the appropriate number of hours. We've already seen
-  ``datetime.datetime.now()`` from the ``current_datetime`` view; the new
-  concept here is that you can perform date/time arithmetic by creating a
-  ``datetime.timedelta`` object and adding to a ``datetime.datetime``
-  object. Our result is stored in the variable ``dt``.
+* Nella riga successiva della funzione, calcoliamo la data/ora corrente e
+  aggiungiamo il numero adeguato di ore. Abbiamo già visto
+  ``datetime.datetime.now()`` dalla vista ``current_datetime``, il nuovo
+  concetto qui è che è possibile eseguire la somma aritmetica sulla data/ora con
+  la creazione di un oggetto ``datetime.timedelta`` e l'aggiunta di un oggetto
+  ``datetime.datetime``. Il nostro risultato viene memorizzato nella variabile
+  ``dt``.
 
-  This line also shows why we called ``int()`` on ``offset`` -- the
-  ``datetime.timedelta`` function requires the ``hours`` parameter to be an
-  integer.
+  Questa linea mostra anche perché abbiamo chiamato ``int()`` su ``offset`` --
+  la funzione ``datetime.timedelta`` richiede il parametro ``hours`` per essere
+  un numero intero.
 
-* Next, we construct the HTML output of this view function, just as we did
-  in ``current_datetime``. A small difference in this line from the previous
-  line is that it uses Python's format-string capability with *two* values,
-  not just one. Hence, there are two ``%s`` symbols in the string and a
-  tuple of values to insert: ``(offset, dt)``.
+* Più avanti, costruiamo l'output HTML di questa view, proprio come abbiamo
+  fatto in ``current_datetime``. Una piccola differenza in questa linea dalla
+  linea precedente è che utilizza la stringa di formattazione Python con *due*,
+  valori non solo uno. Quindi, ci sono due simboli ``%s`` nella stringa e una
+  tupla di valori da inserire: ``(offset, dt)``.
 
-* Finally, we return an ``HttpResponse`` of the HTML. By now, this is old
-  hat.
 
-With that view function and URLconf written, start the Django development server
-(if it's not already running), and visit ``http://127.0.0.1:8000/time/plus/3/``
-to verify it works. Then try ``http://127.0.0.1:8000/time/plus/5/``. Then
-``http://127.0.0.1:8000/time/plus/24/``. Finally, visit
-``http://127.0.0.1:8000/time/plus/100/`` to verify that the pattern in your
-URLconf only accepts one- or two-digit numbers; Django should display a "Page
-not found" error in this case, just as we saw in the section "A Quick Note
-About 404 Errors" earlier. The URL ``http://127.0.0.1:8000/time/plus/`` (with
-*no* hour designation) should also throw a 404.
+* Infine, ritorniamo un ``HttpResponse`` del HTML. Ormai, lo abbiamo capito.
 
-.. admonition:: Coding Order
+Avendo scritto la funzione di visualizzazione ed il corrispondente URLconf,
+avviare il server di sviluppo (se non è già in esecuzione), e visita
+``http://127.0.0.1:8000/time/plus/3/`` per verificarne il funzionamento. Quindi
+prova ``http://127.0.0.1:8000/time/plus/5/``. Poi ``http://127.0.0.1:8000/time/plus/24/``.
+Infine, visita ``http://127.0.0.1:8000/time/plus/100/`` per verificare che il
+pattern configurato da URLconf accetta solo o una o due cifre; Django dovrebbe
+visualizzare un errore "Page not found" in questo caso, proprio come abbiamo
+visto nella sezione "Una breve nota sui 404 Errori" ("Page not found")
+precedenti. Anche gli URL ``http://127.0.0.1:8000/time/plus/`` (*senza* l'ora)
+dovrebbero sollevare un 404.
 
-    In this example, we wrote the URLpattern first and the view second, but in
-    the previous examples, we wrote the view first, then the URLpattern. Which
-    technique is better?
+.. admonition:: Ordine di programmazione
 
-    Well, every developer is different.
+    In questo esempio, abbiamo scritto per prima l'urlPattern e la view in
+    secondo luogo, ma negli esempi precedenti, abbiamo scritto la vista, poi
+    l'urlPattern. Quale tecnica è migliore?
 
-    If you're a big-picture type of person, it may make the most sense to you
-    to write all of the URLpatterns for your application at the same time, at
-    the start of your project, and then code up the views. This has the
-    advantage of giving you a clear to-do list, and it essentially defines the
-    parameter requirements for the view functions you'll need to write.
+    Beh, ogni sviluppatore è diverso.
 
-    If you're more of a bottom-up developer, you might prefer to write the
-    views first, and then anchor them to URLs afterward. That's OK, too.
+    Se sei un tipo di persona che immagina in grande, può avere più senso per te
+    scrivere tutti gli URLpatterns per la tua applicazione, allo stesso tempo,
+    all'inizio del progetto, e quindi codificare le view. Questo ha il vantaggio
+    di dare una chiara "to-do list", e definisce essenzialmente i requisiti dei
+    parametri per le funzioni di visualizzazione che avrai bisogno di scrivere.
 
-    In the end, it comes down to which technique fits your brain the best. Both
-    approaches are valid.
+    Se sei più di uno sviluppatore più build&fix preferirai scrivere prima le
+    view, e poi determinare gli URL dopo. Va bene allo stesso modo.
 
-Django's Pretty Error Pages
-===========================
+    Alla fine, si tratta di quale tecnica si adatta meglio il tuo cervello.
+    Entrambi gli approcci sono validi.
 
-Take a moment to admire the fine Web application we've made so far . . . now
-let's break it! Let's deliberately introduce a Python error into our
-``views.py`` file by commenting out the ``offset = int(offset)`` lines in the
-``hours_ahead`` view::
+Le belle pagine d'errore di Django
+==================================
+
+Prenditi un momento per ammirare l'applicazione che abbiamo fatto finora... ora
+cerchiamo di rompere! Deliberatamente, introduciamo un errore di Python nel
+nostro file ``views.py`` commentando ``offset = int(offset)``  nella vista
+``hours_ahead``::
 
     def hours_ahead(request, offset):
         # try:
@@ -827,78 +831,83 @@ let's break it! Let's deliberately introduce a Python error into our
         html = "<html><body>In %s hour(s), it will be %s.</body></html>" % (offset, dt)
         return HttpResponse(html)
 
-Load up the development server and navigate to ``/time/plus/3/``. You'll see an
-error page with a significant amount of information, including a ``TypeError``
-message displayed at the very top: ``"unsupported type for timedelta hours
-component: unicode"``.
+Carica il server di sviluppo e visita la pagina ``/time/plus/3/``. Vedrai una
+pagina di errore con una notevole quantità di informazioni, compreso un
+messaggio ``TypeError`` mostrato in cima: ``"unsupported type for timedelta hours
+component: unicode"`` ("tipo non supportato per timedelta componente ore: unicode").
 
-What happened? Well, the ``datetime.timedelta`` function expects the ``hours``
-parameter to be an integer, and we commented out the bit of code that converted
-``offset`` to an integer. That caused ``datetime.timedelta`` to raise the
-``TypeError``. It's the typical kind of small bug that every programmer runs
-into at some point.
+Che cosa è successo? Beh, la funzione ``datetime.timedelta`` si aspetta che il
+parametro ``hours`` debba essere un numero intero, e abbiamo commentato il
+codice che fa proprio questo. Questo ha fatto sollevare a ``datetime.timedelta``
+un errore ``TypeError``. È in genere un tipico bug che ogni programmatore
+incontra a un certo punto.
 
-The point of this example was to demonstrate Django's error pages. Take some
-time to explore the error page and get to know the various bits of information
-it gives you.
+L'obiettivo di questo esempio è mostrare le pagine di errore di Django. Prenditi
+del tempo per esplorare la pagina di errore e conoscere i vari pezzi di
+informazioni che ti restituisce.
 
-Here are some things to notice:
+Qui ci sono alcune cose da notare:
 
-* At the top of the page, you get the key information about the exception:
-  the type of exception, any parameters to the exception (the ``"unsupported
-  type"`` message in this case), the file in which the exception was raised,
-  and the offending line number.
+* Nella parte superiore della pagina, si trovano le informazioni chiave: il tipo
+  di eccezione, tutti i parametri dell'eccezione (il messaggio
+  ``"unsupported type"`` in questo caso), il file in cui è stata sollevata
+  l'eccezione ed il numero della riga implicata.
 
-* Under the key exception information, the page displays the full Python
-  traceback for this exception. This is similar to the standard traceback
-  you get in Python's command-line interpreter, except it's more
-  interactive. For each level ("frame") in the stack, Django displays the
-  name of the file, the function/method name, the line number, and the
-  source code of that line.
+* Sotto queste informazioni, la pagina mostra l'intero traceback di Python
+  relativo a questa eccezione. Questo è simile alla traccia standard che si
+  riceve quando si è davanti all'interprete della riga di comando di Python. Per
+  ogni livello ("frame") nella pila, Django mostra il nome del file, il nome
+  della funzione/metodo, il numero di riga e il codice sorgente presente in
+  quella linea.
 
-  Click the line of source code (in dark gray), and you'll see several
-  lines from before and after the erroneous line, to give you context.
+  Cliccare sulla riga di codice sorgente (in grigio scuro), e sarà possibile
+  vedere diverse linee di codice prima e dopo la linea che ha causato l'errore,
+  per darci il contesto.
 
-  Click "Local vars" under any frame in the stack to view a table of all
-  local variables and their values, in that frame, at the exact point in the
-  code at which the exception was raised. This debugging information can be
-  a great help.
+  Cliccando su "Local vars" sotto qualsiasi fotogramma dello stack per vedere
+  una tabella di tutte le variabili locali ed i loro valori attuali nel punto
+  esatto del codice in cui è stata sollevata l'eccezione. Queste informazioni
+  di debug possono essere di grande aiuto.
 
-* Note the "Switch to copy-and-paste view" text under the "Traceback"
-  header. Click those words, and the traceback will switch to a alternate
-  version that can be easily copied and pasted. Use this when you want to
-  share your exception traceback with others to get technical support --
-  such as the kind folks in the Django IRC chat room or on the Django users
-  mailing list.
+* Nota il testo "Switch to copy-and-paste view"  sotto   l'intestazione
+  "Traceback". Cliccando su quelle parole, il traceback passerà ad una versione
+  alternativa che può essere facilmente copiata e incollata. Utilizza questa
+  funzione quando vuoi condividere il traceback dell'eccezione con altri per
+  ottenere supporto tecnico - come ad esempio le gentili persone nella chat room
+  di Django o sulla mailing list degli utenti Django.
 
-  Underneath, the "Share this traceback on a public Web site" button will
-  do this work for you in just one click. Click it to post the traceback to
-  http://www.dpaste.com/, where you'll get a distinct URL that you can
-  share with other people.
+  Più in basso, il pulsante "Share this traceback on a public Web site"
+  ("Condividi questa traceback su un pubblico sito Web", in inglese) farà questo
+  lavoro per noi in un solo click. Cliccando, il traceback viene inserito sul
+  servizio web http://www.dpaste.com/ con un indirizzo univoco che è possibile
+  condividere con altre persone.
 
-* Next, the "Request information" section includes a wealth of information
-  about the incoming Web request that spawned the error: GET and POST
-  information, cookie values, and meta information, such as CGI headers.
-  Appendix G has a complete reference of all the information a request
-  object contains.
 
-  Below the "Request information" section, the "Settings" section lists all
-  of the settings for this particular Django installation. (We've already
-  mentioned ``ROOT_URLCONF``, and we'll show you various Django settings
-  throughout the book. All the available settings are covered in detail in
-  Appendix D.)
+* Successivamente, la sezione "Richiedi informazioni" comprende una serie di
+  informazioni sulla richiesta web in ingresso che ha generato l'errore: le
+  informazioni GET e POST, i valori dei cookie, e altre meta-informazioni, come
+  ad esempio le intestazioni CGI. L'appendice G ha un riferimento completo di
+  tutte le informazioni presenti su un oggetto di richiesta.
 
-The Django error page is capable of displaying more information in certain
-special cases, such as the case of template syntax errors. We'll get to those
-later, when we discuss the Django template system. For now, uncomment the
-``offset = int(offset)`` lines to get the view function working properly again.
+  All'interno della sezione "Request information" ("Richiedi informazioni"), la
+  sezione "Settings" elenca tutte le impostazioni di questa particolare
+  installazione di Django. (Abbiamo già scritto di ``ROOT_URLCONF``, e vi
+  mostreremo le varie impostazioni Django in tutto il libro. Tutte le
+  impostazioni disponibili sono trattate in dettaglio in Appendice D).
 
-Are you the type of programmer who likes to debug with the help of carefully
-placed ``print`` statements? You can use the Django error page to do so -- just
-without the ``print`` statements. At any point in your view, temporarily insert
-an ``assert False`` to trigger the error page. Then, you can view the local
-variables and state of the program. Here's an example, using the
-``hours_ahead`` view::
+La pagina di errore è in grado di mostrare ancor più informazioni in taluni casi
+particolari, come ad esempio nel caso di errori di sintassi nella costruzione di
+un template. Arriveremo a quelli più tardi, quando discuteremo del sistema di
+template incluso in Django. Ora, è possibile rimuovere il commento
+all'istruzione ``offset = int(offset)`` per far tornare a funzionare tutto
+correttamente.
+
+Sei il tipo di programmatore che ama scrivere il codice usando ``print``
+accuratamente posizionati? È possibile utilizzare la pagina di errore Django per
+farlo -- ma senza ``print``. In qualsiasi punto della tua view, è possibile
+inserire temporaneamente un ``assert False`` per attivare la pagina di errore.
+Quindi, è possibile visualizzare le variabili locali e l'intero stato del
+programma. Ecco un esempio, utilizzando la view ``hours_ahead``::
 
     def hours_ahead(request, offset):
         try:
@@ -910,25 +919,28 @@ variables and state of the program. Here's an example, using the
         html = "<html><body>In %s hour(s), it will be %s.</body></html>" % (offset, dt)
         return HttpResponse(html)
 
-Finally, it's obvious that much of this information is sensitive -- it exposes
-the innards of your Python code and Django configuration -- and it would be
-foolish to show this information on the public Internet. A malicious person
-could use it to attempt to reverse-engineer your Web application and do nasty
-things. For that reason, the Django error page is only displayed when your
-Django project is in debug mode. We'll explain how to deactivate debug mode
-in Chapter 12. For now, just know that every Django project is in debug mode
-automatically when you start it. (Sound familiar? The "Page not found" errors,
-described earlier in this chapter, work the same way.)
+Infine, è ovvio che molte di queste informazioni sono sensibili -- poiché espone
+le "interiora" delle impostazioni e del codice Python e Django -- e sarebbe
+sciocco per visualizzare queste informazioni su pubblicamente. Un utente
+malevolo potrebbe usarlo per tentare di decodificare l'applicazione Web e fare
+cose brutte. Per questo motivo, la pagina di errore Django viene mostrata solo
+quando il progetto è in modalità di debug. Spiegheremo come disattivare la
+modalità di debug nel Capitolo 12. Per ora, è sufficiente sapere che ogni
+progetto Django è in modalità di debug automaticamente quando lo si avvia.
 
-What's next?
-============
+(Ti suona familiare? Gli errori "Page not found", descritti in precedenza in
+questo capitolo, funzionano allo stesso modo).
 
-So far, we've been writing our view functions with HTML hard-coded directly
-in the Python code. We've done that to keep things simple while we demonstrated
-core concepts, but in the real world, this is nearly always a bad idea.
+Cosa c'è adesso?
+================
 
-Django ships with a simple yet powerful template engine that allows you to
-separate the design of the page from the underlying code. We'll dive into
-Django's template engine in the next chapter `Chapter 4`_.
+Finora, abbiamo scritto le nostre view in HTML a livello di codice direttamente
+nel codice Python. Lo abbiamo fatto per mantenere le cose semplici, ed abbiamo
+dimostrato concetti fondamentali, ma nel mondo reale, questa è quasi sempre una
+cattiva idea.
 
-.. _Chapter 4: chapter04.html
+Vedremo che Django ha un motore di template semplice ma potente che permette di
+separare la progettazione della pagina dal codice sottostante. Ci immergeremo
+all'interno di questo motore di template nel prossimo capitolo `Capitolo 4`_.
+
+.. _Capitolo 4: chapter04.html
