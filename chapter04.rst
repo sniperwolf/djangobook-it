@@ -492,17 +492,16 @@ metodo (``upper()``)::
     >>> t.render(c)
     u'SALLY is 43 years old.'
 
-Method Call Behavior
-~~~~~~~~~~~~~~~~~~~~
+Comportamento delle chiamate ad un metodo
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Method calls are slightly more complex than the other lookup types. Here are
-some things to keep in mind:
+Le chiamate ad un metodo sono leggermente più complesse rispetto agli altri tipi
+di ricerca. Qui ci sono alcune cose da tenere a mente:
 
-* If, during the method lookup, a method raises an exception, the exception
-  will be propagated, unless the exception has an attribute
-  ``silent_variable_failure`` whose value is ``True``. If the exception
-  *does* have a ``silent_variable_failure`` attribute, the variable will
-  render as an empty string, for example::
+* Se, durante il metodo di ricerca, un metodo solleva un'eccezione, l'eccezione
+  viene propagata, a meno che l'eccezione ha un attributo ``silent_variable_failure``
+  il cui valore è ``True``. Se l'eccezione ha un attributo di questo tipo, la
+  variabile sarà resa come una stringa vuota, per esempio::
 
         >>> t = Template("My name is {{ person.first_name }}.")
         >>> class PersonClass3:
@@ -523,37 +522,36 @@ some things to keep in mind:
         >>> t.render(Context({"person": p}))
         u'My name is .'
 
-* A method call will only work if the method has no required arguments.
-  Otherwise, the system will move to the next lookup type (list-index
-  lookup).
+* Una chiamata al metodo funziona solo se il metodo non ha argomenti richiesti.
+  In caso contrario, il sistema si sposta al prossimo tipo di ricerca (ricerca
+  elenco-indice).
 
-* Obviously, some methods have side effects, and it would be foolish at
-  best, and possibly even a security hole, to allow the template system to
-  access them.
+* Ovviamente, alcuni metodi hanno effetti collaterali, e sarebbe sciocco, e
+  forse anche un buco di sicurezza, consentire al sistema di template di
+  accedervi.
 
-  Say, for instance, you have a ``BankAccount`` object that has a
-  ``delete()`` method. If a template includes something like
-  ``{{ account.delete }}``, where ``account`` is a ``BankAccount`` object,
-  the object would be deleted when the template is rendered!
+ Supponiamo, ad esempio, che si dispone di un oggetto BankAccount che ha un
+  metodo ``delete()``. Se un modello include qualcosa come ``{{ account.delete }}``,
+  dove ``account`` è un oggetto ``BankAccount``, l'oggetto viene eliminato
+  quando sul template viene eseguito il rendering!
 
-  To prevent this, set the function attribute ``alters_data`` on the
-  method::
+  Per evitare questo, impostare sul metodo  l'attributo ``alters_data``::
 
       def delete(self):
           # Delete the account
       delete.alters_data = True
 
-  The template system won't execute any method marked in this way.
-  Continuing the above example, if a template includes
-  ``{{ account.delete }}`` and the ``delete()`` method has the
-  ``alters_data=True``, then the ``delete()`` method will not be executed
-  when the template is rendered. Instead, it will fail silently.
+  Il template di sistema non esegue alcun metodo contrassegnato in questo modo.
+  Continuando l'esempio precedente, se un modello include ``{{ account.delete }}``
+  e il metodo ``delete()`` è la ``alters_data=True``, il metodo ``delete()`` non
+  viene eseguito quando il template viene eseguito il rendering. Invece, fallirà
+  silenziosamente.
 
-How Invalid Variables Are Handled
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Come vengono gestite le variabili non valide
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-By default, if a variable doesn't exist, the template system renders it as an
-empty string, failing silently. For example::
+Per impostazione predefinita, se una variabile non esiste, il sistema di
+template la traduce in una stringa vuota, in mancanza di niente. Per esempio::
 
     >>> from django.template import Template, Context
     >>> t = Template('Your name is {{ name }}.')
@@ -566,19 +564,20 @@ empty string, failing silently. For example::
     >>> t.render(Context({'Name': 'hello'}))
     u'Your name is .'
 
-The system fails silently rather than raising an exception because it's
-intended to be resilient to human error. In this case, all of the
-lookups failed because variable names have the wrong case or name. In the real
-world, it's unacceptable for a Web site to become inaccessible due to a
-small template syntax error.
+Il sistema non sta silenzio, ma solleva un'eccezione perché è destinato
+persistere un errore umano. In questo caso, tutte le ricerche falliscono perchè
+i nomi delle variabili sono il caso o il nome sbagliato. Nel mondo reale, è
+inaccettabile per un sito Web di diventare inaccessibile a causa di un piccolo
+errore di sintassi nel template.
 
-Playing with Context Objects
-----------------------------
+Giocare con l'oggetto Context
+-----------------------------
 
-Most of the time, you'll instantiate ``Context`` objects by passing in a
-fully populated dictionary to ``Context()``. But you can add and delete items
-from a ``Context`` object once it's been instantiated, too, using standard
-Python dictionary syntax::
+Per la maggior parte del tempo, avrai a che fare con le istanze di oggetti
+``Context`` usando un dizionario completamente popolato da ``Context()``. Ma è
+possibile aggiungere ed eliminare elementi da un oggetto ``Context`` anche una
+volta che è stata creata l'istanza utilizzando la sintassi dizionario standard
+di Python::
 
     >>> from django.template import Context
     >>> c = Context({"foo": "bar"})
@@ -593,15 +592,15 @@ Python dictionary syntax::
     >>> c['newvariable']
     'hello'
 
-Basic Template Tags and Filters
-===============================
+Template, Etichette e Filtri
+============================
 
-As we've mentioned already, the template system ships with built-in tags and
-filters. The sections that follow provide a rundown of the most common tags and
-filters.
+Come abbiamo già detto, è possibile usare diversi tag e filtri integrati nel
+sistema di template. Le sezioni che seguono, forniscono una panoramica dei tag
+e dei filtri più comuni.
 
-Tags
-----
+Tag
+---
 
 if/else
 ~~~~~~~
