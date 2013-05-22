@@ -605,15 +605,15 @@ Tag
 if/else
 ~~~~~~~
 
-The ``{% if %}`` tag evaluates a variable, and if that variable is "True"
-(i.e., it exists, is not empty, and is not a false Boolean value), the system
-will display everything between ``{% if %}`` and ``{% endif %}``, for example::
+Il tag ``{% if %}`` valuta una condizione o una variabile, e se quella risulta
+"True" (cioè, esiste, non è vuoto, e non è un valore booleano false), il sistema
+visualizza tutto tra ``{% if %}`` e ``{% endif %}``, ad esempio::
 
     {% if today_is_weekend %}
         <p>Welcome to the weekend!</p>
     {% endif %}
 
-An ``{% else %}`` tag is optional::
+Un tag ``{% else %}`` è opzionale::
 
     {% if today_is_weekend %}
         <p>Welcome to the weekend!</p>
@@ -623,23 +623,23 @@ An ``{% else %}`` tag is optional::
 
 .. admonition:: Python "Truthiness"
 
-   In Python and in the Django template system, these objects evaluate to
-   ``False`` in a Boolean context:
+   In Python e nel sistema di template Django, questi oggetti restituiscono
+   ``False`` in un contesto booleano:
 
-   * An empty list (``[]``)
-   * An empty tuple (``()``)
-   * An empty dictionary (``{}``)
-   * An empty string (``''``)
+   * Una lista vuota (``[]``)
+   * Una tupla vuota (``()``)
+   * Un dizionario vuoto (``{}``)
+   * Una stringa vuota (``''``)
    * Zero (``0``)
-   * The special object ``None``
-   * The object ``False`` (obviously)
-   * Custom objects that define their own Boolean context behavior
-     (this is advanced Python usage)
+   * L'oggetto speciale ``None``
+   * L'oggetto ``False`` (ovviamente)
+   * Oggetti personalizzati che definiscono il proprio comportamento contesto
+     booleano (uso avanzato Python)
 
-   Everything else evaluates to ``True``.
+   Tutto il resto restituisce ``True``.
 
-The ``{% if %}`` tag accepts ``and``, ``or``, or ``not`` for testing multiple
-variables, or to negate a given variable. For example::
+Il tag ``{% if %}`` accetta ``and``, ``or``, or ``not`` per lavorare su più
+variabili, o per negare le variabili date. Per esempio::
 
     {% if athlete_list and coach_list %}
         Both athletes and coaches are available.
@@ -661,15 +661,17 @@ variables, or to negate a given variable. For example::
         There are some athletes and absolutely no coaches.
     {% endif %}
 
-``{% if %}`` tags don't allow ``and`` and ``or`` clauses within the same tag,
-because the order of logic would be ambiguous. For example, this is invalid::
+I tag ``{% if %}`` non permettono clausole ``and`` e ``or`` all'interno della
+stessa istruzione, poiché essa potrebbe avere una logica ambigua. Per esempio,
+questa istruzione è invalida::
 
     {% if athlete_list and coach_list or cheerleader_list %}
 
-The use of parentheses for controlling order of operations is not supported. If
-you find yourself needing parentheses, consider performing logic outside the
-template and passing the result of that as a dedicated template variable. Or,
-just use nested ``{% if %}`` tags, like this::
+L'uso delle parentesi per dare uno specifico ordine alle operazioni di controllo
+non è supportato. Se ti trovi a dover necessariamente usare le parentesi,
+considera di ricreare l'esecuzione di logica al di fuori del template passando
+il risultato come una variabile del template. Oppure, basta usare un tag
+``{% if %}`` nidificato, in questo modo::
 
     {% if athlete_list %}
         {% if coach_list or cheerleader_list %}
@@ -677,13 +679,14 @@ just use nested ``{% if %}`` tags, like this::
         {% endif %}
     {% endif %}
 
-Multiple uses of the same logical operator are fine, but you can't
-combine different operators. For example, this is valid::
+Molteplici usi di uno stesso operatore logico vanno bene, ma non è possibile
+combinare diversi operatori. Per esempio, questo è valido::
 
     {% if athlete_list or coach_list or parent_list or teacher_list %}
 
-There is no ``{% elif %}`` tag. Use nested ``{% if %}`` tags to accomplish
-the same thing::
+
+Non vi è alcun tag ``{% elif %}``. Basta usare un tag if nidificato ``{% if %}``
+per realizzare la stessa cosa::
 
     {% if athlete_list %}
         <p>Here are the athletes: {{ athlete_list }}.</p>
@@ -696,18 +699,20 @@ the same thing::
 
 Make sure to close each ``{% if %}`` with an ``{% endif %}``. Otherwise, Django
 will throw a ``TemplateSyntaxError``.
+Assicurarsi di chiudere ogni ``{% if %}`` con un ``{% endif %}``. In caso
+contrario, Django solleva un ``TemplateSyntaxError``.
 
 for
 ~~~
 
-The ``{% for %}`` tag allows you to loop over each item in a sequence. As in
-Python's ``for`` statement, the syntax is ``for X in Y``, where ``Y`` is the
-sequence to loop over and ``X`` is the name of the variable to use for a
-particular cycle of the loop. Each time through the loop, the template system
-will render everything between ``{% for %}`` and ``{% endfor %}``.
+Il tag ``{% for %}``  consente di fare delle iterazioni su ogni elemento di una
+sequenza. Come in Python per la dichiarazione, la sintassi è ``for X in Y``,
+dove ``Y`` è la sequenza di un ciclo su e ``X`` è il nome della variabile da
+utilizzare per un particolare ciclo. Ogni iterazione del ciclo, il sistema di
+template renderà tutto ciò presente fra ``{% for %}`` e ``{% endfor %}``.
 
-For example, you could use the following to display a list of athletes given a
-variable ``athlete_list``::
+Ad esempio, per visualizzare un elenco di atleti, come la variabile
+``athlete_list`` è possibile utilizzare la seguente istruzione::
 
     <ul>
     {% for athlete in athlete_list %}
@@ -715,13 +720,13 @@ variable ``athlete_list``::
     {% endfor %}
     </ul>
 
-Add ``reversed`` to the tag to loop over the list in reverse::
+Aggiungendo ``reversed`` al tag, è possibile ciclare in maniera inversa la lista::
 
     {% for athlete in athlete_list reversed %}
     ...
     {% endfor %}
 
-It's possible to nest ``{% for %}`` tags::
+E' possibile creare tag ``{% for %}`` annidati in questo modo::
 
     {% for athlete in athlete_list %}
         <h1>{{ athlete.name }}</h1>
@@ -732,8 +737,8 @@ It's possible to nest ``{% for %}`` tags::
         </ul>
     {% endfor %}
 
-A common pattern is to check the size of the list before looping over it, and
-outputting some special text if the list is empty::
+Un uso comune è controllare la dimensione della lista prima di eseguire il loop,
+e poi stampare un testo speciale se la lista è vuota::
 
     {% if athlete_list %}
         {% for athlete in athlete_list %}
@@ -743,9 +748,9 @@ outputting some special text if the list is empty::
         <p>There are no athletes. Only computer programmers.</p>
     {% endif %}
 
-Because this pattern is so common, the ``for`` tag supports an optional
-``{% empty %}`` clause that lets you define what to output if the list is
-empty. This example is equivalent to the previous one::
+Poiché questo modello è così comune, il tag ``for`` supporta una clausola
+``{% empty %}`` opzionale che permette di definire cosa scrivere se la lista è
+vuota. Questo esempio è equivalente alla precedente::
 
     {% for athlete in athlete_list %}
         <p>{{ athlete.name }}</p>
@@ -753,22 +758,22 @@ empty. This example is equivalent to the previous one::
         <p>There are no athletes. Only computer programmers.</p>
     {% endfor %}
 
-There is no support for "breaking out" of a loop before the loop is finished.
-If you want to accomplish this, change the variable you're looping over so that
-it includes only the values you want to loop over. Similarly, there is no
-support for a "continue" statement that would instruct the loop processor to
-return immediately to the front of the loop. (See the section "Philosophies and
-Limitations" later in this chapter for the reasoning behind this design
-decision.)
+Non vi è alcun modo per "rompere" un ciclo prima che esso sia finito. Se vuoi
+farlo, è necessario modificare la variabile che stai iterando in modo da
+includere solo i valori su cui si desidera lavorare. Allo stesso modo, non vi è
+alcuna istruzione "continue" che fa ricominciare immediatamente il ciclo.
+(Leggi la sezione "Filosofia e limitazioni", più avanti in questo capitolo,
+che spiega la motivazione dietro questa decisione di progettazione).
 
-Within each ``{% for %}`` loop, you get access to a template variable called
-``forloop``. This variable has a few attributes that give you information about
-the progress of the loop:
+All'interno di ogni ciclo ``{% for %}``, si ottiene l'accesso ad una variabile
+chiamata ``forloop``. Questa variabile ha un paio di caratteristiche che ti
+danno informazioni sullo stato di avanzamento del ciclo::
 
-* ``forloop.counter`` is always set to an integer representing the number
-  of times the loop has been entered. This is one-indexed, so the first
-  time through the loop, ``forloop.counter`` will be set to ``1``.
-  Here's an example::
+
+* ``forloop.counter`` è sempre impostato su un numero intero che rappresenta il
+  numero di volte che il ciclo è stato eseguito. Questo è una sorta di indice,
+  quindi la prima volta che avviene il ciclo, il ``forloop.counter`` viene
+  impostato ad ``1``. Ecco un esempio::
 
       {% for item in todo_list %}
           <p>{{ forloop.counter }}: {{ item }}</p>
@@ -778,19 +783,25 @@ the progress of the loop:
   zero-indexed. Its value will be set to ``0`` the first time through the
   loop.
 
-* ``forloop.revcounter`` is always set to an integer representing the
-  number of remaining items in the loop. The first time through the loop,
-  ``forloop.revcounter`` will be set to the total number of items in the
-  sequence you're traversing. The last time through the loop,
-  ``forloop.revcounter`` will be set to ``1``.
+* ``forloop.counter0`` è come ``forloop.counter``, tranne per il fatto che parte
+  zero. Il suo valore sarà impostato a 0 la prima volta che viene eseguito il
+  ciclo.
 
-* ``forloop.revcounter0`` is like ``forloop.revcounter``, except it's
-  zero-indexed. The first time through the loop, ``forloop.revcounter0``
-  will be set to the number of elements in the sequence minus 1. The last
-  time through the loop, it will be set to ``0``.
 
-* ``forloop.first`` is a Boolean value set to ``True`` if this is the first
-  time through the loop. This is convenient for special-casing::
+* ``forloop.revcounter`` è sempre impostato su un numero intero che rappresenta
+  il numero di elementi rimanenti nel ciclo. La prima esecuzione del ciclo,
+  ``forloop.revcounter`` viene impostato con il numero totale di elementi nel
+  ciclo che stai eseguendo. All'ultima iterazione del ciclo,
+  ``forloop.revcounter`` viene impostato su ``1``.
+
+* ``forloop.revcounter0`` è come ``forloop.revcounter``, tranne per il fatto che
+  parte zero. La prima iterazione del ciclo, ``forloop.revcounter0`` viene
+  impostato con il numero di elementi del ciclo che stai eseguendo meno 1.
+  L'ultima iterazione del ciclo, è impostata a ``0``.
+
+
+* ``forloop.first`` è un valore booleano impostato su ``True`` se questa è la
+  prima iterazione. Questo è comodo per creare caso particolari::
 
       {% for object in objects %}
           {% if forloop.first %}<li class="first">{% else %}<li>{% endif %}
@@ -798,23 +809,25 @@ the progress of the loop:
           </li>
       {% endfor %}
 
-* ``forloop.last`` is a Boolean value set to ``True`` if this is the last
-  time through the loop. A common use for this is to put pipe
-  characters between a list of links::
+* ``forloop.last`` è un valore booleano impostato su true se questa è l'ultima
+  iterazione. Un uso comune per questo è di mettere i caratteri pipe tra una
+  lista di link::
 
       {% for link in links %}{{ link }}{% if not forloop.last %} | {% endif %}{% endfor %}
 
-  The above template code might output something like this::
+  Il codice del modello precedente potrebbe produrre qualcosa di simile a
+  questo::
 
       Link1 | Link2 | Link3 | Link4
 
-  Another common use for this is to put a comma between words in a list::
+  Un altro uso comune di questa variabile è usarla per mettere una virgola tra
+  le parole in un elenco luoghi preferiti::
 
-      Favorite places:
       {% for p in places %}{{ p }}{% if not forloop.last %}, {% endif %}{% endfor %}
 
-*  ``forloop.parentloop`` is a reference to the ``forloop`` object for the
-   *parent* loop, in case of nested loops. Here's an example::
+
+* ``forloop.parentloop`` è un riferimento all'oggetto ``forloop`` del ciclo
+  *genitore*, nel caso di cicli annidati. Ecco un esempio::
 
       {% for country in countries %}
           <table>
@@ -831,15 +844,18 @@ the progress of the loop:
 The magic ``forloop`` variable is only available within loops. After the
 template parser has reached ``{% endfor %}``, ``forloop`` disappears.
 
-.. admonition:: Context and the forloop Variable
+La magica variabile ``forloop`` è disponibile solo all'interno dei cicli. Dopo
+che il parser del template ha raggiunto ``{% endfor %}``, ``forloop`` scompare.
 
-   Inside the ``{% for %}`` block, the existing variables are moved
-   out of the way to avoid overwriting the magic ``forloop``
-   variable. Django exposes this moved context in
-   ``forloop.parentloop``. You generally don't need to worry about
-   this, but if you supply a template variable named ``forloop``
-   (though we advise against it), it will be named
-   ``forloop.parentloop`` while inside the ``{% for %}`` block.
+.. admonition:: Contesto/Context e variabile forloop
+
+   All'interno del blocco ``{% for %}`` le variabili esistenti vengono spostate
+   al di fuori per evitare di sovrascrivere la variabile ``forloop``. Django
+   mette questo contesto in ``forloop.parentloop``. In genere non è necessario
+   preoccuparsi di questo fatto, ma se si crea una variabile all'interno del
+   template chiamata ``forloop`` (anche se si sconsiglia di farlo), essa viene
+   mantenuta al di fuori del ciclo in o chiamati i ``forloop.parentloop`` mentre
+   all'interno del ``{% for %}`` per blocco.
 
 ifequal/ifnotequal
 ~~~~~~~~~~~~~~~~~~
