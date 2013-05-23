@@ -105,7 +105,6 @@ che analizziamo riga per riga::
   di template mostra tutto quello che c'è tra ``{% else %}`` e ``{% endif %}``.
   Nota che ``{% else %}`` è opzionale.
 
-
 * Infine, il secondo paragrafo di questo template contiene un esempio di *filtro*,
   che è il modo più conveniente per alterare la formattazione di una variabile.
   In questo esempio, ``{{ ship_date|date:"F j, Y" }}``, stiamo passando la
@@ -193,7 +192,6 @@ Passiamo in rassegna alcuni principi fondamentali del sistema di template::
     >>> from django.template import Template
     >>> t = Template('My name is {{ name }}.')
     >>> print t
-
 
 Se stai seguendo la shell integrativa, vedrai qualcosa di simile a questo:
 
@@ -302,26 +300,21 @@ Analizziamo il codice un'istruzione alla volta:
 * In primo luogo, abbiamo importato le classi ``Template`` e ``Context``, che
   stanno nel modulo ``django.template``.
 
-
 * Salviamo il testo del nostro template nella variabile ``raw_template``. Si
   noti che usiamo segni di triple virgolette per indicare stringhe che si
   espandono su più righe. Al contrario, le stringhe racchiuse tra virgolette
   singole non possono essere scritte su più righe.
 
-
 * Quindi, creiamo un oggetto template, ``t``, passando ``raw_template`` al
   costruttore della classe ``Template``.
 
-
 * Importiamo il modulo ``datetime`` dalla libreria standard di Python, perché ne
   avremo bisogno nella seguente dichiarazione.
-
 
 * Quindi, creiamo un oggetto ``Context``, ``c``. Il costruttore ``Context``
   prende un dizionario Python, che mappa i nomi delle variabili di valori. Qui,
   per esempio, si precisa che ``person_name`` è ``'John Smith'``, l'azienda è
   ``'Outdoor Equipment'``, e così via.
-
 
 * Infine, chiamiamo il metodo ``render()`` sul nostro oggetto template,
   passandogli il contesto. Questo restituisce il modello renderizzato -- vale a
@@ -363,8 +356,8 @@ attraverso di esso. Per esempio::
     Hello, Pat
 
 Ogni volta che si utilizza lo stesso oggetto template per rendere più contesti
-come questo, è più efficiente creare l'oggetto ``Template`` *una volta*, e quindi
-chiama ``render()`` su di esso più volte::
+come questo, è più efficiente creare l'oggetto ``Template`` *una volta*, e
+quindi chiama ``render()`` su di esso più volte::
 
     # Cattivo
     for name in ('John', 'Julie', 'Pat'):
@@ -530,7 +523,7 @@ di ricerca. Qui ci sono alcune cose da tenere a mente:
   forse anche un buco di sicurezza, consentire al sistema di template di
   accedervi.
 
- Supponiamo, ad esempio, che si dispone di un oggetto BankAccount che ha un
+  Supponiamo, ad esempio, che si dispone di un oggetto BankAccount che ha un
   metodo ``delete()``. Se un modello include qualcosa come ``{{ account.delete }}``,
   dove ``account`` è un oggetto ``BankAccount``, l'oggetto viene eliminato
   quando sul template viene eseguito il rendering!
@@ -697,8 +690,6 @@ per realizzare la stessa cosa::
         {% endif %}
     {% endif %}
 
-Make sure to close each ``{% if %}`` with an ``{% endif %}``. Otherwise, Django
-will throw a ``TemplateSyntaxError``.
 Assicurarsi di chiudere ogni ``{% if %}`` con un ``{% endif %}``. In caso
 contrario, Django solleva un ``TemplateSyntaxError``.
 
@@ -769,7 +760,6 @@ All'interno di ogni ciclo ``{% for %}``, si ottiene l'accesso ad una variabile
 chiamata ``forloop``. Questa variabile ha un paio di caratteristiche che ti
 danno informazioni sullo stato di avanzamento del ciclo::
 
-
 * ``forloop.counter`` è sempre impostato su un numero intero che rappresenta il
   numero di volte che il ciclo è stato eseguito. Questo è una sorta di indice,
   quindi la prima volta che avviene il ciclo, il ``forloop.counter`` viene
@@ -779,14 +769,9 @@ danno informazioni sullo stato di avanzamento del ciclo::
           <p>{{ forloop.counter }}: {{ item }}</p>
       {% endfor %}
 
-* ``forloop.counter0`` is like ``forloop.counter``, except it's
-  zero-indexed. Its value will be set to ``0`` the first time through the
-  loop.
-
 * ``forloop.counter0`` è come ``forloop.counter``, tranne per il fatto che parte
   zero. Il suo valore sarà impostato a 0 la prima volta che viene eseguito il
   ciclo.
-
 
 * ``forloop.revcounter`` è sempre impostato su un numero intero che rappresenta
   il numero di elementi rimanenti nel ciclo. La prima esecuzione del ciclo,
@@ -841,9 +826,6 @@ danno informazioni sullo stato di avanzamento del ciclo::
           </table>
       {% endfor %}
 
-The magic ``forloop`` variable is only available within loops. After the
-template parser has reached ``{% endfor %}``, ``forloop`` disappears.
-
 La magica variabile ``forloop`` è disponibile solo all'interno dei cicli. Dopo
 che il parser del template ha raggiunto ``{% endfor %}``, ``forloop`` scompare.
 
@@ -860,24 +842,23 @@ che il parser del template ha raggiunto ``{% endfor %}``, ``forloop`` scompare.
 ifequal/ifnotequal
 ~~~~~~~~~~~~~~~~~~
 
-The Django template system deliberately is not a full-fledged programming
-language and thus does not allow you to execute arbitrary Python statements.
-(More on this idea in the section "Philosophies and Limitations.") However,
-it's quite a common template requirement to compare two values and display
-something if they're equal -- and Django provides an ``{% ifequal %}`` tag for
-that purpose.
+Il sistema di template Django volutamente non è un linguaggio di programmazione
+a tutti gli effetti e, quindi, non consente di eseguire comandi Python. (Leggi
+"Filosofia e limitazioni" per saperne su più questa idea), tuttavia, è piuttosto
+comune dover confrontare due valori e mostrare a qualcosa se sono uguali in un
+template -- e Django fornisce un tag ``{% ifequal %}`` per questo scopo.
 
-The ``{% ifequal %}`` tag compares two values and displays everything between
-``{% ifequal %}`` and ``{% endifequal %}`` if the values are equal.
+Il tag ``{% ifequal %}`` confronta due valori e mostra tutto quello che c'è tra
+``{% ifequal %}`` e ``{% endifequal %}`` se i valori sono uguali.
 
-This example compares the template variables ``user`` and ``currentuser``::
+Questo esempio confronta il template variabili ``user`` e ``currentuser``::
 
     {% ifequal user currentuser %}
         <h1>Welcome!</h1>
     {% endifequal %}
 
-The arguments can be hard-coded strings, with either single or double quotes,
-so the following is valid::
+Gli argomenti possono essere stringhe hardcoded, con le virgolette singole o
+doppie, per cui vale quanto segue::
 
     {% ifequal section 'sitenews' %}
         <h1>Site News</h1>
@@ -887,7 +868,7 @@ so the following is valid::
         <h1>Community</h1>
     {% endifequal %}
 
-Just like ``{% if %}``, the ``{% ifequal %}`` tag supports an optional
+Proprio come ``{% if %}``, il ``{% ifequal %}`` tag supporta un opzionale
 ``{% else %}``::
 
     {% ifequal section 'sitenews' %}
@@ -896,170 +877,185 @@ Just like ``{% if %}``, the ``{% ifequal %}`` tag supports an optional
         <h1>No News Here</h1>
     {% endifequal %}
 
-Only template variables, strings, integers, and decimal numbers are allowed as
-arguments to ``{% ifequal %}``. These are valid examples::
+Solo le variabili di template, quindi stringhe, numeri interi e numeri decimali,
+sono consentite come argomenti del tag ``{% ifequal %}``. Questi sono esempi
+validi::
 
     {% ifequal variable 1 %}
     {% ifequal variable 1.23 %}
     {% ifequal variable 'foo' %}
     {% ifequal variable "foo" %}
 
-Any other types of variables, such as Python dictionaries, lists, or Booleans,
-can't be hard-coded in ``{% ifequal %}``. These are invalid examples::
+Eventuali altri tipi di variabili, come dizionari Python, elenchi o booleani,
+non possono essere a livello di codice in ``{% ifequal %}``. Questi sono esempi
+validi::
 
     {% ifequal variable True %}
     {% ifequal variable [1, 2, 3] %}
     {% ifequal variable {'key': 'value'} %}
 
-If you need to test whether something is true or false, use the ``{% if %}``
-tags instead of ``{% ifequal %}``.
+Se hai bisogno di verificare se qualcosa è vero o falso, utilizzare il tag
+``{% if %}`` invece di ``{% ifequal %}``.
 
-Comments
+Commenti
 ~~~~~~~~
 
-Just as in HTML or Python, the Django template language allows for comments. To
-designate a comment, use ``{# #}``::
+Proprio come in HTML o Python, il linguaggio di template Django permette i
+commenti. Per designare un commento, si usa ``{# #}``::
 
     {# This is a comment #}
 
-The comment will not be output when the template is rendered.
+Il commento non sarà considerato quando il template viene renderizzato.
 
-Comments using this syntax cannot span multiple lines. This limitation improves
-template parsing performance. In the following template, the rendered output
-will look exactly the same as the template (i.e., the comment tag will
-not be parsed as a comment)::
+Uutilizzando questa sintassi, i commenti non possono estendersi su più righe.
+Questa limitazione migliora le prestazioni del parse del template. Nel seguente
+template, l'output del rendering sarà esattamente lo stesso del modello (ad
+esempio, il tag di commento non viene analizzato come un commento)::
 
     This is a {# this is not
     a comment #}
     test.
 
-If you want to use multi-line comments, use the ``{% comment %}`` template tag,
-like this::
+Se si desidera utilizzare i commenti su più righe, è necessario utilizzare il
+tag ``{% comment %}``, in questo modo::
 
     {% comment %}
     This is a
     multi-line comment.
     {% endcomment %}
 
-Filters
--------
+Filtri
+------
 
-As explained earlier in this chapter, template filters are simple ways of
-altering the value of variables before they're displayed. Filters use a pipe
-character, like this::
+Come spiegato in precedenza in questo capitolo, i filtri dei template sono
+semplici modi di alterare il valore delle variabili prima di essere visualizzati.
+I filtri utilizzano un carattere pipe, come questo::
 
     {{ name|lower }}
 
-This displays the value of the ``{{ name }}`` variable after being filtered
-through the ``lower`` filter, which converts text to lowercase.
+Visualizza il valore della ``{{ name }}`` variabile, dopo essere stata filtrata
+attraverso il filtro ``lower``, che converte il testo in lettere minuscole.
 
-Filters can be *chained* -- that is, they can be used in tandem such that the
-output of one filter is applied to the next. Here's an example that takes the
-first element in a list and converts it to uppercase::
+I filtri possono essere *concatenati* -- cioè, essi possono essere utilizzati in
+combinazione in modo che il risultato di un filtro venga applicato al successivo.
+Ecco un esempio che prende il primo elemento in una lista e lo converte in
+maiuscolo::
 
     {{ my_list|first|upper }}
 
-Some filters take arguments. A filter argument comes after a colon and is
-always in double quotes. For example::
+Alcuni filtri richiedono degli argomenti. Un argomento viene passato al filtro
+usando i due punti ed è si mette sempre tra virgolette. Per esempio::
 
     {{ bio|truncatewords:"30" }}
 
-This displays the first 30 words of the ``bio`` variable.
+Questo esempio visualizza le prime 30 parole della variabile ``bio``.
 
-The following are a few of the most important filters. Appendix E covers the rest.
+I seguenti sono alcuni dei filtri più importanti. Leggi l'Appendice E per
+scoprire il resto.
 
-* ``addslashes``: Adds a backslash before any backslash, single quote, or
-  double quote. This is useful if the produced text is included in
-  a JavaScript string.
+* ``addslashes``: Aggiunge una barra rovesciata prima di ogni backslash,
+  apostrofo, o virgolette. Questo è utile se il testo prodotto è incluso in una
+  stringa JavaScript.
 
-* ``date``: Formats a ``date`` or ``datetime`` object according to a
-  format string given in the parameter, for example::
+* ``date``: Formatta un oggetto ``date`` o ``datetime`` in base a una stringa di
+  formato passata come parametro, ad esempio::
 
       {{ pub_date|date:"F j, Y" }}
 
-  Format strings are defined in Appendix E.
+  Le stringhe di formato sono definite nell'Appendice E.
 
-* ``length``: Returns the length of the value. For a list, this returns the
-  number of elements. For a string, this returns the number of characters.
-  (Python experts, take note that this works on any Python object that
-  knows how to determine its length -- i.e., any object that has a
-  ``__len__()`` method.)
+* ``length``: Restituisce la lunghezza del valore. Per un elenco, restituisce il
+  numero di elementi. Per una stringa, restituisce il numero di caratteri.
+  (Esperti di Python, prendiate atto che questo funziona su qualsiasi oggetto
+  Python che sa come determinare la sua lunghezza - ovvero, ogni oggetto che ha
+  un metodo ``__len__()``).
 
-Philosophies and Limitations
-============================
+Filosofia e limitazioni
+=======================
 
-Now that you've gotten a feel for the Django template language, we should point
-out some of its intentional limitations, along with some philosophies behind why
-it works the way it works.
+Ora che hai toccato con mano il linguaggio di template di Django, segnaliamo
+alcuni dei suoi limiti intenzionali, insieme ad alcune filosofie che stanno
+dietro al perché funziona nel modo in cui funziona.
 
-More than any other component of Web applications, template syntax is highly
-subjective, and programmers' opinions vary wildly. The fact that Python alone
-has dozens, if not hundreds, of open source template-language implementations
-supports this point. Each was likely created because its developer deemed all
-existing template languages inadequate. (In fact, it is said to be a rite of
-passage for a Python developer to write his or her own template language! If
-you haven't done this yet, consider it. It's a fun exercise.)
+Più di ogni altra componente delle applicazioni Web, la sintassi del template è
+molto soggettiva, e le opinioni dei programmatori variano selvaggiamente. Il
+fatto che solo Python abbia decine, se non centinaia, di implementazioni open
+source di linguaggi di template rafforza questo punto. Ciascuno è stato
+probabilmente creato perché il suo sviluppatore ha ritenuto tutte le lingue di
+template esistenti inadeguati. (In realtà, si dice che sia un rito di passaggio
+per ogni sviluppatore Python scrivere il proprio linguaggio di template! Se non
+lo hai ancora fatto, considera di farlo. Si tratta di un esercizio divertente).
 
-With that in mind, you might be interested to know that Django doesn't require
-that you use its template language. Because Django is intended to be a
-full-stack Web framework that provides all the pieces necessary for Web
-developers to be productive, many times it's *more convenient* to use Django's
-template system than other Python template libraries, but it's not a strict
-requirement in any sense. As you'll see in the upcoming section "Using Templates
-in Views", it's very easy to use another template language with Django.
+Tenendo questo a mente, si potrebbe essere interessati a sapere che Django non
+richiede di utilizzare il linguaggio di template. Perché Django è destinato ad
+essere un framework web "full-stack" (ovvero completo ed intercambiabile) che
+mette a disposizione tutti i pezzi necessari agli sviluppatori web per essere
+produttivi, molte volte *è più comodo* da usare sistema di template di Django di
+altre librerie di modelli di Python, ma non è un requisito rigoroso. Come si
+vedrà nel paragrafo "Uso dei template nelle View", è molto semplice usare un
+altro linguaggio di template con Django.
 
-Still, it's clear we have a strong preference for the way Django's template
-language works. The template system has roots in how Web development is done at
-World Online and the combined experience of Django's creators. Here are a few of
-those philosophies:
+Eppure, è chiaro che abbiamo una forte preferenza per il modo in cui la lingua
+di template di Django funziona. Il template di sistema ha radici nel modo in cui
+lo sviluppo web è stato fatto al World Online e all'esperienza combinata dei
+creatori di Django. Ecco alcune di quelle filosofie:
 
 * *Business logic should be separated from presentation logic*. Django's
   developers see a  template system as a tool that controls presentation and
   presentation-related logic -- and that's it. The template system shouldn't
   support functionality that goes beyond this basic goal.
 
-  For that reason, it's impossible to call Python code directly within
-  Django templates. All "programming" is fundamentally limited to the scope
-  of what template tags can do. It *is* possible to write custom template
-  tags that do arbitrary things, but the out-of-the-box Django template
-  tags intentionally do not allow for arbitrary Python code execution.
+* *La logica di business deve essere separata dalla logica di presentazione*.
+  Gli sviluppatori di Django vedono il template di sistema come uno strumento
+  che controlla la presentazione e la logica della presentazione correlata -- e
+  questo è tutto. Il template di sistema non dovrebbe supportare funzionalità
+  che vanno al di là di questo obiettivo di base.
 
-* *Syntax should be decoupled from HTML/XML*. Although Django's template
-  system is used primarily to produce HTML, it's intended to be just as
-  usable for non-HTML formats, such as plain text. Some other template
-  languages are XML based, placing all template logic within XML tags or
-  attributes, but Django deliberately avoids this limitation. Requiring
-  valid XML to write templates introduces a world of human mistakes and
-  hard-to-understand error messages, and using an XML engine to parse
-  templates incurs an unacceptable level of overhead in template processing.
+  Per questo motivo, non è possibile chiamare direttamente codice Python
+  all'interno dei modelli di Django. La "programmazione" è fondamentalmente
+  limitata a ciò che i tag dei template possono fare. *E' possibile* scrivere
+  dei tag per i template personalizzati che fanno cose arbitrarie, ma i tag
+  "out-of-the-box" (ovvero predefiniti) dei template di Django volutamente non
+  consentono l'esecuzione di codice Python arbitrario.
 
-* *Designers are assumed to be comfortable with HTML code*. The template
-  system isn't designed so that templates necessarily are displayed nicely
-  in WYSIWYG editors such as Dreamweaver. That is too severe a limitation
-  and wouldn't allow the syntax to be as friendly as it is. Django expects
-  template authors to be comfortable editing HTML directly.
+* *La sintassi dovrebbe essere disaccoppiato da HTML/XML*. Sebbene il sistema di
+  template di Django viene utilizzato principalmente per la produzione di codice
+  HTML, ed è destinato ad essere altrettanto utile per i formati non HTML, come
+  il testo normale. Alcune altre lingue template sono basate su XML, mettendo
+  tutta la logica all'interno dei tag dei template o degli attributi XML, ma
+  Django evita deliberatamente questa limitazione. Essi richiedono XML valido
+  per scrivere i template ed introduce quindi un mondo di errori umani da capire
+  con duri messaggi di errore, ed inoltre l'utilizzo di un motore XML per
+  analizzare i template comporta un livello inaccettabile a prescindere dal come
+  è fatto il template.
 
-* *Designers are assumed not to be Python programmers*. The template system
-  authors recognize that Web page templates are most often written by
-  *designers*, not *programmers*, and therefore should not assume Python
-  knowledge.
+* *Si assume che i designer siano a loro agio con il codice HTML*. Il template
+  di sistema non è stato progettato in modo che siano visualizzati bene su
+  editor WYSIWYG come Dreamweaver. Questo è una limitazione troppo severa e non
+  avrebbe permesso alla sintassi di essere amichevole come è adesso. Django si
+  aspetta autori di template che siano a loro agio direttamente con l'HTML.
 
-  However, the system also intends to accommodate small teams in which the
-  templates *are* created by Python programmers. It offers a way to extend
-  the system's syntax by writing raw Python code. (More on this in Chapter
-  9.)
+* *Si assume che i designer non siano programmatori Python*. Gli autori sanno
+  che i template per le pagine web sono spesso scritti da designer, non da
+  programmatori, e quindi non devono conoscere Python.
 
-* *The goal is not to invent a programming language*. The goal is to offer
-  just enough programming-esque functionality, such as branching and
-  looping, that is essential for making presentation-related decisions.
+  Tuttavia, il sistema intende inoltre ospitare piccole parti in cui i template
+  siano creati da programmatori Python. Offre quindi un modo per estendere la
+  sintassi del sistema di scrittura di codice Python. (Maggiori informazioni su
+  questo nel capitolo 9).
 
-Using Templates in Views
+* *L'obiettivo non è quello di inventare un linguaggio di programmazione*.
+  L'obiettivo è di offrire solo le funzionalità di programmazione semplice, come
+  salti e cicli, che sono essenziali per prendere decisioni relative alla
+  presentazione di una informazione.
+
+Utilizzo dei Template nelle View
 ========================
 
-You've learned the basics of using the template system; now let's use this
-knowledge to create a view. Recall the ``current_datetime`` view in
-``mysite.views``, which we started in the previous chapter. Here's what it looks
-like::
+Hai imparato le nozioni di base sull'uso del sistema di template, ora usiamo
+questa conoscenza per creare una vista. Ricordiamo la vista ``current_datetime``
+in ``mysite.views``, che abbiamo iniziato nel capitolo precedente. Ecco come si
+presenta::
 
     from django.http import HttpResponse
     import datetime
@@ -1069,8 +1065,8 @@ like::
         html = "<html><body>It is now %s.</body></html>" % now
         return HttpResponse(html)
 
-Let's change this view to use Django's template system. At first, you might
-think to do something like this::
+Cambiamo questa visualizzazione per utilizzare il sistema di template di Django.
+In un primo momento, si potrebbe pensare di fare qualcosa di simile a questo::
 
     from django.template import Template, Context
     from django.http import HttpResponse
@@ -1082,16 +1078,17 @@ think to do something like this::
         html = t.render(Context({'current_date': now}))
         return HttpResponse(html)
 
-Sure, that uses the template system, but it doesn't solve the problems we
-pointed out in the introduction of this chapter. Namely, the template is still
-embedded in the Python code, so true separation of data and presentation isn't
-achieved. Let's fix that by putting the template in a *separate file*, which
-this view will load.
+Certo, utilizza il sistema di template, ma non risolve i problemi che abbiamo
+sottolineato nell'introduzione di questo capitolo. Vale a dire, il template è
+ancora incorporato nel codice Python, così la vera separazione fra dati e
+presentazione non è raggiunta. Cerchiamo di rimediare spostando il template in
+un *file separato*, che questa view carica.
 
-You might first consider saving your template somewhere on your
-filesystem and using Python's built-in file-opening functionality to read
-the contents of the template. Here's what that might look like, assuming the
-template was saved as the file ``/home/djangouser/templates/mytemplate.html``::
+Si potrebbe invece considerare di salvare prima il template da qualche parte sul
+tuo filesystem e poi utilizzare le funzionalità di apertura file integrata in
+Python per leggere il contenuto del template. Ecco come sembra il tutto,
+prendendo per vero il fatto che il template sia stato salvato in questo modo
+``/home/djangouser/templates/mytemplate.html``::
 
     from django.template import Template, Context
     from django.http import HttpResponse
@@ -1107,37 +1104,38 @@ template was saved as the file ``/home/djangouser/templates/mytemplate.html``::
         html = t.render(Context({'current_date': now}))
         return HttpResponse(html)
 
-This approach, however, is inelegant for these reasons:
+Tuttavia, questo approccio è poco elegante per questi motivi:
 
-* It doesn't handle the case of a missing file. If the file
-  ``mytemplate.html`` doesn't exist or isn't readable, the ``open()`` call
-  will raise an ``IOError`` exception.
+* Non gestisce il caso di un file mancante. Se il file ``mytemplate.html`` non
+  esiste o non è leggibile, la chiamata ``open()`` genera un'eccezione
+  ``IOError``.
 
-* It hard-codes your template location. If you were to use this
-  technique for every view function, you'd be duplicating the template
-  locations. Not to mention it involves a lot of typing!
+* Il percorso del template potrebbe essere lungo. Se si sceglie di usare questa
+  tecnica per ogni view, si dovrebbero duplicare le posizioni dei template. Per
+  non parlare del fatto che comporta un bel po' di battitura!
 
-* It includes a lot of boring boilerplate code. You've got better things to
-  do than to write calls to ``open()``, ``fp.read()``, and ``fp.close()``
-  each time you load a template.
+* Comprende un sacco di codice standard noioso. Hai di meglio da fare che
+  scrivere chiamate a ``open()``, ``fp.read()``, e ``fp.close()`` ogni volta che
+  si carica un modello.
 
-To solve these issues, we'll use *template loading* and *template directories*.
+Per risolvere questi problemi, useremo quindi il *Template Loading* (caricamento
+dei Template) e le *directory dei template*.
 
 Template Loading
 ================
 
-Django provides a convenient and powerful API for loading templates from the
-filesystem, with the goal of removing redundancy both in your template-loading
-calls and in your templates themselves.
+Django fornisce un'API comoda e potente per il caricamento dei template dal
+filesystem, con l'obiettivo di eliminare la ridondanza sia nelle chiamate ai
+template che nei template stessi.
 
-In order to use this template-loading API, first you'll need to tell the
-framework where you store your templates. The place to do this is in your
-settings file -- the ``settings.py`` file that we mentioned last chapter, when
-we introduced the ``ROOT_URLCONF`` setting.
+Per poter utilizzare le API del Template Loading, in primo luogo è necessario
+dire al framework dove si memorizzano i template. Il luogo per far ciò è nel
+file di impostazioni -- il file ``settings.py`` che abbiamo menzionato
+nell'ultimo capitolo, quando abbiamo introdotto l'impostazione ``ROOT_URLCONF``.
 
-If you're following along, open your ``settings.py`` and find the
-``TEMPLATE_DIRS`` setting. By default, it's an empty tuple, likely containing
-some auto-generated comments::
+Continuando così, aprire il ``settings.py`` e trovare l'impostazione
+``TEMPLATE_DIRS``. Per impostazione predefinita, è una tupla vuota,
+probabilmente contenente alcuni commenti generati automaticamente::
 
     TEMPLATE_DIRS = (
         # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -1145,56 +1143,56 @@ some auto-generated comments::
         # Don't forget to use absolute paths, not relative paths.
     )
 
-This setting tells Django's template-loading mechanism where to look for
-templates. Pick a directory where you'd like to store your templates and add it
-to ``TEMPLATE_DIRS``, like so::
+Questa impostazione indica al meccanismo di caricamento di Django dove cercare i
+modelli. Scegli una directory in cui vuoi memorizzare i template e aggiungilo a
+``TEMPLATE_DIRS``, in questo modo::
 
     TEMPLATE_DIRS = (
         '/home/django/mysite/templates',
     )
 
-There are a few things to note:
+Ci sono alcune cose da notare:
 
-* You can specify any directory you want, as long as the directory and
-  templates within that directory are readable by the user account under
-  which your Web server runs. If you can't think of an appropriate
-  place to put your templates, we recommend creating a ``templates``
-  directory within your project (i.e., within the ``mysite`` directory you
-  created in Chapter 2).
+* È possibile specificare qualsiasi directory che si desidera, a condizione che
+  la directory ed i template all'interno di tale directory siano leggibili
+  dall'account utente in cui il server web viene eseguito. Se non hai idea del
+  nome da dare ad una directory per i template, si consiglia di creare una
+  cartella ``templates`` all'interno del progetto (cioè, all'interno della
+  directory ``mysite`` creata nel capitolo 2).
 
-* If your ``TEMPLATE_DIRS`` contains only one directory, don't forget the
-  comma at the end of the directory string!
+* Se il tuo ``TEMPLATE_DIRS`` contiene solo una directory, non dimenticare
+  comunque la virgola alla fine della stringa di directory!
 
-  Bad::
+  Male::
 
-      # Missing comma!
+      # Virgola Mancante!
       TEMPLATE_DIRS = (
           '/home/django/mysite/templates'
       )
 
-  Good::
+  Bene::
 
-      # Comma correctly in place.
+      # Virgola correttamente inserita.
       TEMPLATE_DIRS = (
           '/home/django/mysite/templates',
       )
 
-  The reason for this is that Python requires commas within single-element
-  tuples to disambiguate the tuple from a parenthetical expression. This is
-  a common newbie gotcha.
+  La ragione di questo è che Python richiede virgole all'interno di tuple in un
+  singolo elemento per rendere non ambiguo il fatto che sia una tupla. Questo è
+  un comune ai Principianti.
 
-* If you're on Windows, include your drive letter and use Unix-style
-  forward slashes rather than backslashes, as follows::
+* Se sei in Windows, includere la lettera dell'unità e utilizzare le barre in
+  stile Unix piuttosto che gli backslash, come segue::
 
       TEMPLATE_DIRS = (
           'C:/www/django/templates',
       )
 
-* It's simplest to use absolute paths (i.e., directory paths that start at
-  the root of the filesystem). If you want to be a bit more flexible and
-  decoupled, though, you can take advantage of the fact that Django
-  settings files are just Python code by constructing the contents of
-  ``TEMPLATE_DIRS`` dynamically. For example::
+* E' semplice usare percorsi assoluti (cioè percorsi di directory che iniziano
+  alla radice del filesystem). Ma se si vuole essere un po' più flessibili e
+  disaccoppiati, si può approfittare del fatto che i file delle impostazioni
+  Django sono solo codice Python costruendo il contenuto del ``TEMPLATE_DIRS``
+  dinamicamente. Per esempio::
 
       import os.path
 
@@ -1202,22 +1200,22 @@ There are a few things to note:
           os.path.join(os.path.dirname(__file__), 'templates').replace('\\','/'),
       )
 
-  This example uses the "magic" Python variable ``__file__``, which is
-  automatically set to the file name of the Python module in which the code
-  lives. It gets the name of the directory that contains ``settings.py``
-  (``os.path.dirname``), then joins that with ``templates`` in a
-  cross-platform way (``os.path.join``), then ensures that everything uses
-  forward slashes instead of backslashes (in case of Windows).
+  Questo esempio utilizza la "magia" della variabile ``__file__`` di Python, che
+  viene impostata automaticamente sul nome del modulo in esecuzione. Si prende
+  il nome della directory che contiene ``settings.py`` (``os.path.dirname``), lo
+  si unisce a quella dei modelli indipendentemente dal sistema in uso
+  (``os.path.join``) e ci si assicura che tutto utilizza le barre invece che il
+  backslash (nel caso di Windows).
 
-  While we're on the topic of dynamic Python code in settings files, we
-  should point out that it's very important to avoid Python errors in your
-  settings file. If you introduce a syntax error, or a runtime error, your
-  Django-powered site will likely crash.
+  Parlando di codice dinamico nel file di impostazione, bisogna dire che è molto
+  importante evitare errori Python nel file di impostazioni. Se si introduce un
+  errore di sintassi, o di un errore di runtime, il tuo sito Django-powered
+  probabilmente lo si bloccherà.
 
-With ``TEMPLATE_DIRS`` set, the next step is to change the view code to
-use Django's template-loading functionality rather than hard-coding the
-template paths. Returning to our ``current_datetime`` view, let's change it
-like so::
+Con ``TEMPLATE_DIRS``, il passo successivo è quello di modificare il codice al
+fine di utilizzare la funzionalità di Template loading inclusa in Django,
+piuttosto che a livello di codice. Tornando alla nostra view ``current_datetime``,
+cambiamo il tutto in questo modo::
 
     from django.template.loader import get_template
     from django.template import Context
