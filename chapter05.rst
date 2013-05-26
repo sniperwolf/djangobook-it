@@ -1,45 +1,51 @@
-=================
-Chapter 5: Models
-=================
+==================
+Chapter 5: Modelli
+==================
 
-In Chapter 3, we covered the fundamentals of building dynamic Web sites
-with Django: setting up views and URLconfs. As we explained, a view is
-responsible for doing *some arbitrary logic*, and then returning a response. In
-one of the examples, our arbitrary logic was to calculate the current date and
-time.
+Nel Capitolo 3, abbiamo parlato delle basi della costruzione di siti web
+dinamici con Django: la creazione di view/viste e URLconfs. Come abbiamo
+spiegato, la view si occupa della *logica arbitraria*, e il ritorna una risposta.
+In uno degli esempi, la nostra logica arbitraria è stata calcolare la data e ora
+correnti.
 
-In modern Web applications, the arbitrary logic often involves interacting
-with a database. Behind the scenes, a *database-driven Web site* connects to
-a database server, retrieves some data out of it, and displays that data on a
-Web page. The site might also provide ways for site visitors to populate the
-database on their own.
+Nelle moderne applicazioni Web, la logica arbitraria spesso comporta
+l'*interazione con un database*. Dietro le quinte, un sito web basato su
+database si connette a un server di database, recupera alcuni dati fuori di esso,
+e li mostra una pagina web. Il sito potrebbe anche fornire modi ai visitatori
+del sito di popolare il database.
 
-Many complex Web sites provide some combination of the two. Amazon.com, for
-instance, is a great example of a database-driven site. Each product page is
-essentially a query into Amazon's product database formatted as HTML, and when
-you post a customer review, it gets inserted into the database of reviews.
+Molti siti Web complessi forniscono una combinazione dei due. Amazon.com, per
+esempio, è un grande esempio di un sito basato su database. Ogni pagina del
+prodotto è essenzialmente una query nel database di prodotti di Amazon in
+formato HTML, e quando scrivi una recensione cliente, esso viene inserito nel
+database di controllo.
 
-Django is well suited for making database-driven Web sites, because it comes
-with easy yet powerful tools for performing database queries using Python. This
-chapter explains that functionality: Django's database layer.
+Django è adatto per la produzione di siti web basati su database, perché dispone
+di diversi strumenti semplici ma potenti per l'esecuzione di query di database
+utilizzando Python. Questo capitolo spiega questa funzionalità: il livello
+(layer in inglese) database di Django.
 
-(Note: While it's not strictly necessary to know basic relational database
-theory and SQL in order to use Django's database layer, it's highly
-recommended. An introduction to those concepts is beyond the scope of this
-book, but keep reading even if you're a database newbie. You'll probably be
-able to follow along and grasp concepts based on the context.)
 
-The "Dumb" Way to Do Database Queries in Views
-==============================================
+(Nota: Anche se non è strettamente necessario conoscere la teoria dei database
+relazionali di base e SQL per utilizzare layer di database di Django, è
+altamente consigliato una introduzione a questi concetti, va oltre lo scopo di
+questo libro, ma continuate a leggere, anche se sei un principiante del database.
+Probabilmente sarei in grado di seguire e comprendere i concetti in base al
+contesto).
 
-Just as Chapter 3 detailed a "dumb" way to produce output within a
-view (by hard-coding the text directly within the view), there's a "dumb" way to
-retrieve data from a database in a view. It's simple: just use any existing
-Python library to execute an SQL query and do something with the results.
+La strada "stupida" di fare Query al Database in una View
+=========================================================
 
-In this example view, we use the ``MySQLdb`` library (available via
-http://www.djangoproject.com/r/python-mysql/) to connect to a MySQL database,
-retrieve some records, and feed them to a template for display as a Web page::
+Proprio come nel Capitolo 3 abbiamo  un modo "stupido" per produrre output
+all'interno di una vista (codificando il testo direttamente all'interno della
+vista), c'è un modo "stupido" per recuperare i dati da un database in una view.
+E' semplice: basta usare qualsiasi libreria Python esistente per eseguire una
+query SQL e fare qualcosa con i risultati.
+
+In questa prospettiva, ad esempio, si usa la libreria ``MySQLdb`` (disponibile
+all'indirizzo http://www.djangoproject.com/r/python-mysql/) per connettersi a un
+database MySQL, recuperare alcuni record, e dar loro come cibo a un template per
+la visualizzazione come una pagina web::
 
     from django.shortcuts import render
     import MySQLdb
@@ -52,30 +58,34 @@ retrieve some records, and feed them to a template for display as a Web page::
         db.close()
         return render(request, 'book_list.html', {'names': names})
 
-.. SL Tested ok
+Questo approccio funziona, ma alcuni problemi dovrebbero saltare all'occhio
+subito:
 
-This approach works, but some problems should jump out at you immediately:
 
 * We're hard-coding the database connection parameters. Ideally, these
   parameters would be stored in the Django configuration.
 
-* We're having to write a fair bit of boilerplate code: creating a
-  connection, creating a cursor, executing a statement, and closing the
-  connection. Ideally, all we'd have to do is specify which results we
-  wanted.
+* Stiamo codificando i parametri di connessione al database. Idealmente, questi
+  parametri saranno memorizzati nella configurazione Django.
 
-* It ties us to MySQL. If, down the road, we switch from MySQL to
-  PostgreSQL, we'll have to use a different database adapter (e.g.,
-  ``psycopg`` rather than ``MySQLdb``), alter the connection parameters,
-  and -- depending on the nature of the SQL statement -- possibly rewrite
-  the SQL. Ideally, the database server we're using would be abstracted, so
-  that a database server change could be made in a single place. (This
-  feature is particularly relevant if you're building an open-source Django
-  application that you want to be used by as many people as possible.)
+* Siamo costretti a dover scrivere un bel po' di codice standard: creazione di
+  una connessione, creazione di un cursore, esecuzione di una dichiarazione e
+  chiusura della connessione. Idealmente, tutto ciò è necessario per fare ciò
+  che vogliamo.
 
-As you might expect, Django's database layer aims to solve these problems.
-Here's a sneak preview of how the previous view can be rewritten using Django's
-database API::
+* E ci lega a MySQL. Se, lungo il cammino, si passa da MySQL a PostgreSQL,
+  dovremo utilizzare un adattatore di database diverso (ad esempio, ``psycopg``
+  piuttosto che ``MySQLdb``), modificare i parametri di connessione, e .- a
+  seconda della natura della dichiarazione SQL - forse riscrivere l'SQL.
+  Idealmente, il server di database che stiamo usando è astratto, cosicché un
+  cambiamento di database sia fatto in un unico luogo. (Questa funzione è
+  particolarmente rilevante se si sta costruendo un'applicazione Django
+  open-source che si desidera utilizzare dal maggior numero possibile di
+  persone).
+
+Come ci si potrebbe aspettare, il layer database di Django mira a risolvere
+questi problemi. Ecco un'anteprima di come la vista precedente può essere
+riscritta utilizzando le API di Django::
 
     from django.shortcuts import render
     from mysite.books.models import Book
@@ -84,97 +94,108 @@ database API::
         books = Book.objects.order_by('name')
         return render(request, 'book_list.html', {'books': books})
 
-We'll explain this code a little later in the chapter. For now, just get a
-feel for how it looks.
+Spiegheremo questo codice un po' più avanti nel capitolo. Per ora, basta avere
+un'idea di come appare.
 
-The MTV (or MVC) Development Pattern
-====================================
+Il modello di sviluppocMTV (o MVC)
+==================================
 
-Before we delve into any more code, let's take a moment to consider the overall
-design of a database-driven Django Web application.
+Prima di approfondire qualsiasi altro codice, prenditi un momento per
+considerare il design complessivo di un database-driven in una applicazione web
+Django.
 
-As we mentioned in previous chapters, Django is designed to encourage loose
-coupling and strict separation between pieces of an application. If you follow
-this philosophy, it's easy to make changes to one particular piece of the
-application without affecting the other pieces. In view functions, for
-instance, we discussed the importance of separating the business logic from the
-presentation logic by using a template system. With the database layer, we're
-applying that same philosophy to data access logic.
+Come abbiamo accennato nei capitoli precedenti, Django è stato progettato per
+incoraggiare l'accoppiamento lasco ed una rigida separazione tra le parti di
+un'applicazione. Se si segue questa filosofia, è facile apportare modifiche a un
+particolare pezzo di applicazione senza influenzare gli altri pezzi. Nelle
+funzioni di visualizzazione, per esempio, abbiamo discusso l'importanza di
+separare la logica di business dalla logica di presentazione utilizzando un
+template di sistema. Con il livello/layer database, stiamo applicando la stessa
+filosofia alla logica di accesso ai dati.
 
-Those three pieces together -- data access logic, business logic, and
-presentation logic -- comprise a concept that's sometimes called the
-*Model-View-Controller* (MVC) pattern of software architecture. In this
-pattern, "Model" refers to the data access layer, "View" refers to the part of
-the system that selects what to display and how to display it, and
-"Controller" refers to the part of the system that decides which view to use,
-depending on user input, accessing the model as needed.
+Questi tre pezzi insieme -- la logica di accesso ai dati, la logica di business
+e la logica di presentazione -- comprendono un concetto che è talvolta chiamato
+*Model-View-Controller* (MVC) dell'architettura software. In questo modello di
+architettura software, "modello" si riferisce al livello di accesso ai dati,
+"View" si riferisce alla parte del sistema che seleziona cosa visualizzare e
+come visualizzare, mentre "Controller" si riferisce alla parte del sistema che
+decide quale vista utilizzare, secondo gli input dell'utente, l'accesso al
+modello come necessario.
 
-.. admonition:: Why the Acronym?
+.. admonition:: Perché l'Acronimo?
 
-    The goal of explicitly defining patterns such as MVC is mostly to
-    streamline communication among developers. Instead of having to tell your
-    coworkers, "Let's make an abstraction of the data access, then let's have a
-    separate layer that handles data display, and let's put a layer in the
-    middle that regulates this," you can take advantage of a shared vocabulary
-    and say, "Let's use the MVC pattern here."
+    L'obiettivo di modelli che si definiscono esplicitamente come MVC è per lo
+    più per semplificare la comunicazione tra gli sviluppatori. Invece di dover
+    dire ai vostri colleghi, "Facciamo una astrazione della connessione dati,
+    quindi diamo uno strato separato che gestisce la visualizzazione dei dati, e
+    cerchiamo di mettere uno strato in mezzo che regola questo", è possibile
+    usufruire di un vocabolario condiviso e dicono: "Qui usiamo il pattern MVC."
 
-Django follows this MVC pattern closely enough that it can be called an MVC
-framework. Here's roughly how the M, V, and C break down in Django:
+Django segue questo pattern MVC da vicino abbastanza da poter essere definito un
+framework MVC. Ecco grosso modo come la M, V e C appaiono in Django:
 
-* *M*, the data-access portion, is handled by Django's database layer,
-  which is described in this chapter.
+* *M*, la parte di accesso ai dati, è gestito dal layer database di Django, che
+  è descritto in questo capitolo.
 
-* *V*, the portion that selects which data to display and how to display
-  it, is handled by views and templates.
+* *V*, la parte che seleziona i dati da visualizzare e come visualizzarli, è
+  gestita da vista e template.
 
-* *C*, the portion that delegates to a view depending on user input, is
-  handled by the framework itself by following your URLconf and calling the
-  appropriate Python function for the given URL.
+* *C*, la parte che mostra una view in base all'input dell'utente, viene
+  gestito dal framework stesso, seguendo l'URLconf e chiamando la funzione
+  Python appropriata per l'URL specificato.
 
 Because the "C" is handled by the framework itself and most of the excitement
 in Django happens in models, templates and views, Django has been referred to
 as an *MTV framework*. In the MTV development pattern,
 
-* *M* stands for "Model," the data access layer. This layer contains
-  anything and everything about the data: how to access it, how to validate
-  it, which behaviors it has, and the relationships between the data.
+Poiché la "C" è gestita dal framework stesso e la maggior parte del divertimento
+in Django sta nei modelli, template e view, Django è stato descritto come un
+*framework MTV*. Nel modello di sviluppo di MTV,
 
-* *T* stands for "Template," the presentation layer. This layer contains
-  presentation-related decisions: how something should be displayed on a
-  Web page or other type of document.
+* *M* sta per "Modello", il livello di accesso ai dati. Questo livello non
+  contiene nulla a parte tutto ciò che riguarda i dati: come accedervi, come per
+  convalidarlo, che i comportamenti che ha, e le relazioni tra i dati.
 
-* *V* stands for "View," the business logic layer. This layer contains the
-  logic that access the model and defers to the appropriate template(s).
-  You can think of it as the bridge between models and templates.
+* *T* sta per "Template", il livello di presentazione. Questo livello contiene
+  le decisioni di presentazione-correlati: come qualcosa deve essere
+  visualizzato in una pagina Web o di altro tipo di documento.
 
-If you're familiar with other MVC Web-development frameworks, such as Ruby on
-Rails, you may consider Django views to be the "controllers" and Django
-templates to be the "views." This is an unfortunate confusion brought about by
-differing interpretations of MVC. In Django's interpretation of MVC, the "view"
-describes the data that gets presented to the user; it's not necessarily just
-*how* the data looks, but *which* data is presented. In contrast, Ruby on Rails
-and similar frameworks suggest that the controller's job includes deciding
-which data gets presented to the user, whereas the view is strictly *how* the
-data looks, not *which* data is presented.
+* *V* sta per "View", il livello di logica di business. Questo strato contiene
+  la logica che accede ad un modello e lo rinvia al template appropriato. Si può
+  pensare ad esso come il ponte tra modelli e template.
 
-Neither interpretation is more "correct" than the other. The important thing is
-to understand the underlying concepts.
+Se si ha familiarità con altri framework web MVC per lo sviluppo, come ad
+esempio Ruby on Rails, si possono considerare le viste di Django come i
+"controllers" mentre i modelli di Django sono le "viste". Si tratta di una
+confusione spiacevole causata da interpretazioni divergenti di MVC.
+Nell'interpretazione di Django di MVC, la "vista" descrive i dati che vengono
+presentati all'utente, non necessariamente *come* sono fatti i dati, ma *da
+quali* dati sono mostrati. Al contrario, Ruby on Rails e framework simili dicono
+che il lavoro del controller include decidere quali dati viene presentato
+all'utente, mentre la vista è fatta strettamente solo da *come* sono fatti i
+dati, non *da quali* dati sono mostrati.
 
-Configuring the Database
-========================
+Nessuna interpretazione è più "corretta" dell'altra. La cosa importante è capire
+i concetti di base.
 
-With all of that philosophy in mind, let's start exploring Django's database
-layer. First, we need to take care of some initial configuration; we need to
-tell Django which database server to use and how to connect to it.
+Configurazione del Database
+===========================
 
-We'll assume you've set up a database server, activated it, and created a
-database within it (e.g., using a ``CREATE DATABASE`` statement). If you're
-using SQLite, no such setup is required, because SQLite uses standalone files
-on the filesystem to store its data.
+Con tutta la filosofia in mente, cominciamo ad esplorare il layer database di
+Django. In primo luogo, abbiamo bisogno di prenderci cura di qualche
+configurazione iniziale, abbiamo bisogno di dire a Django quale server database
+utilizzare e come connettersi ad esso.
 
-As with ``TEMPLATE_DIRS`` in the previous chapter, database configuration lives in
-the Django settings file, called ``settings.py`` by default. Edit that file and
-look for the database settings::
+Diamo per scontato che hai impostato un server database, attivato, e creato un
+database all'interno di esso (ad esempio, utilizzando un'istruzione ``CREATE
+DATABASE``). Se stai usando SQLite, non è richiesta alcuna configurazione,
+perché SQLite utilizza dei file standalone sul filesystem per memorizzare i
+propri dati.
+
+Come fatto con ``TEMPLATE_DIRS`` nel capitolo precedente, la configurazione del
+database sta nel file di impostazioni Django, chiamato ``settings.py`` per
+impostazione predefinita. Basta modificare il file e cercare le impostazioni del
+database::
 
     DATABASES = {
         'default': {
@@ -187,182 +208,184 @@ look for the database settings::
         }
     }
 
-Here's a rundown of each setting.
+Ecco una carrellata di ciascuna impostazione.
 
-* ``ENGINE`` tells Django which database engine to use. If you're
-  using a database with Django, ``ENGINE`` must be set to one of
-  the strings shown in Table 5-1.
+* ``ENGINE`` dice a Django quale motore di database da utilizzare. Se si
+  utilizza un database con Django, ``ENGINE`` deve essere impostato su una delle
+  stringhe riportate nella Tabella 5-1.
 
-  .. table:: Table 5-1. Database Engine Settings
+  .. table:: Table 5-1. Impostazioni del Database
 
       ============================================ ============ ================================================
-      Setting                                      Database     Required Adapter
+      Impostazione                                 Database     Adattatore Richiesto
       ============================================ ============ ================================================
-      ``django.db.backends.postgresql_psycopg2``   PostgreSQL   ``psycopg`` version 2.x,
+      ``django.db.backends.postgresql_psycopg2``   PostgreSQL   ``psycopg`` versione 2.x,
                                                                 http://www.djangoproject.com/r/python-pgsql/.
 
       ``django.db.backends.mysql``                 MySQL        ``MySQLdb``,
                                                                 http://www.djangoproject.com/r/python-mysql/.
 
-      ``django.db.backends.sqlite3``               SQLite       No adapter needed.
+      ``django.db.backends.sqlite3``               SQLite       Non e' necessario alcun adattatore.
 
       ``django.db.backends.oracle``                Oracle       ``cx_Oracle``,
                                                                 http://www.djangoproject.com/r/python-oracle/.
       ============================================ ============ ================================================
 
-  Note that for whichever database back-end you use, you'll need to download
-  and install the appropriate database adapter. Each one is available for
-  free on the Web; just follow the links in the "Required Adapter" column
-  in Table 5-1. If you're on Linux, your distribution's package-management
-  system might offer convenient packages. (Look for packages called
-  ``python-postgresql`` or ``python-psycopg``, for example.)
+  Nota che per qualsiasi database back-end si utilizza, è necessario scaricare e
+  installare l'adattatore di database appropriato. Ognuno è disponibile
+  gratuitamente sul web, basta seguire i link nella "Scheda richiesti" colonna
+  nella Tabella 5-1. Se sei su Linux, il sistema di gestione dei pacchetti della
+  tua distribuzione potrebbe offrire dei comodi pacchetti. (Cercare i pacchetti
+  con nomi del tipo ``python-postgresql`` o ``python-psycopg``)
 
-  Example::
+  Esempio::
 
       'ENGINE': 'django.db.backends.postgresql_psycopg2',
 
-* ``NAME`` tells Django the name of your database. For example::
+* ``NAME`` dice a Django il nome del database. Per esempio::
 
       'NAME': 'mydb',
 
-  If you're using SQLite, specify the full filesystem path to the database
-  file on your filesystem. For example::
+  Se stai usando SQLite, specifica il percorso completo del filesystem per il
+  file di database nel filesystem. Per esempio::
 
       'NAME': '/home/django/mydata.db',
 
-  As for where you put that SQLite database, we're using the ``/home/django``
-  directory in this example, but you should pick a directory that works
-  best for you.
 
-* ``USER`` tells Django which username to use when connecting to
-  your database. For example: If you're using SQLite, leave this blank.
+  Per quanto riguarda il dove mettere il database SQLite, stiamo usando la
+  directory ``/home/django`` in questo esempio, ma si potrebbe scegliere una
+  directory che funziona meglio.
 
-* ``PASSWORD`` tells Django which password to use when connecting
-  to your database. If you're using SQLite or have an empty password, leave
-  this blank.
+* ``USER`` dice a Django il nome utente da utilizzare per la connessione al
+  database. Ad esempio: se si utilizza SQLite, lasciarlo vuoto.
 
-* ``HOST`` tells Django which host to use when connecting to your
-  database. If your database is on the same computer as your Django
-  installation (i.e., localhost), leave this blank. If you're using SQLite,
-  leave this blank.
+* ``PASSWORD`` dice a Django la password da utilizzare per la connessione al
+  database. Se stai usando SQLite o hai una password vuota, lasciare il campo
+  vuoto.
 
-  MySQL is a special case here. If this value starts with a forward slash
-  (``'/'``) and you're using MySQL, MySQL will connect via a Unix socket to
-  the specified socket, for example::
+* ``HOST`` dice a Django quale è l'indirizzo a cui collegarsi. Se il database si
+  trova sullo stesso computer come l'installazione Django (cioè, localhost),
+  lasciare il campo vuoto. Se stai usando SQLite, lascia il campo vuoto.
+
+  MySQL è un caso speciale qui. Se questo valore inizia con una barra (``'/'``)
+  e si sta utilizzando MySQL, MySQL si connette tramite un socket Unix per il
+  socket specificato, ad esempio::
 
       'HOST': '/var/run/mysql',
 
-.. SL The usual convention is for the socket to be named 'mysql.sock' or similar,
-.. SL so would '/var/run/mysql.sock' be a better example?
+  Se stai usando MySQL e questo valore *non* inizia con uno slash, allora questo
+  valore viene considerato l'host.
 
-  If you're using MySQL and this value *doesn't* start with a forward
-  slash, then this value is assumed to be the host.
+* ``PORT`` dice a Django la porta da utilizzare per la connessione al database.
+  Se stai usando SQLite, lasciare il campo vuoto. In caso contrario, se lo lasci
+  vuoto, l'adattatore di database sottostante ne userà predefinita per il server
+  di database specificato. Nella maggior parte dei casi, la porta di default va
+  bene, quindi è possibile lasciare il campo vuoto.
 
-* ``PORT`` tells Django which port to use when connecting to your
-  database. If you're using SQLite, leave this blank. Otherwise, if you
-  leave this blank, the underlying database adapter will use whichever
-  port is default for your given database server. In most cases, the
-  default port is fine, so you can leave this blank.
+Una volta inserite le impostazioni e salvato il file ``settings.py``, è una
+buona idea verificare la configurazione. Per far questo, eseguire
+``python manage.py shell`` come nel precedente capitolo, all'interno della
+directory del progetto ``mysite``. (Come abbiamo sottolineato nell'ultimo
+capitolo ``manage.py shell`` è un modo per eseguire l'interprete Python con le
+impostazioni relative a Django attivate. Ciò è necessario nel nostro caso,
+perché Django ha bisogno di sapere quali file di impostazione bisogna utilizzare
+per una corretta connessione al database informazioni).
 
-Once you've entered those settings and saved ``settings.py``, it's a good idea
-to test your configuration. To do this, run ``python manage.py shell`` as in
-the last chapter, from within the ``mysite`` project directory. (As we pointed
-out last chapter ``manage.py shell`` is a way to run the Python interpreter
-with the correct Django settings activated. This is necessary in our case,
-because Django needs to know which settings file to use in order to get your
-database connection information.)
-
-In the shell, type these commands to test your database configuration::
+Nella shell, digitare i seguenti comandi per verificare la configurazione del
+database::
 
     >>> from django.db import connection
     >>> cursor = connection.cursor()
 
-If nothing happens, then your database is configured properly. Otherwise, check
-the error message for clues about what's wrong. Table 5-2 shows some common errors.
+Se non succede nulla, allora il database è configurato correttamente. In caso
+contrario, controllare il messaggio di errore per avere degli indizi su ciò che
+è sbagliato. La tabella 5-2 mostra alcuni errori comuni.
 
-.. table:: Table 5-2. Database Configuration Error Messages
+.. table:: Table 5-2. Messaggi d'errore della Configurazione del Database
 
     =========================================================  ===============================================
-    Error Message                                              Solution
+    Messaggio d'errore                                         Soluzione
     =========================================================  ===============================================
-    You haven't set the ENGINE setting yet.                    Set the ``ENGINE`` setting to
-                                                               something other than an empty string. Valid
-                                                               values are in Table 5-1.
-    Environment variable DJANGO_SETTINGS_MODULE is undefined.  Run the command ``python manage.py shell``
-                                                               rather than ``python``.
-    Error loading _____ module: No module named _____.         You haven't installed the appropriate
-                                                               database-specific adapter (e.g., ``psycopg``
-                                                               or ``MySQLdb``). Adapters are *not* bundled
-                                                               with Django, so it's your responsibility to
-                                                               download and install them on your own.
-    _____ isn't an available database backend.                 Set your ``ENGINE`` setting to
-                                                               one of the valid engine settings described
-                                                               previously. Perhaps you made a typo?
-    database _____ does not exist                              Change the ``NAME`` setting to
-                                                               point to a database that exists, or
-                                                               execute the appropriate
-                                                               ``CREATE DATABASE`` statement in order to
-                                                               create it.
-    role _____ does not exist                                  Change the ``USER`` setting to point
-                                                               to a user that exists, or create the user
-                                                               in your database.
-    could not connect to server                                Make sure ``HOST`` and
-                                                               ``PORT`` are set correctly, and
-                                                               make sure the database server is running.
+    You haven't set the ENGINE setting yet.                    Impostare la flag ``ENGINE`` con qualcosa di
+                                                               diverso dalla stringa vuota. Valori validi sono
+                                                               presenti nella Tabella 5-1.
+    Environment variable DJANGO_SETTINGS_MODULE is undefined.  Eseguire il comando ``python manage.py shell``
+                                                               piuttosto che ``python``.
+    Error loading _____ module: No module named _____.         Non ha installato un corretto adattatore
+                                                               specifico per il database (per esempio
+                                                               ``psycopg`` o ``MySQLdb``). Gli adattatore *non*
+                                                               sono inclusi in Django, perciò è tua
+                                                               responsabilità scaricarli ed installarli da solo.
+    _____ isn't an available database backend.                 Imposta la flag ``ENGINE`` con un valore valido
+                                                               come descritto precedentemente.
+                                                               Hai forse fatto un "typo"?
+    database _____ does not exist                              Cambiare la flag ``NAME`` in modo che punti ad
+                                                               un database esistente o eseguire il comando
+                                                               appropriato ``CREATE DATABASE`` per crearlo.
+    role _____ does not exist                                  Cambiare la flag ``USER`` in modo che punti ad
+                                                               un utente esistente o crearlo nel tuo database.
+    could not connect to server                                Accertati che ``HOST`` e
+                                                               ``PORT`` siano settati correttamente e che
+                                                               il server database sia in esecuzione.
     =========================================================  ===============================================
 
-Your First App
-==============
+La tua prima App
+================
 
-Now that you've verified the connection is working, it's time to create a
-*Django app* -- a bundle of Django code, including models and views, that
-lives together in a single Python package and represents a full Django
-application.
+Ora che hai verificato che la connessione funziona, è il momento di creare un
+*app Django* -- un insieme di codice Django, compresi i template e le view, che
+stanno insieme in un unico pacchetto Python e rappresentano una completa
+applicazione Django.
 
-It's worth explaining the terminology here, because this tends to trip up
-beginners. We'd already created a *project*, in Chapter 2, so what's the
-difference between a *project* and an *app*? The difference is that of
-configuration vs. code:
+Vale la pena di spiegare la terminologia qui, perché questo tende a fare
+barcollare i principianti. Avevamo già creato un *progetto*, nel Capitolo 2,
+quindi qual è la differenza tra un *progetto* e un'*app*? La differenza è che di
+configurazione vs codice:
 
-* A project is an instance of a certain set of Django apps, plus the
-  configuration for those apps.
+* Un progetto è un esempio di un particolare insieme di applicazioni Django, più
+  la configurazione per queste applicazioni.
 
-  Technically, the only requirement of a project is that it supplies a
-  settings file, which defines the database connection information, the
-  list of installed apps, the ``TEMPLATE_DIRS``, and so forth.
+  Tecnicamente, l'unico requisito di un progetto è che esso fornisce un file di
+  impostazioni, che definisce le informazioni riguardo il database usato,
+  l'elenco delle applicazioni installate, i ``TEMPLATE_DIRS``, e così via.
 
-* An app is a portable set of Django functionality, usually including
-  models and views, that lives together in a single Python package.
 
-  For example, Django comes with a number of apps, such as a commenting
-  system and an automatic admin interface. A key thing to note about these
-  apps is that they're portable and reusable across multiple projects.
+* L'app è un set portatile di funzionalità Django, di solito fatto da template
+  e view, che sta insieme in un unico pacchetto Python.
 
-There are very few hard-and-fast rules about how you fit your Django code into
-this scheme. If you're building a simple Web site, you may use only a single
-app. If you're building a complex Web site with several unrelated pieces such
-as an e-commerce system and a message board, you'll probably want to split
-those into separate apps so that you'll be able to reuse them individually in
-the future.
+  Ad esempio, Django viene riempito con qualche di applicazione, come ad esempio
+  un sistema di commento e un'interfaccia di amministrazione automaticamente.
+  Una cosa fondamentale da notare su queste applicazioni è che sono portatili e
+  riutilizzabili in più progetti.
 
-Indeed, you don't necessarily need to create apps at all, as evidenced by the
-example view functions we've created so far in this book. In those cases, we
-simply created a file called ``views.py``, filled it with view functions, and
-pointed our URLconf at those functions. No "apps" were needed.
 
-However, there's one requirement regarding the app convention: if you're using
-Django's database layer (models), you must create a Django app. Models must
-live within apps. Thus, in order to start writing our models, we'll need to
-create a new app.
+Ci sono poche regole rigide e veloci su come si forma il tuo codice Django in
+questo schema. Se si sta costruendo un semplice sito Web, è possibile utilizzare
+solo una singola applicazione. Se si sta costruendo un sito web complesso con
+diversi pezzi non correlati, quali un sistema di e-commerce e una message board,
+probabilmente si vorrebbe poter dividere quelli in applicazioni separate in modo
+che sia possibile riutilizzarle singolarmente in futuro.
 
-Within the ``mysite`` project directory, type this command to create a
-``books`` app::
+In effetti, non è necessario creare applicazioni a tutti i costi, come dimostra
+l'esempio di funzioni di visualizzazione che abbiamo creato finora in questo
+libro. In questi casi, abbiamo semplicemente creato un file chiamato ``views.py``,
+riempito con funzioni di visualizzazione ed abbiamo messo in circuito le
+suddette funzioni usando URLconf. Non c'era bisogno di "apps".
+
+Tuttavia, un requisito per quanto riguarda la convenzione delle applicazioni
+Django: se si sta utilizzando il layer database di Django (e quindi i modelli),
+è necessario creare un'app Django. I modelli devono stare all'interno delle app.
+Pertanto, per iniziare a scrivere i nostri modelli, abbiamo bisogno di creare
+una nuova app.
+
+All'interno della directory del progetto ``mysite``, digita questo comando per
+creare un'app ``books``::
 
     python manage.py startapp books
 
-This command does not produce any output, but it does create a ``books``
-directory within the ``mysite`` directory. Let's look at the contents
-of that directory::
+Questo comando non produce alcun output, ma crea una directory di ``books``
+all'interno della directory ``mysite``. Guardiamo il contenuto di quella
+directory::
 
     books/
         __init__.py
@@ -372,21 +395,24 @@ of that directory::
 
 These files will contain the models and views for this app.
 
-Have a look at ``models.py`` and ``views.py`` in your favorite text editor.
-Both files are empty, except for comments and an import in ``models.py``. This
-is the blank slate for your Django app.
+Questi file contengono i modelli e le viste per quest'applicazione.
 
-Defining Models in Python
-=========================
+Dai un'occhiata a ``models.py`` e ``views.py`` nel tuo editor di testo preferito.
+Entrambi i file sono vuoti, ad eccezione dei commenti e un import in ``models.py``.
+Questa è la base delle app Django.
 
-As we discussed earlier in this chapter, the "M" in "MTV" stands for "Model." A
-Django model is a description of the data in your database, represented as
-Python code. It's your data layout -- the equivalent of your SQL ``CREATE
-TABLE`` statements -- except it's in Python instead of SQL, and it includes
-more than just database column definitions. Django uses a model to execute SQL
-code behind the scenes and return convenient Python data structures representing
-the rows in your database tables. Django also uses models to represent
-higher-level concepts that SQL can't necessarily handle.
+Definizione di modelli in Python
+================================
+
+Come abbiamo discusso in precedenza in questo capitolo, la "M" di "MTV" sta per
+"Model." Un modello di Django è una descrizione dei dati nel database,
+rappresentate come codice Python. E' il layout dei dati -- l'equivalente del
+nostro SQL ``CREATE TABLE`` -- tranne che è scritto in Python invece di SQL, e
+comprende più di semplici definizioni di colonna di database. Django utilizza un
+modello per eseguire codice SQL dietro le quinte e tornare strutture dati Python
+convenienti che rappresentano le righe nelle tabelle del database. Django
+utilizza anche modelli per rappresentare i concetti di livello superiore che SQL
+non è in grado di gestire necessariamente.
 
 If you're familiar with databases, your immediate thought might be, "Isn't it
 redundant to define data models in Python instead of in SQL?" Django works the
