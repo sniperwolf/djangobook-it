@@ -414,81 +414,88 @@ convenienti che rappresentano le righe nelle tabelle del database. Django
 utilizza anche modelli per rappresentare i concetti di livello superiore che SQL
 non è in grado di gestire necessariamente.
 
-If you're familiar with databases, your immediate thought might be, "Isn't it
-redundant to define data models in Python instead of in SQL?" Django works the
-way it does for several reasons:
+Se hai familiarità con i database, il tuo primo pensiero potrebbe essere: "Non è
+forse ridondante dover definire dei modelli in Python piuttosto che in SQL?".
+Django funziona nel modo in cui funziona per diversi motivi:
 
-* Introspection requires overhead and is imperfect. In order to provide
-  convenient data-access APIs, Django needs to know the
-  database layout *somehow*, and there are two ways of accomplishing this.
-  The first way would be to explicitly describe the data in Python, and the
-  second way would be to introspect the database at runtime to determine
-  the data models.
+* L'introspezione richiede tempo di calcolo ed è imperfetta. Per dare una API
+  per l'accesso ai dati conveniente, Django deve conoscere il layout del database
+  in qualche modo, e ci sono due modi per realizzare ciò. Il primo modo è quello
+  di descrivere in modo esplicito i dati in Python, mentre il secondo modo sarebbe
+  quello di eseguire una introspezione del database in fase di esecuzione per
+  determinare i modelli di dati.
 
-  This second way seems cleaner, because the metadata about your tables
-  lives in only one place, but it introduces a few problems. First,
-  introspecting a database at runtime obviously requires overhead. If the
-  framework had to introspect the database each time it processed a
-  request, or even only when the Web server was initialized, this would
-  incur an unacceptable level of overhead. (While some believe that level
-  of overhead is acceptable, Django's developers aim to trim as much
-  framework overhead as possible.) Second, some databases, notably older
-  versions of MySQL, do not store sufficient metadata for accurate and
-  complete introspection.
+  Questo secondo modo sembra più pulito, perché i metadati sulle nostre tabelle
+  stanno in un solo luogo, ma introduce alcuni problemi. In primo luogo,
+  l'introspezione di un database in fase di esecuzione, ovviamente, necessita di
+  tempo di calcolo. Se il framework dovesse eseguire una introspezione del
+  database ogni volta che debba elaborare una richiesta, o anche solo quando il
+  server Web venga inizializzato, questo comporterebbe un'inaccettabile livello
+  di carico. (Se alcuni pensano che il livello di sovraccarico sia
+  accettabile, gli sviluppatori di Django mirano a tagliare il più framework in
+  modo che esso sia meno relativo all'ambientale possibile). In secondo luogo,
+  alcuni database, in particolare le versioni più vecchie di MySQL, non
+  memorizzano i metadati sufficienti per un'accurata e completa introspezione.
 
-* Writing Python is fun, and keeping everything in Python limits the number
-  of times your brain has to do a "context switch." It helps productivity
-  if you keep yourself in a single programming environment/mentality for as
-  long as possible. Having to write SQL, then Python, and then SQL again is
-  disruptive.
+* Scrivere in Python è divertente, e tenere tutto in Python limita il numero di
+  volte che il tuo cervello deve fare un "cambio di contesto". Aiuta quindi la
+  produttività, poiché si mantiene lo sviluppo in un unico ambiente di
+  programmazione/mentalità. Dover scrivere prima in SQL, poi in Python, e poi
+  di nuovo in SQL è fastidioso.
 
-* Having data models stored as code rather than in your database makes it
-  easier to keep your models under version control. This way, you can
-  easily keep track of changes to your data layouts.
+* Avendo modelli di dati memorizzati come codice piuttosto che nel database
+  rende più facile mantenere i modelli con un controllo della versione. In
+  questo modo, si può facilmente tenere traccia delle modifiche fatte ai layout
+  dei dati.
 
-* SQL allows for only a certain level of metadata about a data layout. Most
-  database systems, for example, do not provide a specialized data type for
-  representing email addresses or URLs. Django models do. The advantage of
-  higher-level data types is higher productivity and more reusable code.
+* SQL permette solo un certo livello di metadati relativi a un layout di dati.
+  La maggior parte dei sistemi di database, ad esempio, non forniscono un tipo
+  di dato specializzato per rappresentare indirizzi e-mail o URL. I modelli di
+  Django lo fanno. Il vantaggio dato dai tipi di dati a livello superiore sono
+  una maggiore produttività ed un codice più riutilizzabile.
 
-* SQL is inconsistent across database platforms. If you're distributing a
-  Web application, for example, it's much more pragmatic to distribute a
-  Python module that describes your data layout than separate sets of
-  ``CREATE TABLE`` statements for MySQL, PostgreSQL, and SQLite.
+* SQL non è coerente fra le piattaforme di database. Se stai distribuendo
+  un'applicazione Web, per esempio, è molto più comprensibile distribuire un
+  modulo Python che descrive il layout dei dati in gruppi separati piuttosto che
+  istruzioni ``CREATE TABLE`` per MySQL, PostgreSQL e SQLite.
 
-A drawback of this approach, however, is that it's possible for the Python code
-to get out of sync with what's actually in the database. If you make changes to
-a Django model, you'll need to make the same changes inside your database to
-keep your database consistent with the model. We'll discuss some strategies for
-handling this problem later in this chapter.
+Uno svantaggio di questo approccio, tuttavia, è che è possibile che il codice
+Python non sia sincronizzato con ciò che sta effettivamente sul database. Quindi,
+se si apportano modifiche ad un modello di Django, è necessario apportare le
+stesse modifiche all'interno del database per mantenere il database coerente con
+il modello. Discuteremo di alcune strategie per la gestione di questo problema
+più avanti in questo capitolo.
 
-Finally, we should note that Django includes a utility that can generate models
-by introspecting an existing database. This is useful for quickly getting up
-and running with legacy data. We'll cover this in Chapter 18.
+Infine, bisogna  notare che Django include un programma di utilità che può
+generare modelli analizzando un database esistente. Questo è utile per
+rapportarsi rapidamente con i dati preesistenti. Parleremo di questo nel
+capitolo 18.
 
-Your First Model
-================
+Il tuo primo modello
+====================
 
-As an ongoing example in this chapter and the next chapter, we'll focus on a
-basic book/author/publisher data layout. We use this as our example because the
-conceptual relationships between books, authors, and publishers are well known,
-and this is a common data layout used in introductory SQL textbooks. You're
-also reading a book that was written by authors and produced by a publisher!
+A titolo di esempio, in questo e nel prossimo capitolo, ci concentreremo su un
+layout base libro/autore/editore. Usiamo questo layout esempio perché le
+relazioni concettuali tra i libri, gli autori e gli editori sono intuitive, e
+questo è un layout di dati molto comune utilizzato in diversi libri di testo
+introduttivi su SQL. Stai anche leggendoun libro che è stato scritto da autori e
+prodotto da un editore!
 
-We'll suppose the following concepts, fields, and relationships:
+Si suppongono i seguenti concetti, campi e relazioni:
 
-* An author has a first name, a last name and an email address.
+* Un autore ha un nome, un cognome e un indirizzo email.
 
-* A publisher has a name, a street address, a city, a state/province, a
-  country, and a Web site.
+* Un editore ha un nome, un indirizzo, una città, uno stato/provincia, un paese,
+  e un sito web.
 
-* A book has a title and a publication date. It also has one or more
-  authors (a many-to-many relationship with authors) and a single publisher
-  (a one-to-many relationship -- aka foreign key -- to publishers).
+* Un libro ha un titolo e una data di pubblicazione. Dispone inoltre di uno o
+  più autori (relazione molti-a-molti con gli autori) ed un singolo editore
+  (relazione uno-a-molti -- conosciuta come foreign key o chiave esterna in
+  italiano -- per gli editori).
 
-The first step in using this database layout with Django is to express it as
-Python code. In the ``models.py`` file that was created by the ``startapp``
-command, enter the following::
+Il primo passo per utilizzare questo layout con Django è esprimerlo come codice
+Python. Nel file ``models.py`` creato dal comando ``startapp``, digita il
+seguente codice::
 
     from django.db import models
 
@@ -511,20 +518,22 @@ command, enter the following::
         publisher = models.ForeignKey(Publisher)
         publication_date = models.DateField()
 
-Let's quickly examine this code to cover the basics. The first thing to notice
-is that each model is represented by a Python class that is a subclass of
-``django.db.models.Model``. The parent class, ``Model``, contains all the
-machinery necessary to make these objects capable of interacting with a
-database -- and that leaves our models responsible solely for defining their
-fields, in a nice and compact syntax. Believe it or not, this is all the code
-we need to write to have basic data access with Django.
+Esaminiamo rapidamente il codice di coprire le idee di base. La prima cosa da
+notare è che ogni modello è rappresentato da una classe Python che è una
+sottoclasse di ``django.db.models.Model``. La classe padre, ``Model``, contiene
+tutti gli strumenti necessari per rendere questi oggetti in grado di interagire
+con un database -- il che lascia i nostri modelli responsabile esclusivamente
+di definire i loro campi con una sintassi bella e compatta. Che tu ci creda o no,
+questo è tutto il codice che bisogna scrivere per avere accesso ai dati con
+Django.
 
-Each model generally corresponds to a single database table, and each attribute
-on a model generally corresponds to a column in that database table. The
-attribute name corresponds to the column's name, and the type of field (e.g.,
-``CharField``) corresponds to the database column type (e.g., ``varchar``). For
-example, the ``Publisher`` model is equivalent to the following table (assuming
-PostgreSQL ``CREATE TABLE`` syntax)::
+Ogni modello corrisponde generalmente ad una singola tabella di database, ed ogni
+attributo di un modello corrisponde generalmente ad una colonna nella tabella
+del database. Il nome dell'attributo corrisponde al nome della colonna, e il
+tipo di campo (ad esempio, ``CharField``) corrisponde al tipo di colonna di
+database (ad es, ``varchar``). Ad esempio, il modello ``Publisher`` è
+equivalente alla seguente tabella (assumendo di scrivere nella sintassi
+``CREATE TABLE`` di PostgreSQL)::
 
     CREATE TABLE "books_publisher" (
         "id" serial NOT NULL PRIMARY KEY,
@@ -536,17 +545,18 @@ PostgreSQL ``CREATE TABLE`` syntax)::
         "website" varchar(200) NOT NULL
     );
 
-Indeed, Django can generate that ``CREATE TABLE`` statement automatically, as
-we'll show you in a moment.
+Invece, Django può generare istruzioni ``CREATE TABLE`` automaticamente, come ti
+mostreremo fra un attimo.
 
-The exception to the one-class-per-database-table rule is the case of
-many-to-many relationships. In our example models, ``Book`` has a
-``ManyToManyField`` called ``authors``. This designates that a book has one or
-many authors, but the ``Book`` database table doesn't get an ``authors``
-column. Rather, Django creates an additional table -- a many-to-many "join
-table" -- that handles the mapping of books to authors.
+C'è una eccezione alla regola "una-classe-per-tabella" nel caso di relazioni
+molti-a-molti. Nel nostro esempio, ``Book`` ha un campo ``ManyToManyField``
+chiamato ``authors``. Questo specifica che un libro ha uno o molti autori, ma la
+tabella del database libro non ha una colonna ``authors``. Django, invece, crea
+una tabella aggiuntiva -- una tabella join molti-a-molti -- che gestisce la
+relazone dei libri con gli autori.
 
-For a full list of field types and model syntax options, see Appendix B.
+Per un elenco completo dei tipi di campo e le opzioni di sintassi del modello,
+leggi l'Appendice B.
 
 Finally, note we haven't explicitly defined a primary key in any of these
 models. Unless you instruct it otherwise, Django automatically gives every
