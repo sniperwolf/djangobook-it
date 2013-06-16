@@ -1,6 +1,6 @@
-==================
-Chapter 5: Modelli
-==================
+===================
+Capitolo 5: Modelli
+===================
 
 Nel Capitolo 3, abbiamo parlato delle basi della costruzione di siti web
 dinamici con Django: la creazione di view/viste e URLconfs. Come abbiamo
@@ -558,22 +558,29 @@ relazone dei libri con gli autori.
 Per un elenco completo dei tipi di campo e le opzioni di sintassi del modello,
 leggi l'Appendice B.
 
-Finally, note we haven't explicitly defined a primary key in any of these
-models. Unless you instruct it otherwise, Django automatically gives every
-model an auto-incrementing integer primary key field called ``id``. Each Django
-model is required to have a single-column primary key.
+Infine, nota che non abbiamo definito esplicitamente una chiave primaria in
+ognuno di questi modelli. A meno di modifiche, Django da automaticamente ad ogni
+modello una chiave primaria rappresentata da un campo intero che si
+auto-incrementa chiamato ``id``. Ogni modello Django deve avere una singola
+colonna che funge da chiave primaria.
 
-Installing the Model
-====================
+Installare un Modello
+=====================
 
 We've written the code; now let's create the tables in our database. In order
 to do that, the first step is to *activate* these models in our Django project.
 We do that by adding the ``books`` app to the list of "installed apps" in the
 settings file.
 
-Edit the ``settings.py`` file again, and look for the ``INSTALLED_APPS``
-setting. ``INSTALLED_APPS`` tells Django which apps are activated for a given
-project. By default, it looks something like this::
+Abbiamo scritto il codice, ora creiamo le tabelle nel database. Per fare questo,
+il primo passo è quello di *attivare* questi modelli nel nostro progetto Django.
+Dobbiamo quindi aggiungere l'app ``books`` alla lista delle "installed apps" nel
+file di impostazioni.
+
+Modificare nuovamente il file ``settings.py``, e cercare l'impostazione
+``INSTALLED_APPS``. ``INSTALLED_APPS`` dice a Django quali applicazioni sono
+attivate per un dato progetto. Per impostazione predefinita, assomiglia qualcosa
+di simile::
 
     INSTALLED_APPS = (
         'django.contrib.auth',
@@ -584,13 +591,13 @@ project. By default, it looks something like this::
         'django.contrib.staticfiles',
     )
 
-Temporarily comment out all six of those strings by putting a hash character
-(``#``) in front of them. (They're included by default as a common-case
-convenience, but we'll activate and discuss them in subsequent chapters.)
-While you're at it, comment out the default ``MIDDLEWARE_CLASSES`` setting, too;
-the default values in ``MIDDLEWARE_CLASSES`` depend on some of the apps we
-just commented out. Then, add  ``'books'`` to the ``INSTALLED_APPS``
-list, so the setting ends up looking like this::
+Commentare temporaneamente tutte e sei le righe mettendo un cancelletto (``#``)
+davanti a loro. (Sono inclusi di default, ma li attiveremo e discuteremo di loro
+nei capitoli successivi). Mentre ci siamo, commentare l'impostazione predefinita
+``MIDDLEWARE_CLASSES``; i valori di default in ``MIDDLEWARE_CLASSES`` dipendono
+da alcune delle applicazioni che abbiamo appena commentato. Quindi, aggiungere
+``'books'`` alla lista ``INSTALLED_APPS``, quindi l'impostazione finisce per
+assomigliare a qualcosa di simile::
 
     MIDDLEWARE_CLASSES = (
         # 'django.middleware.common.CommonMiddleware',
@@ -615,35 +622,48 @@ after *every* element of a tuple, regardless of whether the tuple has only a
 single element. This avoids the issue of forgetting commas, and there's no
 penalty for using that extra comma.)
 
-``'mysite.books'`` refers to the ``books`` app we're working on. Each app in
-``INSTALLED_APPS`` is represented by its full Python path -- that is, the path
-of packages, separated by dots, leading to the app package.
+(Come abbiamo accennato nell'ultimo capitolo quando si imposta ``TEMPLATE_DIRS``,
+è necessario essere sicuri di includere la virgola finale in ``INSTALLED_APPS``,
+perché è una tupla a singolo elemento. In proposito, gli autori di questo libro
+preferiscono mettere una virgola dopo *ogni* elemento di un tupla,
+indipendentemente dal fatto che la tupla abbia un solo elemento. Ciò evita il
+problema di virgole dimenticate, e non c'è nessun problema nell'utilizzare
+quella virgola in più).
+
+``'mysite.books'`` si riferisce all'applicazione ``books`` su cui stiamo
+lavorando. Ogni applicazione in ``INSTALLED_APPS`` è rappresentata dal suo
+percorso completo Python -- cioè, il percorso dei pacchetti, separati da punti,
+che portano al vero pacchetto dell'applicazione.
 
 Now that the Django app has been activated in the settings file, we can create
 the database tables in our database. First, let's validate the models by
 running this command::
 
+Ora che l'app Django è stata attivata nel file delle impostazioni, possiamo
+creare le tabelle nel nostro database. In primo luogo, cerchiamo di validare i
+modelli eseguendo questo comando::
+
     python manage.py validate
 
-.. SL Tested ok
+Il comando ``validate`` controlla se la sintassi e la logica dei tuoi modelli
+sono corretti. Se tutto va bene, vedrai il messaggio ``0 errors found``. Se non
+va bene, assicurati di aver digitato correttamente il codice del modello.
+L'uscita di un errore dovrebbe dare informazioni utili su che cosa c'è di
+sbagliato nel codice.
 
-The ``validate`` command checks whether your models' syntax and logic are
-correct. If all is well, you'll see the message ``0 errors found``. If you
-don't, make sure you typed in the model code correctly. The error output should
-give you helpful information about what was wrong with the code.
+Ogni volta che si pensa di avere problemi con i modelli, eseguire
+``python manage.py validate``. Esso tende a catturare tutti i problemi comuni
+dei modelli.
 
-Any time you think you have problems with your models, run
-``python manage.py validate``. It tends to catch all the common model problems.
-
-If your models are valid, run the following command for Django to generate
-``CREATE TABLE`` statements for your models in the ``books`` app (with colorful
-syntax highlighting available, if you're using Unix)::
+Se i modelli sono validi, esegui il seguente comando per generare istruzioni
+``CREATE TABLE`` dei modelli nella app ``books`` (con la sintassi evidenziata d
+colori, se stai utilizzando Unix)::
 
     python manage.py sqlall books
 
-In this command, ``books`` is the name of the app. It's what you specified when
-you ran the command ``manage.py startapp``. When you run the command, you
-should see something like this::
+In questo comando, ``books`` è il nome dell'app. E' quello che è stato
+specificato quando è stato eseguito il comando ``manage.py startapp``. Quando si
+esegue il comando, si dovrebbe vedere qualcosa di simile a questo::
 
     BEGIN;
     CREATE TABLE "books_publisher" (
@@ -680,73 +700,72 @@ should see something like this::
     CREATE INDEX "books_book_publisher_id" ON "books_book" ("publisher_id");
     COMMIT;
 
-.. SL Tested ok (sqlall output for postgres matches that shown here)
+Da notare che:
 
-Note the following:
+* I nomi delle tabelle vengono generati automaticamente combinando il nome dell'app
+  (``books``) e il nome del modello in minuscolo (``publisher``, ``book``, e
+  ``author``). È possibile sovrascrivere questo comportamento, come indicato
+  nell'Appendice B.
 
-* Table names are automatically generated by combining the name of the app
-  (``books``) and the lowercase name of the model (``publisher``,
-  ``book``, and ``author``). You can override this behavior, as detailed
-  in Appendix B.
+* Come abbiamo accennato in precedenza, Django aggiunge una chiave primaria per
+  ogni tabella automaticamente -- i campi ``id``. È possibile ignorare anche
+  questo.
 
-* As we mentioned earlier, Django adds a primary key for each table
-  automatically -- the ``id`` fields. You can override this, too.
+* Per convenzione, Django aggiunge ``"_id"`` al nome dei campi chiave esterna.
+  Come si può immaginare, è possibile anche ignorare questo comportamento.
 
-* By convention, Django appends ``"_id"`` to the foreign key field name. As
-  you might have guessed, you can override this behavior, too.
+* La relazione di chiave esterna è resa esplicita da una dichiarazione
+  ``REFERENCES``.
 
-* The foreign key relationship is made explicit by a ``REFERENCES``
-  statement.
+* Queste istruzioni ``CREATE TABLE`` sono su misura per il database che si sta
+  utilizzando, quindi vengono utilizzati i tipi di campi specifici del database,
+  ad esempio ``auto_increment``   (MySQL), ``serial`` (PostgreSQL), o
+  ``integer primary key`` (SQLite) sono gestite in maniera automatica. Lo stesso
+  vale per le virgolette da usare (ad esempio, usare le virgolette doppie o
+  singole). Questo output di esempio è scritto seguendo la sintassi PostgreSQL.
 
-* These ``CREATE TABLE`` statements are tailored to the database you're
-  using, so database-specific field types such as ``auto_increment``
-  (MySQL), ``serial`` (PostgreSQL), or ``integer primary key`` (SQLite) are
-  handled for you automatically. The same goes for quoting of column names
-  (e.g., using double quotes or single quotes). This example output is in
-  PostgreSQL syntax.
-
-The ``sqlall`` command doesn't actually create the tables or otherwise touch
-your database -- it just prints output to the screen so you can see what SQL
-Django would execute if you asked it. If you wanted to, you could copy and
-paste this SQL into your database client, or use Unix pipes to pass it
-directly (e.g., ``python manage.py sqlall books | psql mydb``). However, Django
-provides an easier way of committing the SQL to the database: the ``syncdb``
-command::
+Il comando ``sqlall`` non crea le tabelle o comunque non tocca il database --
+stampa solo l'output sullo schermo in modo da poter vedere quale istruzioni
+SQL Django avrebbe eseguito se gli fosse richiesto. Se si volesse, si potrebbe
+copiare e incollare questo SQL nel database client, o utilizzarlo con l'operatore
+pipe di Unix per passarlo direttamente (ad esempio, ``python manage.py sqlall
+books | psql mydb``). Tuttavia, Django fornisce un modo più semplice di inviare
+SQL per il database: il comando ``syncdb`::
 
     python manage.py syncdb
 
-Run that command, and you'll see something like this::
+Eseguendo questo comando, vedremo qualcosa di simile a questo::
 
     Creating table books_publisher
     Creating table books_author
     Creating table books_book
     Installing index for books.Book model
 
-.. SL Tested ok
 
-The ``syncdb`` command is a simple "sync" of your models to your database. It
-looks at all of the models in each app in your ``INSTALLED_APPS`` setting,
-checks the database to see whether the appropriate tables exist yet, and
-creates the tables if they don't yet exist. Note that ``syncdb`` does *not*
-sync changes in models or deletions of models; if you make a change to a model
-or delete a model, and you want to update the database, ``syncdb`` will not
-handle that. (More on this in the "Making Changes to a Database Schema" section
-toward the end of this chapter.)
+Il comando ``syncdb`` è un semplice "sincronizzatore" dei modelli per il
+database. Controlla tutti i modelli di ogni app nell'ambiente ``INSTALLED_APPS``,
+controlla il database per vedere se esistono le tabelle e le crea se non esistono
+ancora. Da notare che ``syncdb`` *non* sincronizza i cambiamenti o l'eliminazione
+dei modelli, se si apporta una modifica ad un modello o lo si elimina e si
+desidera aggiornare il database, ``syncdb`` non ti può aiutare. (Maggiori
+informazioni al riguardo nella sezione "Modifica dello SCHEMA di database" verso
+la fine di questo capitolo).
 
-If you run ``python manage.py syncdb`` again, nothing happens, because you
-haven't added any models to the ``books`` app or added any apps to
-``INSTALLED_APPS``. Ergo, it's always safe to run ``python manage.py syncdb``
--- it won't clobber things.
+Eseguendo nuovamente ``python manage.py syncdb``, non succede niente, perché
+non hai aggiunto i modelli per l'applicazione ``books`` o aggiunto Apps per
+``INSTALLED_APPS``. Ergo, è sempre sicuro eseguire ``python manage.py syncdb``
+-- non sovrascrive le cose.
 
-If you're interested, take a moment to dive into your database server's
-command-line client and see the database tables Django created. You can
-manually run the command-line client (e.g., ``psql`` for PostgreSQL) or
-you can run the command ``python manage.py dbshell``, which will figure out
-which command-line client to run, depending on your ``DATABASE_SERVER``
-setting. The latter is almost always more convenient.
+Se sei interessato, prenditi un momento per tuffarti nel client a riga di
+comando del server di database e vedere le tabelle create da Django sul database.
+È possibile eseguire manualmente il client a riga di comando (ad esempio, ``psql``
+per PostgreSQL) oppure è possibile eseguire il comando
+``python manage.py dbshell``, che sarà in grado di capire quale client a riga di
+comando eseguire, in base all'impostazione ``DATABASE_SERVER``. Quest'ultimo è
+quasi sempre più conveniente.
 
-Basic Data Access
-=================
+Accesso al Database
+===================
 
 Once you've created a model, Django automatically provides a high-level Python
 API for working with those models. Try it out by running
