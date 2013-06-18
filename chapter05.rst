@@ -767,9 +767,9 @@ quasi sempre più conveniente.
 Accesso al Database
 ===================
 
-Once you've created a model, Django automatically provides a high-level Python
-API for working with those models. Try it out by running
-``python manage.py shell`` and typing the following::
+Una volta creato un modello, Django fornisce automaticamente una API Python ad
+alto livello per lavorare con tali modelli. Provalo eseguendo
+``python manage.py shell`` e digitando il seguente::
 
     >>> from books.models import Publisher
     >>> p1 = Publisher(name='Apress', address='2855 Telegraph Avenue',
@@ -784,37 +784,35 @@ API for working with those models. Try it out by running
     >>> publisher_list
     [<Publisher: Publisher object>, <Publisher: Publisher object>]
 
-.. SL Tested ok
+Queste poche righe di codice fanno un bel po' di lavoro. Ecco i punti salienti:
 
-These few lines of code accomplish quite a bit. Here are the highlights:
+* In primo luogo, importiamo la nostra classe modello ``Publisher``. Questo ci
+  permette di interagire con la tabella del database che contiene gli editori;
 
-* First, we import our ``Publisher`` model class. This lets us interact
-  with the database table that contains publishers.
+* Creiamo un oggetto ``Publisher`` istanziandola con dei valori per ogni campo
+  -- nome, indirizzo, ecc...;
 
-* We create a ``Publisher`` object by instantiating it with values for
-  each field -- ``name``, ``address``, etc.
+* Per salvare l'oggetto nel database, viene chiamato il suo metodo ``save()``.
+  Dietro le quinte, Django qui esegue un'istruzione SQL ``INSERT``;
 
-* To save the object to the database, call its ``save()`` method. Behind
-  the scenes, Django executes an SQL ``INSERT`` statement here.
+* Per recuperare gli editori dal database, viene usato l'attributo
+  ``Publisher.objects``, che si può pensare come un insieme di tutti gli editori.
+  Per recuperare un elenco di *tutti* gli oggetti ``Publisher`` nel database,
+  si usa l'istruzione ``Publisher.objects.all()``. In questi casi, dietro le
+  quinte, Django esegue un'istruzione SQL ``SELECT``.
 
-* To retrieve publishers from the database, use the attribute
-  ``Publisher.objects``, which you can think of as a set of all publishers.
-  Fetch a list of *all* ``Publisher`` objects in the database with the
-  statement ``Publisher.objects.all()``. Behind the scenes, Django executes
-  an SQL ``SELECT`` statement here.
-
-One thing is worth mentioning, in case it wasn't clear from this example. When
-you're creating objects using the Django model API, Django doesn't save the
-objects to the database until you call the ``save()`` method::
+Una cosa è degna di nota, nel caso in cui non fosse stato chiaro da questo
+esempio. Quando si creano oggetti utilizzando le API dei modelli, Django non
+salva gli oggetti nel database fino a quando si chiama il metodo ``save()``::
 
     p1 = Publisher(...)
-    # At this point, p1 is not saved to the database yet!
+    # A questo punto, p1 non è ancora salvato sul database!
     p1.save()
-    # Now it is.
+    # Ora lo è.
 
-If you want to create an object and save it to the database in a single step,
-use the ``objects.create()`` method. This example is equivalent to the example
-above::
+Se si desidera creare un oggetto e salvarlo nel database in un unico passaggio,
+utilizzare il metodo ``objects.create()``. Questo esempio è equivalente al
+precedente esempio::
 
     >>> p1 = Publisher.objects.create(name='Apress',
     ...     address='2855 Telegraph Avenue',
@@ -827,24 +825,24 @@ above::
     >>> publisher_list = Publisher.objects.all()
     >>> publisher_list
 
-.. SL Tested ok
+Naturalmente, si può fare molto con le API relative ai database di Django -- ma
+in primo luogo, cerchiamo di prenderci cura di un piccolo fastidio.
 
-Naturally, you can do quite a lot with the Django database API -- but first,
-let's take care of a small annoyance.
+Aggiungere una rappresentazione ai Modelli
+==========================================
 
-Adding Model String Representations
-===================================
-
-When we printed out the list of publishers, all we got was this
-unhelpful display that makes it difficult to tell the ``Publisher`` objects
-apart::
+Quando abbiamo stampato l'elenco degli editori, abbiamo ottenuto un inutile
+messaggio che rende difficile pubblicare gli oggetti ``Publisher``
+singolarmente::
 
     [<Publisher: Publisher object>, <Publisher: Publisher object>]
 
-We can fix this easily by adding a method called ``__unicode__()`` to our
-``Publisher`` class. A ``__unicode__()`` method tells Python how to display the
-"unicode" representation of an object. You can see this in action by adding a
-``__unicode__()`` method to the three models:
+
+Siamo in grado di risolvere questo problema facilmente con l'aggiunta di un
+metodo chiamato ``__unicode__()`` nella nostra classe Publisher. Un metodo
+``__unicode__()`` indica a Python come visualizzare con la rappresentazione
+"unicode" un oggetto. Ecco come aggiungere un metodo ``__unicode__()`` ai tre
+modelli::
 
 .. parsed-literal::
 
@@ -878,78 +876,79 @@ We can fix this easily by adding a method called ``__unicode__()`` to our
         **def __unicode__(self):**
             **return self.title**
 
-As you can see, a ``__unicode__()`` method can do whatever it needs to do in order
-to return a representation of an object. Here, the ``__unicode__()`` methods for
-``Publisher`` and ``Book`` simply return the object's name and title,
-respectively, but the ``__unicode__()`` for ``Author`` is slightly more complex --
-it pieces together the ``first_name`` and ``last_name`` fields, separated by a
-space.
+Come puoi vedere, un metodo ``__unicode__()`` restituisce una rappresentazione
+di un oggetto. Nel nostro esempio, il metodo ``__unicode__()`` di ``Publisher``
+e ``Book`` semplicemente restituisce il nome e il titolo dell'oggetto,
+rispettivamente, ma lo ``__unicode__()`` per ``Author`` è leggermente più
+complesso -- è un'unione dei campi ``first_name`` e ``last_name``, separati da
+uno spazio.
 
-The only requirement for ``__unicode__()`` is that it return a Unicode object.
-If ``__unicode__()`` doesn't return a Unicode object -- if it returns, say, an
-integer -- then Python will raise a ``TypeError`` with a message like
-``"coercing to Unicode: need string or buffer, int found"``.
+L'unico requisito per ``__unicode__()`` è che si restituisca un oggetto Unicode.
+Se ``__unicode__()`` non restituisce un oggetto Unicode - se restituisce, ad
+esempio, un intero -- Python solleva l'eccezione ``TypeError`` con un messaggio
+del tipo ``"coercing to Unicode: need string or buffer, int found"``.
 
-.. admonition:: Unicode objects
+.. admonition:: Oggetti Unicode
 
-    What are Unicode objects?
+    Cosa sono gli Oggetti Unicode?
 
-    You can think of a Unicode object as a Python string that can handle more
-    than a million different types of characters, from accented versions of
-    Latin characters to non-Latin characters to curly quotes and obscure
-    symbols.
+    Si può pensare a un oggetto Unicode come una stringa Python in grado di
+    gestire più di un milione di diversi tipi di caratteri, da versioni
+    accentate di caratteri latini a caratteri non latini alle virgolette
+    tipografiche e simboli oscuri.
 
-    Normal Python strings are *encoded*, which means they use an encoding such
-    as ASCII, ISO-8859-1 or UTF-8. If you're storing fancy characters (anything
-    beyond the standard 128 ASCII characters such as 0-9 and A-Z) in a normal
-    Python string, you have to keep track of which encoding your string is
-    using, or the fancy characters might appear messed up when they're
-    displayed or printed. Problems occur when you have data that's stored in
-    one encoding and you try to combine it with data in a different encoding,
-    or you try to display it in an application that assumes a certain encoding.
-    We've all seen Web pages and e-mails that are littered with "??? ??????"
-    or other characters in odd places; that generally suggests there's an
-    encoding problem.
+    Le Stringhe Python normali sono *codificati*, il che significa che utilizzano
+    una codifica come ASCII, ISO-8859-1 o UTF-8. Se devi utilizzare caratteri
+    particolari (nulla oltre i 128 caratteri ASCII standard come 0-9 e AZ)
+    in una normale stringa di Python, è necessario tenere traccia di quale
+    codifica la stringa sta usando, o i caratteri particolari potrebbero
+    sembrare incasinati quando vengono visualizzati o stampati. I problemi si
+    verificano quando si dispone di dati che sono memorizzati in una codifica e
+    si tenta di combinarli con i dati in una codifica diversa, o si tenta di
+    visualizzarlo in un ambito che presuppone una certa codifica. Abbiamo visto
+    tutti pagine Web e e-mail che sono disseminati di "??? ??????" ed altri
+    caratteri in posti strani, che generalmente suggeriscono c'è un problema di
+    codifica.
 
-    Unicode objects, however, have no encoding; they use a consistent,
-    universal set of characters called, well, "Unicode." When you deal with
-    Unicode objects in Python, you can mix and match them safely without having
-    to worry about encoding issues.
+    Gli Oggetti Unicode, tuttavia, non hanno una codifica; essi usano un
+    coerente, insieme universale di caratteri chiamato, beh, "Unicode". Quando
+    avete a che fare con oggetti Unicode in Python, è possibile combinarli in
+    modo sicuro, senza doversi preoccupare di problemi di codifica.
 
-    Django uses Unicode objects throughout the framework. Model objects are
-    retrieved as Unicode objects, views interact with Unicode data, and
-    templates are rendered as Unicode. Generally, you won't have to worry about
-    making sure your encodings are right; things should just work.
+    Django utilizza oggetti Unicode per tutto il framework. Gli oggetti del
+    modello vengono recuperati come oggetti Unicode, le viste interagiscono con
+    i dati Unicode, e template sono resi come Unicode. In generale, non dovrete
+    preoccuparvi di rendere sicuro il vostro codifiche sono giuste, le cose
+    dovrebbero solo lavorare.
 
-    Note that this has been a *very* high-level, dumbed down overview of
-    Unicode objects, and you owe it to yourself to learn more about the topic.
-    A good place to start is http://www.joelonsoftware.com/articles/Unicode.html .
+    Questo è uno strato di astrazione *molto* elevato, e se sei stordito da
+    questa panoramica sugli oggetti Unicode, e lo devi a te stesso conoscere
+    meglio l'argomento. Un buon punto di partenza è
+    http://www.joelonsoftware.com/articles/Unicode.html.
 
-For the ``__unicode__()`` changes to take effect, exit out of the Python shell
-and enter it again with ``python manage.py shell``. (This is the simplest way
-to make code changes take effect.) Now the list of ``Publisher`` objects is
-much easier to understand::
+Affinché le modifiche di ``__unicode__()`` abbiano effetto, bisogna uscire fuori
+dalla shell Python ed entrare di nuovo con ``python manage.py shell``. (Questo
+è il modo più semplice per vedere delle modifiche) Ora la lista di oggetti di
+``Publisher`` è molto più facile da capire::
 
     >>> from books.models import Publisher
     >>> publisher_list = Publisher.objects.all()
     >>> publisher_list
     [<Publisher: Apress>, <Publisher: O'Reilly>]
 
-.. SL Tested ok
+Assicurati che qualsiasi modello si definisca abbia un metodo ``__unicode__()``
+-- non solo per comodità quando si utilizza l'interprete interattivo, ma anche
+perché Django utilizza l'output di ``__unicode__()`` in più punti quando ha
+bisogno della visualizzazione degli oggetti.
 
-Make sure any model you define has a ``__unicode__()`` method -- not only for
-your own convenience when using the interactive interpreter, but also because
-Django uses the output of ``__unicode__()`` in several places when it needs to
-display objects.
+Infine, ricordiamo che aggiungere ``__unicode__()`` ad ogni modello è una
+*best-practices* da seguire. Un modello Django descrive non solo la disposizione
+della tabella di database per un oggetto, ma anche una funzionalità che un
+oggetto deve avere. ``__unicode__()`` è un esempio di tale funzionalità --
+un modello sa come visualizzare se stesso.
 
-Finally, note that ``__unicode__()`` is a good example of adding *behavior* to
-models. A Django model describes more than the database table layout for an
-object; it also describes any functionality that object knows how to do.
-``__unicode__()`` is one example of such functionality -- a model knows how to
-display itself.
-
-Inserting and Updating Data
-===========================
+Inserimento e Aggiornamento dei dati
+====================================
 
 You've already seen this done: to insert a row into your database, first create
 an instance of your model using keyword arguments, like so::
