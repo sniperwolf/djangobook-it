@@ -36,13 +36,13 @@ contesto).
 La strada "stupida" di fare Query al Database in una View
 =========================================================
 
-Proprio come nel Capitolo 3 abbiamo  un modo "stupido" per produrre output
+Proprio come nel Capitolo 3 abbiamo un modo "stupido" per produrre output
 all'interno di una vista (codificando il testo direttamente all'interno della
 vista), c'è un modo "stupido" per recuperare i dati da un database in una view.
 E' semplice: basta usare qualsiasi libreria Python esistente per eseguire una
 query SQL e fare qualcosa con i risultati.
 
-In questa prospettiva, ad esempio, si usa la libreria ``MySQLdb`` (disponibile
+In questa prospettiva, ad esempio, usiamo la libreria ``MySQLdb`` (disponibile
 all'indirizzo http://www.djangoproject.com/r/python-mysql/) per connettersi a un
 database MySQL, recuperare alcuni record, e dar loro come cibo a un template per
 la visualizzazione come una pagina web::
@@ -60,10 +60,6 @@ la visualizzazione come una pagina web::
 
 Questo approccio funziona, ma alcuni problemi dovrebbero saltare all'occhio
 subito:
-
-
-* We're hard-coding the database connection parameters. Ideally, these
-  parameters would be stored in the Django configuration.
 
 * Stiamo codificando i parametri di connessione al database. Idealmente, questi
   parametri saranno memorizzati nella configurazione Django.
@@ -393,8 +389,6 @@ directory::
         tests.py
         views.py
 
-These files will contain the models and views for this app.
-
 Questi file contengono i modelli e le viste per quest'applicazione.
 
 Dai un'occhiata a ``models.py`` e ``views.py`` nel tuo editor di testo preferito.
@@ -615,13 +609,6 @@ assomigliare a qualcosa di simile::
         'books',
     )
 
-(As we mentioned last chapter when setting ``TEMPLATE_DIRS``, you'll need to be
-sure to include the trailing comma in ``INSTALLED_APPS``, because it's a
-single-element tuple. By the way, this book's authors prefer to put a comma
-after *every* element of a tuple, regardless of whether the tuple has only a
-single element. This avoids the issue of forgetting commas, and there's no
-penalty for using that extra comma.)
-
 (Come abbiamo accennato nell'ultimo capitolo quando si imposta ``TEMPLATE_DIRS``,
 è necessario essere sicuri di includere la virgola finale in ``INSTALLED_APPS``,
 perché è una tupla a singolo elemento. In proposito, gli autori di questo libro
@@ -634,10 +621,6 @@ quella virgola in più).
 lavorando. Ogni applicazione in ``INSTALLED_APPS`` è rappresentata dal suo
 percorso completo Python -- cioè, il percorso dei pacchetti, separati da punti,
 che portano al vero pacchetto dell'applicazione.
-
-Now that the Django app has been activated in the settings file, we can create
-the database tables in our database. First, let's validate the models by
-running this command::
 
 Ora che l'app Django è stata attivata nel file delle impostazioni, possiamo
 creare le tabelle nel nostro database. In primo luogo, cerchiamo di validare i
@@ -741,7 +724,6 @@ Eseguendo questo comando, vedremo qualcosa di simile a questo::
     Creating table books_book
     Installing index for books.Book model
 
-
 Il comando ``syncdb`` è un semplice "sincronizzatore" dei modelli per il
 database. Controlla tutti i modelli di ogni app nell'ambiente ``INSTALLED_APPS``,
 controlla il database per vedere se esistono le tabelle e le crea se non esistono
@@ -836,7 +818,6 @@ messaggio che rende difficile pubblicare gli oggetti ``Publisher``
 singolarmente::
 
     [<Publisher: Publisher object>, <Publisher: Publisher object>]
-
 
 Siamo in grado di risolvere questo problema facilmente con l'aggiunta di un
 metodo chiamato ``__unicode__()`` nella nostra classe Publisher. Un metodo
@@ -950,8 +931,8 @@ un modello sa come visualizzare se stesso.
 Inserimento e Aggiornamento dei dati
 ====================================
 
-You've already seen this done: to insert a row into your database, first create
-an instance of your model using keyword arguments, like so::
+Hai già visto questo dato di fatto: per inserire una riga nel database, bisogna
+creare un'istanza del modello usando gli argomenti in questo modo::
 
     >>> p = Publisher(name='Apress',
     ...         address='2855 Telegraph Ave.',
@@ -960,15 +941,13 @@ an instance of your model using keyword arguments, like so::
     ...         country='U.S.A.',
     ...         website='http://www.apress.com/')
 
-As we noted above, this act of instantiating a model class does *not* touch
-the database. The record isn't saved into the database until you call
-``save()``, like this::
+Come abbiamo notato sopra, queste istruzioni *non* toccano il database. Il
+record non viene salvato nel database finché non viene chiamato ``save()``,
+in questo modo::
 
     >>> p.save()
 
-.. SL Tested ok
-
-In SQL, this can roughly be translated into the following::
+In SQL, questo può essere ruvidament tradotto nella seguente:::
 
     INSERT INTO books_publisher
         (name, address, city, state_province, country, website)
@@ -976,25 +955,22 @@ In SQL, this can roughly be translated into the following::
         ('Apress', '2855 Telegraph Ave.', 'Berkeley', 'CA',
          'U.S.A.', 'http://www.apress.com/');
 
-Because the ``Publisher`` model uses an autoincrementing primary key ``id``,
-the initial call to ``save()`` does one more thing: it calculates the primary
-key value for the record and sets it to the ``id`` attribute on the instance::
+Poiché il modello ``Publisher`` usa una chiave prima con autoincremento ``id``,
+la prima chiamata a ``save()`` fa una cosa in più: calcola il valore della
+chiave primaria per il record e la imposta come attributo ``id`` nell'istanza::
 
     >>> p.id
     52    # this will differ based on your own data
 
 .. SL Should be '52L' to match actual output.
 
-Subsequent calls to ``save()`` will save the record in place, without creating
-a new record (i.e., performing an SQL ``UPDATE`` statement instead of an
-``INSERT``)::
+Le chiamate successive a ``save()`` salveranno il record, senza crearne alcuno
+nuovo (ad esempio, lancia l'istruzione SQL ``UPDATE`` invece di ``INSERT``)::
 
     >>> p.name = 'Apress Publishing'
     >>> p.save()
 
-.. SL Tested ok
-
-The preceding ``save()`` statement will result in roughly the following SQL::
+L'istruzione ``save()`` precedente produrrà un SQL simile a questo::
 
     UPDATE books_publisher SET
         name = 'Apress Publishing',
@@ -1005,137 +981,129 @@ The preceding ``save()`` statement will result in roughly the following SQL::
         website = 'http://www.apress.com'
     WHERE id = 52;
 
-Yes, note that *all* of the fields will be updated, not just the ones that have
-been changed. Depending on your application, this may cause a race condition.
+Nota che *tutti* i campi sono stati aggiornati, non solo quello che è stato
+cambiato. A seconda dell'applicazione, questo potrebbe causare una race condition
+Leggi il paragrafo "Aggiornare più Oggetti in una sola istruzione" qui sotto per
+capire come eseguire questa ()
 See "Updating Multiple Objects in One Statement" below to find out how to
-execute this (slightly different) query::
+execute this (leggermente diversa) query::
 
     UPDATE books_publisher SET
         name = 'Apress Publishing'
     WHERE id=52;
 
-Selecting Objects
+Selezionare Oggetti
 =================
 
-Knowing how to create and update database records is essential, but chances are
-that the Web applications you'll build will be doing more querying of existing
-objects than creating new ones. We've already seen a way to retrieve *every*
-record for a given model::
+Saper creare e aggiornare i record del database è essenziale, ma è probabile che
+le applicazioni web si costruiscano più sull'interrogazione di oggetti esistenti
+piuttosto che sulla creazione di nuovi. Abbiamo già visto un modo per recuperare
+tutti i record per un determinato modello::
 
     >>> Publisher.objects.all()
     [<Publisher: Apress>, <Publisher: O'Reilly>]
 
-.. SL Tested ok
-
-This roughly translates to this SQL::
+Questo si traduce approssimativamente a questa istruzione SQL:::
 
     SELECT id, name, address, city, state_province, country, website
     FROM books_publisher;
 
 .. note::
 
-    Notice that Django doesn't use ``SELECT *`` when looking up data and instead
-    lists all fields explicitly. This is by design: in certain circumstances
-    ``SELECT *`` can be slower, and (more important) listing fields more closely
-    follows one tenet of the Zen of Python: "Explicit is better than implicit."
+    Nota che Django non utilizza ``SELECT *`` quando cerca dati, invece esprime
+    tutti i campi esplicitamente. Questa è una scelta di progettazione: in certe
+    circostanze, ``SELECT *`` può essere lenta, e (cosa più importante) elencare
+    i campi si avvicina di più ad un principio dello Zen di Python: "Explicit is
+    better than implicit" (Esplicito è meglio di implicito, in italiano).
 
-    For more on the Zen of Python, try typing ``import this`` at a Python
-    prompt.
+    Per leggere lo Zen di Python, prova a digitare ``import this``
+    sull'interprete di Python
 
-Let's take a close look at each part of this ``Publisher.objects.all()`` line:
+Diamo uno sguardo da vicino alla linea ``Publisher.objects.all()``:
 
-* First, we have the model we defined, ``Publisher``. No surprise here: when
-  you want to look up data, you use the model for that data.
+* In primis, abbiamo un modello definito, ``Publisher``. Nessuna sorpresa qui:
+  quando vuoi ottenere i dati, usi il modello relativo a quel dato.
 
-* Next, we have the ``objects`` attribute. This is called a *manager*.
-  Managers are discussed in detail in Chapter 10. For now, all you need to
-  know is that managers take care of all "table-level" operations on data
-  including, most important, data lookup.
+* Adesso, abbiamo un attributo ``objects``. Questo è detto *manager*.
+  Discutiamo dei Manager in dettaglio nel Capitolo 10. Per adesso, tutto quello
+  che si serve sapere è che i manager si prendono cura di tutte le operazioni a
+  'livello tabella' per includere e, più importante, ottenere dati.
 
-  All models automatically get a ``objects`` manager; you'll use it
-  any time you want to look up model instances.
+  Tutti i modelli hanno un manager ``objects``; lo userai tutte le volte per
+  ottenere le istanze del modello.
 
-* Finally, we have ``all()``. This is a method on the ``objects`` manager
-  that returns all the rows in the database. Though this object *looks*
-  like a list, it's actually a *QuerySet* -- an object that represents a
-  specific set of rows from the database. Appendix C deals with QuerySets
-  in detail. For the rest of this chapter, we'll just treat them like the
-  lists they emulate.
+* Infine, abbiamo ``all()``. Questo è un metodo del manager ``objects`` che
+  ritorna tutte le righe del database. Anche se questo oggetto *sembra* simile
+  ad una lista, esso è realmente una *QuerySet* -- un oggetto che rappresenta
+  uno specifico insieme di righe dal database. L'appendice C tratta le QuerySet
+  in dettaglio. Per il resto di questo capitolo, li tratteremo come una lista.
 
-Any database lookup is going to follow this general pattern -- we'll call methods on
-the manager attached to the model we want to query against.
+Ogni ricerca sul database segue questo pattern generale -- chiamiamo dei metodi
+sul manager del modello che vogliamo interrogare.
 
-Filtering Data
---------------
+Filtrare i dati
+---------------
 
-Naturally, it's rare to want to select *everything* from a database at once; in
-most cases, you'll want to deal with a subset of your data. In the Django API,
-you can filter your data using the ``filter()`` method::
+Naturalmente, è raro voler selezionare *tutti* i dati del database in una sola
+volta; nella gran parte dei casi, si lavorerà su sotto insiemi di dati. Le API
+di Django permettono di filtrare i tuoi dati usando il metodo ``filter()``::
 
     >>> Publisher.objects.filter(name='Apress')
     [<Publisher: Apress>]
 
-.. SL Tested ok
-
-``filter()`` takes keyword arguments that get translated into the appropriate
-SQL ``WHERE`` clauses. The preceding example would get translated into
-something like this::
+``filter()`` prende due argomenti che vengono tradotti in appropriate istruzioni
+SQL ``WHERE``. Nel precedente esempio, otteniamo qualcosa del genere::
 
     SELECT id, name, address, city, state_province, country, website
     FROM books_publisher
     WHERE name = 'Apress';
 
-You can pass multiple arguments into ``filter()`` to narrow down things further::
+Puoi passare più argomenti a ``filter()`` per restringere ulteriormente le cose::
 
     >>> Publisher.objects.filter(country="U.S.A.", state_province="CA")
     [<Publisher: Apress>]
 
-.. SL Tested ok
-
-Those multiple arguments get translated into SQL ``AND`` clauses. Thus, the
-example in the code snippet translates into the following::
+Questi argomenti in più vengono tradotti come clausole SQL ``AND``. Per esempio,
+lo snippet si traduce nelle seguenti righe::
 
     SELECT id, name, address, city, state_province, country, website
     FROM books_publisher
     WHERE country = 'U.S.A.'
     AND state_province = 'CA';
 
-Notice that by default the lookups use the SQL ``=`` operator to do exact match
-lookups. Other lookup types are available::
+Nota che di default la ricerca usa l'operatore SQL ``=`` per trovare
+corrispondenze esatte. Altri tipi di ricerche sono disponibili::
 
     >>> Publisher.objects.filter(name__contains="press")
     [<Publisher: Apress>]
 
-.. SL Tested ok
-
-That's a *double* underscore there between ``name`` and ``contains``. Like
-Python itself, Django uses the double underscore to signal that something
-"magic" is happening -- here, the ``__contains`` part gets translated by Django
-into a SQL ``LIKE`` statement::
+C'è un *doppio* underscore fra ``name`` e ``contains``. Come nello stesso Python,
+Django usa il doppio underscore per segnalare che sta avvenendo qualcosa di
+"magico"  to signal that something -- qui, la porzione ``__contains`` viene
+tradotta da Django nell'istruzione SQL``LIKE``::
 
     SELECT id, name, address, city, state_province, country, website
     FROM books_publisher
     WHERE name LIKE '%press%';
 
-Many other types of lookups are available, including ``icontains``
-(case-insensitive ``LIKE``), ``startswith`` and ``endswith``, and ``range`` (SQL
-``BETWEEN`` queries). Appendix C describes all of these lookup types in detail.
+Sono disponibili molti altri tipi di ricerche, incluse ``icontains`` (``LIKE``
+che non distingue fra minuscole e maiuscole), ``startswith`` e ``endswith``, e
+``range`` (in SQL, le query ``BETWEEN``). L'appendice C descrive ttuti questi
+tipi di ricerca nel dettaglio.
 
-Retrieving Single Objects
--------------------------
+Ottenere singoli Oggetti
+------------------------
 
-The ``filter()`` examples above all returned a ``QuerySet``, which you can
-treat like a list. Sometimes it's more convenient to fetch only a single object,
-as opposed to a list. That's what the ``get()`` method is for::
+Gli esempi su ``filter()`` qui sopra hanno restituito una ``QuerySet``, che
+abbiamo trattato come una lista. A volte, è più conveniente richiedere solo un
+singolo oggetto, piuttosto che una lista. Questo è ciò che fa il metodo ``get()``::
 
     >>> Publisher.objects.get(name="Apress")
     <Publisher: Apress>
 
-.. SL Tested ok
-
-Instead of a list (rather, ``QuerySet``), only a single object is returned.
-Because of that, a query resulting in multiple objects will cause an
-exception::
+Invece di una lista (o meglio, ``QuerySet``), viene tornato solo un singolo
+oggetto. Per questo motivo, la query che restituisce più oggetti causerà una
+eccezione::
 
     >>> Publisher.objects.get(country="U.S.A.")
     Traceback (most recent call last):
@@ -1143,20 +1111,16 @@ exception::
     MultipleObjectsReturned: get() returned more than one Publisher --
         it returned 2! Lookup parameters were {'country': 'U.S.A.'}
 
-.. SL Tested ok
-
-A query that returns no objects also causes an exception::
+Anche una query che non restituisce oggetti causa una eccezione::
 
     >>> Publisher.objects.get(name="Penguin")
     Traceback (most recent call last):
         ...
     DoesNotExist: Publisher matching query does not exist.
 
-.. SL Tested ok
-
-The ``DoesNotExist`` exception is an attribute of the model's class --
-``Publisher.DoesNotExist``. In your applications, you'll want to trap these
-exceptions, like this::
+L'eccezione ``DoesNotExist`` è un attributo della classe del modello --
+``Publisher.DoesNotExist``. Nelle tue applicazioni, gestirai queste eccezioni in
+un modo simile a questo::
 
     try:
         p = Publisher.objects.get(name='Apress')
@@ -1165,33 +1129,30 @@ exceptions, like this::
     else:
         print "Apress is in the database."
 
-.. SL Tested ok
+Ordinare i dati
+---------------
 
-Ordering Data
--------------
+Giocando con gli esempio precedenti, avrai notato che gli oggetti ritornati
+sembrano avere un ordine casuale. Non ti stai immaginando le cose; poiché non
+abbiamo detto al database con quale ordine restituire il risultato, semplicemente
+ritornerà i dati in maniera arbitraria, a seconda del database che si sta
+utilizzando.
 
-As you play around with the previous examples, you might discover that the objects
-are being returned in a seemingly random order. You aren't imagining things; so
-far we haven't told the database how to order its results, so we're simply
-getting back data in some arbitrary order chosen by the database.
-
-In your Django applications, you'll probably want to order your results
-according to a certain value -- say, alphabetically. To do this, use the
-``order_by()`` method::
+Nelle nostre applicazione Django, è probabile dover dare un ordine a seconda di
+un certo valore -- supponiamo, alfabeticamente. Per far ciò, usiamo il metodo
+``order_by()``::
 
     >>> Publisher.objects.order_by("name")
     [<Publisher: Apress>, <Publisher: O'Reilly>]
 
-.. SL Tested ok
-
-This doesn't look much different from the earlier ``all()`` example, but the
-SQL now includes a specific ordering::
+Questo non sembra molto diverso dall'esempio con ``all()`` precedente, ma in SQL
+si traduce con uno specifico ordine::
 
     SELECT id, name, address, city, state_province, country, website
     FROM books_publisher
     ORDER BY name;
 
-You can order by any field you like::
+Puoi ordinare qualunque tipo di campo::
 
     >>> Publisher.objects.order_by("address")
     [<Publisher: O'Reilly>, <Publisher: Apress>]
@@ -1199,28 +1160,22 @@ You can order by any field you like::
     >>> Publisher.objects.order_by("state_province")
     [<Publisher: Apress>, <Publisher: O'Reilly>]
 
-.. SL Tested ok
-
-To order by multiple fields (where the second field is used to disambiguate
-ordering in cases where the first is the same), use multiple arguments::
+Per ordinare più campi (dove il secondo campo è usato per rendere disambiguo
+l'ordinamento nel caso in cui il primo è lo stesso), usa più argumenti::
 
     >>> Publisher.objects.order_by("state_province", "address")
      [<Publisher: Apress>, <Publisher: O'Reilly>]
 
-.. SL Tested ok
-
-You can also specify reverse ordering by prefixing the field name with a ``-``
-(that's a minus character)::
+Puoi inoltre specificare un ordine esattamente invertito antemponendo al nome
+del campo il prefisso ``-`` (un carattere meno)::
 
     >>> Publisher.objects.order_by("-name")
     [<Publisher: O'Reilly>, <Publisher: Apress>]
 
-.. SL Tested ok
-
-While this flexibility is useful, using ``order_by()`` all the time can be quite
-repetitive. Most of the time you'll have a particular field you usually want
-to order by. In these cases, Django lets you specify a default ordering in the
-model:
+Questa flessibilità è molto utile, ma usare ``order_by()`` tutte le volte può
+essere ripetitivo. Il più delle volte, avrai semplicemente bisogno di ordinare
+per lo stesso campo. In questi casi, Django ti permette di specificare un ordine
+di default nel modello
 
 .. parsed-literal::
 
@@ -1238,97 +1193,91 @@ model:
         **class Meta:**
             **ordering = ['name']**
 
-Here, we've introduced a new concept: the ``class Meta``, which is a class
-that's embedded within the ``Publisher`` class definition (i.e., it's indented
-to be within ``class Publisher``). You can use this ``Meta`` class on any model
-to specify various model-specific options. A full reference of ``Meta`` options
-is available in Appendix B, but for now, we're concerned with the ``ordering``
-option. If you specify this, it tells Django that unless an ordering is given
-explicitly with ``order_by()``, all ``Publisher`` objects should be ordered by
-the ``name`` field whenever they're retrieved with the Django database API.
+Qui abbiamo introdotto un nuovo concetto: la ``class Meta``, che è una classe
+inclusa all'interno della definizione di classe di ``Publisher`` (in questo caso,
+è indentata all'interno di ``class Publisher``). Puoi usare questa classe ``Meta``
+in ogni modello per specificare le varie opzioni relative al modello. Per un
+riferimento completo alle opzioni disponibili alle classi ``Meta`` leggi
+l'appendice B, ma per adesso, ci concentriamo soltanto sulla opzione di ``ordering``.
+Se specifichi questa, Django saprà che a meno di parametri specifici al metodo
+``order_by()``, tutti gli oggetti ``Publisher`` debbono essere ordinati per il
+campo ``name`` quando vengono richieste usando le API di Django.
 
-Chaining Lookups
+Ricerce a Catena
 ----------------
 
-You've seen how you can filter data, and you've seen how you can order it. Often, of course,
-you'll need to do both. In these cases, you simply "chain" the lookups together::
+Abbiamo visto come filtrare i dati, ed abbiamo visto anche come ordinarli. Ovviamente,
+spesso hai bisogno di fare entrambe le cose. In questi casi, puoi semplicemente
+formare una catena per filtra e poi ordinare i dati::
 
     >>> Publisher.objects.filter(country="U.S.A.").order_by("-name")
     [<Publisher: O'Reilly>, <Publisher: Apress>]
 
-.. SL Tested ok
-
-As you might expect, this translates to a SQL query with both a ``WHERE`` and an
-``ORDER BY``::
+Come ci si aspetta, questo si traduce nella query SQL con una istruzioni ``WHERE``
+ed una ``ORDER BY``::
 
     SELECT id, name, address, city, state_province, country, website
     FROM books_publisher
     WHERE country = 'U.S.A'
     ORDER BY name DESC;
 
-Slicing Data
-------------
+Tagliare/Dividere i Dati
+------------------------
 
-Another common need is to look up only a fixed number of rows. Imagine you have thousands
-of publishers in your database, but you want to display only the first one. You can do this
-using Python's standard list slicing syntax::
-
+Un'altra esigenza comune è effettuare ricerche solo su un numero fisso di righe.
+Immagine di avere già migliaia di 'publisher' (editori) nel tuo database, ma vuoi
+mostrare soltanto il primo. Puoi farlo in Python usando la sintassi standard
+dello slicing delle liste::
     >>> Publisher.objects.order_by('name')[0]
     <Publisher: Apress>
 
-.. SL Tested ok
-
-This translates roughly to::
+Che si traduce in::
 
     SELECT id, name, address, city, state_province, country, website
     FROM books_publisher
     ORDER BY name
     LIMIT 1;
 
-Similarly, you can retrieve a specific subset of data using Python's
-range-slicing syntax::
+Molto similmente, puoi ottenere uno specifico sottoinsieme di dati usando la
+sintassi range-slicing::
 
     >>> Publisher.objects.order_by('name')[0:2]
 
-.. SL Tested ok (but should show expected output?)
-
-This returns two objects, translating roughly to::
+Questo restituisce due oggetti, traducibili nella istruzione SQL::
 
     SELECT id, name, address, city, state_province, country, website
     FROM books_publisher
     ORDER BY name
     OFFSET 0 LIMIT 2;
 
-Note that negative slicing is *not* supported::
+Nota che gli slicing negative *non* sono supportate::
 
     >>> Publisher.objects.order_by('name')[-1]
     Traceback (most recent call last):
       ...
     AssertionError: Negative indexing is not supported.
 
-This is easy to get around, though. Just change the ``order_by()`` statement,
-like this::
-
+Per ottenere questo effetto, basta usare l'istruzione``order_by()``, in questo
+modo::
     >>> Publisher.objects.order_by('-name')[0]
 
-Updating Multiple Objects in One Statement
-------------------------------------------
+Aggiornare più Oggetti con una sola Istruzione
+----------------------------------------------
 
-We pointed out in the "Inserting and Updating Data" section that the model
-``save()`` method updates *all* columns in a row. Depending on your
-application, you may want to update only a subset of columns.
+Abbiamo precisato nella sezione "Inserire ed Aggiornare Dati" che il metodo ``save()``
+dei modelli aggiorna *tutte* le colonne di una riga. A seconda della nostra
+applicazione, potremmo volere aggiornare solo un sottoinsieme di colonne.
 
-For example, let's say we want to update the Apress ``Publisher`` to change
-the name from ``'Apress'`` to ``'Apress Publishing'``. Using ``save()``, it
-would look something like this::
-
+Per esempio, supponiamo di voler aggiornare il ``Publisher`` Apress per cambiare
+il nome da ``'Apress'`` a ``'Apress Publishing'``. Usando ``save()``, dovremmo
+scrivere qualcosa del genere::
     >>> p = Publisher.objects.get(name='Apress')
     >>> p.name = 'Apress Publishing'
     >>> p.save()
 
 .. SL Tested ok
 
-This roughly translates to the following SQL::
+Che si traduce in SQL in qualcosa di simile::
 
     SELECT id, name, address, city, state_province, country, website
     FROM books_publisher
@@ -1343,42 +1292,39 @@ This roughly translates to the following SQL::
         website = 'http://www.apress.com'
     WHERE id = 52;
 
-(Note that this example assumes Apress has a publisher ID of ``52``.)
+(Nota che questo esempio assume il fatto che il publisher/editore Apresso ha un
+ID di ``52``).
 
-You can see in this example that Django's ``save()`` method sets *all* of the
-column values, not just the ``name`` column. If you're in an environment where
-other columns of the database might change due to some other process, it's
-smarter to change *only* the column you need to change. To do this, use the
-``update()`` method on ``QuerySet`` objects. Here's an example::
+In questo esempio, possiamo notare che il metodo ``save()`` di Django imposta
+*tutti* i valori delle colonne, non solo quelli della colonna ``name``. Se ti
+trovi in un ambiente in cui le altre colonne del database possono cambiare a
+causa di altri processi, è più intelligente cambiare *solo* la colonna che deve
+essere cambiata. Per far questo, si usa il metodo ``update()`` sugli oggetti
+``QuerySet``. Ecco un esempio::
 
     >>> Publisher.objects.filter(id=52).update(name='Apress Publishing')
 
-.. SL Tested ok
-
-The SQL translation here is much more efficient and has no chance of race
-conditions::
+La traduzione SQL qui è molto più efficiente e non produce alcuna race condition::
 
     UPDATE books_publisher
     SET name = 'Apress Publishing'
     WHERE id = 52;
 
-The ``update()`` method works on any ``QuerySet``, which means you can edit
-multiple records in bulk. Here's how you might change the ``country`` from
-``'U.S.A.'`` to ``USA`` in each ``Publisher`` record::
+Il metodo ``update()`` lavora solo su ``QuerySet``, il che significa che puoi
+modificare più record in una volta. In questo esempio, cambia il ``country``
+(paese) da ``'U.S.A.'`` a ``USA`` in ogni record ``Publisher``::
 
     >>> Publisher.objects.all().update(country='USA')
     2
 
-.. SL Tested ok
+Il metodo ``update()`` ha un valore di ritorno -- un intero che rappresenta il
+numero di record cambiati. Nell'esempio precedente, abbiamo ottenuto ``2``.
 
-The ``update()`` method has a return value -- an integer representing how many
-records changed. In the above example, we got ``2``.
+Cancellare Oggetti
+==================
 
-Deleting Objects
-================
-
-To delete an object from your database, simply call the object's ``delete()``
-method::
+Per cancellare un oggetto dal database, basta chiamare il metodo ``delete()``
+sull'oggetto::
 
     >>> p = Publisher.objects.get(name="O'Reilly")
     >>> p.delete()
@@ -1387,57 +1333,50 @@ method::
 
 .. SL Tested ok
 
-You can also delete objects in bulk by calling ``delete()`` on the result of
-any ``QuerySet``. This is similar to the ``update()`` method we showed in the
-last section::
+Puoi cancellare anche più oggetti in una volta chiamando ``delete()`` sul
+risultato di qualunque ``QuerySet``. Questo assimigli al metodo ``update()``
+visto in precedenza::
 
     >>> Publisher.objects.filter(country='USA').delete()
     >>> Publisher.objects.all().delete()
     >>> Publisher.objects.all()
     []
 
-.. SL Tested ok
-
-Be careful deleting your data! As a precaution against deleting all of the data
-in a particular table, Django requires you to explicitly use ``all()`` if you
-want to delete *everything* in your table. For example, this won't work::
+Fai attenzione nella cancellazione dei dati! Come protezione nei confronti di
+cancellazioni complete su una particolare tabella, Django richiede di usare
+esplicitamente ``all()`` per eliminare *tutti i dati* della tabella. Ad esempio,
+questo non funge::
 
     >>> Publisher.objects.delete()
     Traceback (most recent call last):
       File "<console>", line 1, in <module>
     AttributeError: 'Manager' object has no attribute 'delete'
 
-.. SL Tested ok
-
-But it'll work if you add the ``all()`` method::
+Ma ha successo usando il metodo``all()``::
 
     >>> Publisher.objects.all().delete()
 
-.. SL Tested ok
-
-If you're just deleting a subset of your data, you don't need to include
-``all()``. To repeat a previous example::
+Se vuoi cancellare solo un sottoinsieme di dati, non hai bisogno di includere
+``all()``. Ripetendo un esempio precedente::
 
     >>> Publisher.objects.filter(country='USA').delete()
 
-.. SL Tested ok
+Cosa c'è adesso?
+================
 
-What's Next?
-============
+Dopo aver letto questo capitolo, hai acquisito una conoscenza sui modelli di Django
+tale da essere in grado di scrivere semplici applicazioni basate su database.
+Il Capitolo 10 fornirà alcune informazioni su un più avanzato uso del livello
+database di Django.
 
-Having read this chapter, you have enough knowledge of Django models to be able
-to write basic database applications. Chapter 10 will provide some information
-on more advanced usage of Django's database layer.
+Una volta che hai definito i tuoi modelli, il passo successivo è quello di popolare
+il database con dei dati. Si potrebbe avere già dei dati, in tal caso, il
+capitolo 18 ti darà consigli su come integrarli. Se ci si basa sui dati degli
+utenti, il capitolo 7 vi insegnerà come elaborare i dati da un form.
 
-Once you've defined your models, the next step is to populate your database
-with data. You might have legacy data, in which case Chapter 18 will give you
-advice about integrating with legacy databases. You might rely on site users
-to supply your data, in which case Chapter 7 will teach you how to process
-user-submitted form data.
-
-But in some cases, you or your team might need to enter data manually, in which
-case it would be helpful to have a Web-based interface for entering and
-managing data. The next chapter `Chapter 6`_ covers Django's admin interface, which exists
-precisely for that reason.
+Ma in alcuni casi, tu o il tuo team avranno bisogno di immettere manualmente i
+dati, in tal caso, sarebbe utile avere una interfaccia web-based per l'inserimento
+e la gestione dei dati. Il prossimo capitolo, il `Capitolo 6`_, tratta dell'interfaccia
+di amministrazione di Django, che esiste proprio per questo motivo.
 
 .. _Chapter 6: chapter06.html
