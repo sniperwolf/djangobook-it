@@ -25,12 +25,12 @@ di diversi strumenti semplici ma potenti per l'esecuzione di query di database
 utilizzando Python. Questo capitolo spiega questa funzionalità: il livello
 (layer in inglese) database di Django.
 
-(Nota: Anche se non è strettamente necessario conoscere la teoria dei database
-relazionali di base e SQL per utilizzare layer di database di Django, è
-altamente consigliato una introduzione a questi concetti, va oltre lo scopo di
-questo libro, ma continuate a leggere, anche se sei un principiante del database.
-Probabilmente sarei in grado di seguire e comprendere i concetti in base al
-contesto).
+(Nota: anche se non è strettamente necessario conoscere la teoria di base dei
+database relazionali e SQL per utilizzare il database layer di Django, è
+altamente consigliato prendersi del tempo per leggere una introduzione a questi
+concetti, il che va oltre lo scopo di questo libro, ma continua a leggere, anche
+se sei un principiante nei database. E' molto probabile che sarai comunque in
+grado di seguire e comprendere i concetti in base al contesto).
 
 La strada "stupida" di fare Query al Database in una View
 =========================================================
