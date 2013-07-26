@@ -25,7 +25,6 @@ di diversi strumenti semplici ma potenti per l'esecuzione di query di database
 utilizzando Python. Questo capitolo spiega questa funzionalità: il livello
 (layer in inglese) database di Django.
 
-
 (Nota: Anche se non è strettamente necessario conoscere la teoria dei database
 relazionali di base e SQL per utilizzare layer di database di Django, è
 altamente consigliato una introduzione a questi concetti, va oltre lo scopo di
@@ -93,7 +92,7 @@ riscritta utilizzando le API di Django::
 Spiegheremo questo codice un po' più avanti nel capitolo. Per ora, basta avere
 un'idea di come appare.
 
-Il modello di sviluppocMTV (o MVC)
+Il modello di sviluppo MTV (o MVC)
 ==================================
 
 Prima di approfondire qualsiasi altro codice, prenditi un momento per
@@ -345,7 +344,6 @@ configurazione vs codice:
   impostazioni, che definisce le informazioni riguardo il database usato,
   l'elenco delle applicazioni installate, i ``TEMPLATE_DIRS``, e così via.
 
-
 * L'app è un set portatile di funzionalità Django, di solito fatto da template
   e view, che sta insieme in un unico pacchetto Python.
 
@@ -353,7 +351,6 @@ configurazione vs codice:
   un sistema di commento e un'interfaccia di amministrazione automaticamente.
   Una cosa fondamentale da notare su queste applicazioni è che sono portatili e
   riutilizzabili in più progetti.
-
 
 Ci sono poche regole rigide e veloci su come si forma il tuo codice Django in
 questo schema. Se si sta costruendo un semplice sito Web, è possibile utilizzare
@@ -472,8 +469,7 @@ A titolo di esempio, in questo e nel prossimo capitolo, ci concentreremo su un
 layout base libro/autore/editore. Usiamo questo layout esempio perché le
 relazioni concettuali tra i libri, gli autori e gli editori sono intuitive, e
 questo è un layout di dati molto comune utilizzato in diversi libri di testo
-introduttivi su SQL. Stai anche leggendoun libro che è stato scritto da autori e
-prodotto da un editore!
+introduttivi su SQL.
 
 Si suppongono i seguenti concetti, campi e relazioni:
 
@@ -560,11 +556,6 @@ colonna che funge da chiave primaria.
 
 Installare un Modello
 =====================
-
-We've written the code; now let's create the tables in our database. In order
-to do that, the first step is to *activate* these models in our Django project.
-We do that by adding the ``books`` app to the list of "installed apps" in the
-settings file.
 
 Abbiamo scritto il codice, ora creiamo le tabelle nel database. Per fare questo,
 il primo passo è quello di *attivare* questi modelli nel nostro progetto Django.
@@ -947,7 +938,7 @@ in questo modo::
 
     >>> p.save()
 
-In SQL, questo può essere ruvidament tradotto nella seguente:::
+In SQL, questo può essere brutalmente tradotto nella seguente:::
 
     INSERT INTO books_publisher
         (name, address, city, state_province, country, website)
@@ -960,9 +951,7 @@ la prima chiamata a ``save()`` fa una cosa in più: calcola il valore della
 chiave primaria per il record e la imposta come attributo ``id`` nell'istanza::
 
     >>> p.id
-    52    # this will differ based on your own data
-
-.. SL Should be '52L' to match actual output.
+    52    # questo sara' diverso a seconda del tuo dato
 
 Le chiamate successive a ``save()`` salveranno il record, senza crearne alcuno
 nuovo (ad esempio, lancia l'istruzione SQL ``UPDATE`` invece di ``INSERT``)::
@@ -984,9 +973,7 @@ L'istruzione ``save()`` precedente produrrà un SQL simile a questo::
 Nota che *tutti* i campi sono stati aggiornati, non solo quello che è stato
 cambiato. A seconda dell'applicazione, questo potrebbe causare una race condition
 Leggi il paragrafo "Aggiornare più Oggetti in una sola istruzione" qui sotto per
-capire come eseguire questa ()
-See "Updating Multiple Objects in One Statement" below to find out how to
-execute this (leggermente diversa) query::
+capire come eseguire questa query (leggermente diversa)::
 
     UPDATE books_publisher SET
         name = 'Apress Publishing'
@@ -1088,7 +1075,7 @@ tradotta da Django nell'istruzione SQL``LIKE``::
 
 Sono disponibili molti altri tipi di ricerche, incluse ``icontains`` (``LIKE``
 che non distingue fra minuscole e maiuscole), ``startswith`` e ``endswith``, e
-``range`` (in SQL, le query ``BETWEEN``). L'appendice C descrive ttuti questi
+``range`` (in SQL, le query ``BETWEEN``). L'appendice C descrive tutti questi
 tipi di ricerca nel dettaglio.
 
 Ottenere singoli Oggetti
@@ -1166,7 +1153,7 @@ l'ordinamento nel caso in cui il primo è lo stesso), usa più argumenti::
     >>> Publisher.objects.order_by("state_province", "address")
      [<Publisher: Apress>, <Publisher: O'Reilly>]
 
-Puoi inoltre specificare un ordine esattamente invertito antemponendo al nome
+Puoi inoltre specificare un ordine esattamente invertito anteponendo al nome
 del campo il prefisso ``-`` (un carattere meno)::
 
     >>> Publisher.objects.order_by("-name")
@@ -1203,8 +1190,8 @@ Se specifichi questa, Django saprà che a meno di parametri specifici al metodo
 ``order_by()``, tutti gli oggetti ``Publisher`` debbono essere ordinati per il
 campo ``name`` quando vengono richieste usando le API di Django.
 
-Ricerce a Catena
-----------------
+Ricerche a Catena
+-----------------
 
 Abbiamo visto come filtrare i dati, ed abbiamo visto anche come ordinarli. Ovviamente,
 spesso hai bisogno di fare entrambe le cose. In questi casi, puoi semplicemente
@@ -1228,6 +1215,7 @@ Un'altra esigenza comune è effettuare ricerche solo su un numero fisso di righe
 Immagine di avere già migliaia di 'publisher' (editori) nel tuo database, ma vuoi
 mostrare soltanto il primo. Puoi farlo in Python usando la sintassi standard
 dello slicing delle liste::
+
     >>> Publisher.objects.order_by('name')[0]
     <Publisher: Apress>
 
@@ -1259,6 +1247,7 @@ Nota che gli slicing negative *non* sono supportate::
 
 Per ottenere questo effetto, basta usare l'istruzione``order_by()``, in questo
 modo::
+
     >>> Publisher.objects.order_by('-name')[0]
 
 Aggiornare più Oggetti con una sola Istruzione
@@ -1271,11 +1260,10 @@ applicazione, potremmo volere aggiornare solo un sottoinsieme di colonne.
 Per esempio, supponiamo di voler aggiornare il ``Publisher`` Apress per cambiare
 il nome da ``'Apress'`` a ``'Apress Publishing'``. Usando ``save()``, dovremmo
 scrivere qualcosa del genere::
+
     >>> p = Publisher.objects.get(name='Apress')
     >>> p.name = 'Apress Publishing'
     >>> p.save()
-
-.. SL Tested ok
 
 Che si traduce in SQL in qualcosa di simile::
 
@@ -1292,7 +1280,7 @@ Che si traduce in SQL in qualcosa di simile::
         website = 'http://www.apress.com'
     WHERE id = 52;
 
-(Nota che questo esempio assume il fatto che il publisher/editore Apresso ha un
+(Nota che questo esempio assume il fatto che il publisher/editore Apress ha un
 ID di ``52``).
 
 In questo esempio, possiamo notare che il metodo ``save()`` di Django imposta
@@ -1331,10 +1319,8 @@ sull'oggetto::
     >>> Publisher.objects.all()
     [<Publisher: Apress Publishing>]
 
-.. SL Tested ok
-
 Puoi cancellare anche più oggetti in una volta chiamando ``delete()`` sul
-risultato di qualunque ``QuerySet``. Questo assimigli al metodo ``update()``
+risultato di qualunque ``QuerySet``. Questo assomiglia al metodo ``update()``
 visto in precedenza::
 
     >>> Publisher.objects.filter(country='USA').delete()
