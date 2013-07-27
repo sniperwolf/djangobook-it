@@ -59,14 +59,11 @@ dispone di un database legacy.
    generati e fare tutte le personalizzazioni necessarie. Daremo alcuni
    suggerimenti per fare questo nella prossima sezione.
 
-Cleaning Up Generated Models
-----------------------------
-
-Ripulitura modelli generati
+Pulizia dei modelli generati
 ----------------------------
 
 Come ci si potrebbe aspettare, l'introspezione del database non è perfetta, e
-avrai bisogno di fare un po' di pulizia del codice del modello risultante. Qui
+avrai bisogno di fare un po' di pulizia nel codice del modello risultante. Qui
 descriviamo alcune metodologie per trattare con i modelli generati::
 
 1. Ogni tabella del database viene convertita in una classe del modello (cioè,
@@ -82,7 +79,7 @@ descriviamo alcune metodologie per trattare con i modelli generati::
        id = models.IntegerField(primary_key=True)
 
     Non solo queste linee sono ridondanti, ma possono anche causare problemi se
-    la tua applicazione aggiunga *nuovi* record a queste tabelle.
+    la tua applicazione aggiunge *nuovi* record a queste tabelle.
 
 3. Ogni tipo di campo (ad esempio, ``CharField``, ``DateField``) è determinato
    guardando il tipo di colonna del database (ad esempio, ``VARCHAR``, ``DATA``).
@@ -107,7 +104,6 @@ descriviamo alcune metodologie per trattare con i modelli generati::
 
    ``inspectdb`` inserirà il commento Python
    ``'Field renamed because it was a Python reserved word.'`` accanto al campo.
-
 
 5. Se il database contiene tabelle che fanno riferimento ad altre tabelle (come
    fanno la maggior parte dei Database), potrebbe essere necessario modificare
@@ -194,7 +190,6 @@ Ma potrebbe autenticare anche un token, come il seguente::
 Altrimenti, ``authenticate`` può controllare le credenziali che gli si passa e
 restituire un oggetto ``User`` che corrisponde con quelle credenziali, se quelle
 sono valide. Se non lo sono, dovrebbe restituire un ``None``.
-
 
 Il sistema admin di Django è strettamente accoppiato al proprio oggetto ``User``
 presente nel database, come descritto nel capitolo 14. Il modo migliore per
@@ -300,7 +295,7 @@ Se sei un madrelingua inglese, potresti non aver notato una delle
 caratteristiche più interessanti del pannello di amministrazione di Django: è
 disponibile in più di 50 lingue diverse! Ciò è reso possibile
 dall'internazionalizzazione del framework Django (e il duro lavoro dei traduttori
-volontari di Django). Nel `prossimo capitolo`_ spiega come utilizzare questo
-framework per fornire una versione localizzata dei siti web Django.
+volontari di Django). Il `prossimo capitolo`_ spiega come utilizzare questo
+framework per fornire una versione localizzata dei siti web Django powered.
 
 .. _prossimo capitolo: chapter19.html
