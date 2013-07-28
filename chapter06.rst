@@ -1,94 +1,99 @@
-================================
-Chapter 6: The Django Admin Site
-================================
+=============================================================
+Chapter 6: L'interfaccia di amministrazione (admin) di Django
+=============================================================
 
-For a certain class of Web sites, an *admin interface* is an essential part of
-the infrastructure. This is a Web-based interface, limited to trusted site
-administrators, that enables the adding, editing and deletion of site content.
-Some common examples: the interface you use to post to your blog, the backend
-site managers use to moderate user-generated comments, the tool your clients
-use to update the press releases on the Web site you built for them.
+Per una certa classe di siti web, una *interfaccia d'amministrazione* è una parte
+essenziale dell'infrastruttura. Si tratta di una interfaccia web, limitata agli
+amministratori del sito, che consente l'aggiunta, la modifica e la cancellazione
+dei contenuti del sito. Alcuni esempi comuni: l'interfaccia da utilizzare per
+postare sul tuo blog, i gestori del sito la usano per moderare i commenti
+scritti dagli utenti, mentre i clienti la utilizzano per aggiornare i comunicati
+stampa sul sito web che hai costruito per loro.
 
-There's a problem with admin interfaces, though: it's boring to build them.
-Web development is fun when you're developing public-facing functionality, but
-building admin interfaces is always the same. You have to authenticate users,
-display and handle forms, validate input, and so on. It's boring, and it's
-repetitive.
+Però, c'è un problema con le interfacce d'amministrazione: è noioso per
+costruirle. Lo sviluppo web è divertente quando si sta sviluppando funzionalità
+rivolte al pubblico, mentre la creazione di interfacce di amministrazione è
+sempre la stessa storia. È necessario autenticare gli utenti, visualizzare e
+gestire i form, convalidare l'input, e così via. E' noioso e ripetitivo.
 
-So what's Django's approach to these boring, repetitive tasks? It does it all
-for you -- in just a couple of lines of code, no less. With Django, building an
-admin interface is a solved problem.
+Allora, qual è l'approccio di Django a questi compiti ripetitivi? Fa tutto per
+noi -- in appena un paio di righe di codice, niente di meno. Con Django, la
+costruzione di un interfaccia di amministrazione è un problema risolto.
 
-This chapter is about Django's automatic admin interface. The feature works by
-reading metadata in your model to provide a powerful and production-ready
-interface that site administrators can start using immediately. Here, we discuss
-how to activate, use, and customize this feature.
+Questo capitolo riguarda l'interfaccia di amministrazione automatica di Django.
+La feature funge leggendo i metadati nel modello per fornire un'interfaccia
+potente e pronta per la produzione che gli amministratori del sito possono
+iniziare ad utilizzare immediatamente. Qui, discutiamo come attivare, utilizzare
+e personalizzare queste funzioni.
 
-Note that we recommend reading this chapter even if you don't intend to use the
-Django admin site, because we introduce a few concepts that apply to all of
-Django, regardless of admin-site usage.
+Consigliamo di leggere questo capitolo, anche se si utilizzerà mai
+l'admin di Django, poiché vengono introdotti alcuni concetti che si applicano
+spesso in varie parte di Django, indipendentemente dall'utilizzo dell'admin.
 
-The django.contrib packages
-===========================
+I pacchetti django.contrib
+==========================
 
-Django's automatic admin is part of a larger suite of Django functionality
-called ``django.contrib`` -- the part of the Django codebase that contains
-various useful add-ons to the core framework. You can think of
-``django.contrib`` as Django's equivalent of the Python standard library --
-optional, de facto implementations of common patterns. They're bundled with
-Django so that you don't have to reinvent the wheel in your own applications.
+L'Admin automatico di Django è parte di una più ampia suite di funzionalità
+Django chiamate ``django.contrib`` -- la parte di codebase che contiene vari
+utili add-on per il framework. Si può pensare a django.contrib come l'equivalente
+Django della libreria standard di Python -- opzionale, ma di fatto, implementata
+in pattern di sviluppo assai comuni. Sono integrati in Django in modo che non
+è necessario di reinventare la ruota in tutte le applicazioni.
 
-The admin site is the first part of ``django.contrib`` that we're covering in
-this book; technically, it's called ``django.contrib.admin``. Other available
-features in ``django.contrib`` include a user authentication system
-(``django.contrib.auth``), support for anonymous sessions
-(``django.contrib.sessions``) and even a system for user comments
-(``django.contrib.comments``). You'll get to know the various ``django.contrib``
-features as you become a Django expert, and we'll spend some more time
-discussing them in Chapter 16. For now, just know that Django ships with many
-nice add-ons, and ``django.contrib`` is generally where they live.
+L'amministratore del sito è la prima parte di ``django.contrib`` di cui parliamo
+in questo libro, tecnicamente, si chiama ``django.contrib.admin``. Altre
+funzioni disponibili in ``django.contrib`` includono un sistema di
+autenticazione utente (``django.contrib.auth``), il supporto per le sessioni
+anonime (``django.contrib.session``) e anche un sistema per i commenti degli
+utenti (``django.contrib.comments``). Si arriva a conoscere tutte le varie
+caratteristiche ``django.contrib`` solo quando si diventa un esperto di Django,
+e passeremo un po 'di tempo a discutere di loro nel Capitolo 16. Per ora, è
+sufficiente sapere che Django ha molti utili add-on, e ``django.contrib`` è
+generalmente il luogo in cui si trovano.
 
-Activating the Admin Interface
-==============================
+Attivazione dell'interfaccia Admin
+==================================
 
-The Django admin site is entirely optional, because only certain types of sites
-need this functionality. That means you'll need to take a few steps to activate
-it in your project.
+L'amministratore del sito Django è facoltativa, perché solo alcuni tipi di siti
+hanno bisogno di questa funzionalità. Questo significa che hai bisogno di fare
+qualche passo aggiuntivo per attivarlo nel tup progetto.
 
-First, make a few changes to your settings file:
+In primo luogo, bisogna fare un paio di modifiche al file di impostazioni::
 
-1. Add ``'django.contrib.admin'`` to the ``INSTALLED_APPS`` setting. (The
-   order of ``INSTALLED_APPS`` doesn't matter, but we like to keep things
-   alphabetical so it's easy for a human to read.)
+1. Aggiungi ``'django.contrib.admin'`` all'impostazione ``INSTALLED_APPS``.
+   (l'ordine in ``INSTALLED_APPS`` non importa, ma a noi piace mantenere le cose
+   in ordine alfabetico, in modo che sia più facile da leggere per un essere
+   umano).
 
-2. Make sure ``INSTALLED_APPS`` contains ``'django.contrib.auth'``,
-   ``'django.contrib.contenttypes'``, ``'django.contrib.messages'`` 
-   and ``'django.contrib.sessions'``. The
-   Django admin site requires these three packages. (If you're following
-   along with our ongoing ``mysite`` project, note that we commented out
-   these four ``INSTALLED_APPS`` entries in Chapter 5. Uncomment them now.)
+2. Assicurarsi che ``INSTALLED_APPS`` contiene ``'django.contrib.admin'``,
+   ``'django.contrib.contenttypes'``, ``'django.contrib.messages'`` e
+   ``'django.contrib.sessions'``. L'admin richiede questi tre pacchetti. (Se
+   stai continuando con il progetto ``mysite``, nota che abbiamo commentato
+   queste quattro voci nel Capitolo 5. Basta decommentarle adesso).
 
-3. Make sure ``MIDDLEWARE_CLASSES`` contains
+3. Assicurarsi che ``MIDDLEWARE_CLASSES`` contenga
    ``'django.middleware.common.CommonMiddleware'``,
    ``'django.contrib.messages.middleware.MessageMiddleware'``,
-   ``'django.contrib.sessions.middleware.SessionMiddleware'`` and
-   ``'django.contrib.auth.middleware.AuthenticationMiddleware'``. (Again,
-   if you're following along, note that we commented them out in Chapter 5,
-   so uncomment them.)
+   ``'django.contrib.sessions.middleware.SessionMiddleware'`` e
+   ``'django.contrib.auth.middleware.AuthenticationMiddleware'``. (Anche in
+   questo caso, se stai seguendo l'esempio, li abbiamo commentati nel capitolo
+   5).
 
-Second, run ``python manage.py syncdb``. This step will install the extra
-database tables that the admin interface uses. The first time you run
-``syncdb`` with ``'django.contrib.auth'`` in ``INSTALLED_APPS``, you'll be
-asked about creating a superuser. If you don't do this, you'll need to run
-``python manage.py createsuperuser`` separately to create an admin user
-account; otherwise, you won't be able to log in to the admin site. (Potential
-gotcha: the ``python manage.py createsuperuser`` command is only available if
-``'django.contrib.auth'`` is in your ``INSTALLED_APPS``.)
+In secondo luogo, esegui ``python manage.py syncdb``. Questo passaggio
+installerà delle tabelle extra nel database che utilizza l'interfaccia di
+amministrazione. La prima volta che si esegue ``syncdb`` con ``'django.contrib.auth'``
+in ``INSTALLED_APPS``, viene chiesto di creare un superuser. Se non esegui
+questa operazione, è necessario separatamente eseguire il comando
+``python manage.py createsuperuser`` per creare un account utente amministratore,
+altrimenti non sarai in grado di accedere al sito admin. (Potenziale problema:
+il comando ``python manage.py createsuperuser`` è disponibile solo se
+``'django.contrib.auth'`` è presente in ``INSTALLED_APPS``).
 
-Third, add the admin site to your URLconf (in ``urls.py``, remember). By
-default, the ``urls.py`` generated by ``django-admin.py startproject`` contains
-commented-out code for the Django admin, and all you have to do is uncomment
-it. For the record, here are the bits you need to make sure are in there::
+Infine, aggiungi l'admin del sito all'URLconf (ricorda, in ``urls.py``). Per
+impostazione predefinita, l'``urls.py`` generato da ``django-admin.py startproject``
+contiene un po' di codice commentato per abilitare l'admin di Django, e quindi
+tutto quello che bisogna fare è semplicemente rimuovere il commento. Per la
+cronaca, qui c'è lo snippet necessario per verificare tutto è al suo posto::
 
     # Include these import statements...
     from django.contrib import admin
@@ -101,143 +106,139 @@ it. For the record, here are the bits you need to make sure are in there::
         # ...
     )
 
-With that bit of configuration out of the way, now you can see the Django
-admin site in action. Just run the development server
-(``python manage.py runserver``, as in previous chapters) and visit
-``http://127.0.0.1:8000/admin/`` in your Web browser.
+Con queste configurazioni, ora è possibile vedere l'admin Django in azione.
+Basta eseguire il server di sviluppo (``python manage.py runserver``, come nei
+capitoli precedenti) e visitare ``http://127.0.0.1:8000/admin/`` nel browser.
 
-Using the Admin Site
-====================
+Utilizzare l'interfaccia Admin
+==============================
 
-The admin site is designed to be used by nontechnical users, and as such it
-should be pretty self-explanatory. Nevertheless, we'll give you a quick
-walkthrough of the basic features.
+L'interfaccia Admin è stato progettato per essere utilizzato da utenti non
+tecnici, e per questa ragione dovrebbe essere abbastanza intuitivo. Tuttavia,
+ti daremo una guida rapida alle caratteristiche base.
 
-The first thing you'll see is a login screen, as shown in Figure 6-1.
+La prima cosa che vedremo è una schermata di login, come mostrato nella
+Figura 6-1.
 
 .. figure:: graphics/chapter06/login.png
-   :alt: Screenshot of Django's login page.
+   :alt: Screenshot della schermata di login di Django.
 
-   Figure 6-1. Django's login screen
+   Figura 6-1. La schermata di login di Django
 
-Log in with the username and password you set up when you added your superuser.
-If you're unable to log in, make sure you've actually created a superuser --
-try running ``python manage.py createsuperuser``.
+Accedi con il nome utente e la password che hai impostato quando hai aggiunto
+il tuo superutente/superuser. Se non riesci ad accedere, assicurati di aver
+effettivamente creato un superuser -- prova ad eseguire il comando
+``python manage.py createsuperuser``.
 
-Once you're logged in, the first thing you'll see will be the admin home page.
-This page lists all the available types of data that can be edited on the admin
-site. At this point, because we haven't activated any of our own models yet,
-the list is sparse: it includes only Groups and Users, which are the two
-default admin-editable models.
-
-.. DWP The screenshot contains books etc too.
+Una volta effettuato l'accesso, la prima cosa che vedrai sarà la home page
+dell'interfaccia admin. Questa pagina elenca tutti i tipi di dati disponibili
+che possono essere modificati all'interno dell'admin. A questo punto, poiché non
+abbiamo ancora attivato alcun modello, la lista è abbastanza scarna: include
+solo 'Gruppi' e 'Utenti', che sono i due modelli personalizzabili di default.
 
 .. figure:: graphics/chapter06/admin_index.png
-   :alt: Screenshot of the Django admin home page.
+   :alt: Screenshot della homepage dell'admin di Django
 
-   Figure 6-2. The Django admin home page
+   Figura 6-2. La homepage dell'admin di Django
 
-Each type of data in the Django admin site has a *change list* and an
-*edit form*. Change lists show you all the available objects in the database,
-and edit forms let you add, change or delete particular records in your
-database.
+Ogni tipo di dato nel sito d'amministrazione ha una *pagina di elenco* ed un
+*modulo/form di modifica*. Le liste dei cambiamenti mostrano tutti gli oggetti
+disponibili nel database, mentre i moduli di modifica permettono di aggiungere,
+modificare o eliminare particolari record nel database.
 
-.. admonition:: Other languages
+.. admonition:: Altre lingue
 
-    If your primary language is not English and your Web browser is configured
-    to prefer a language other than English, you can make a quick change to
-    see whether the Django admin site has been translated into your language.
-    Just add ``'django.middleware.locale.LocaleMiddleware'`` to your
-    ``MIDDLEWARE_CLASSES`` setting, making sure it appears *after*
+    Se la lingua principale non è l'inglese e il browser Web è configurato per
+    preferire una lingua diversa dall'inglese, è possibile effettuare un rapido
+    cambio per verificare se l'admin è stato tradotto in questa lingua. Basta
+    aggiungere ``'django.middleware.locale.LocaleMiddleware'`` nelle impostazioni
+    ``MIDDLEWARE_CLASSES``, facendo attenzione che appaia dopo
     ``'django.contrib.sessions.middleware.SessionMiddleware'``.
 
-    When you've done that, reload the admin index page. If a translation for
-    your language is available, then the various parts of the interface -- from
-    the "Change password" and "Log out" links at the top of the page, to the
-    "Groups" and "Users" links in the middle -- will appear in your language
-    instead of English. Django ships with translations for dozens of languages.
+    Una volta fatto ciò, ricaricare l'homepage dell'admin. Se è disponibile una
+    traduzione, le varie parti dell'interfaccia - dal "Modifica password" al
+    link "Esci" nella parte superiore della pagina, o i link "Gruppi" e "Utenti"
+    in mezzo -- appariranno in questa lingua, invece che in inglese. Django ha
+    traduzioni per decine di lingue.
 
-    For much more on Django's internationalization features, see Chapter 19.
+    E' possibile ottenere più informazioni sulle caratteristiche di
+    internazionalizzazione di Django nel Capitolo 19.
 
-Click the "Change" link in the "Users" row to load the change list page for
-users.
+Per caricare la pagina di gestione degli utenti, cliccare sul link "Modifica"
+nella sezione "Utenti".
 
 .. figure:: graphics/chapter06/user_changelist.png
-   :alt: Screenshot of the user change list page.
+   :alt: Screenshot della pagina di gestione dell'utente.
 
-   Figure 6-3. The user change list page
+   Figure 6-3. La pagina di gestione dell'utente
 
-.. DWP This screenshot is actually the list for books.
+In questa pagina vengono visualizzati tutti gli utenti nel database, e la si può
+interpretare come una versione web abbellita di una query SQL ``SELECT * FROM auth_user;``.
+Seguendo il nostro esempio, vedrai solo un utente, assumendo che ne sia stato
+aggiunto solo uno, ma una volta aggiunti altri utenti, probabilmente troverai
+molto utili le opzioni per il filtraggio, l'ordinamento e di ricerca. Le opzioni
+di filtraggio sono a destra, l'ordinamento è disponibile cliccando su una
+colonna, e la casella di ricerca nella parte superiore consente di cercare per
+nome utente.
 
-This page displays all users in the database; you can think of it as a
-prettied-up Web version of a ``SELECT * FROM auth_user;`` SQL query. If you're
-following along with our ongoing example, you'll only see one user here,
-assuming you've added only one, but once you have more users, you'll probably
-find the filtering, sorting and searching options useful. Filtering options are
-at right, sorting is available by clicking a column header, and the search box
-at the top lets you search by username.
-
-Click the username of the user you created, and you'll see the edit form for
-that user.
+Cliccando sul nome dell'utente creato, vedremo il form di modifica per l'utente.
 
 .. figure:: graphics/chapter06/user_editform.png
-   :alt: Screenshot of the user edit form
+   :alt: Screenshot del modulo di modifica per l'utente.
 
-   Figure 6-4. The user edit form
+   Figure 6-4. Il modulo di modifica per l'utente
 
-.. DWP The edit form screenshot is for a book.
+Questa pagina permette di modificare gli attributi dell'utente, come nome e
+cognome, ed i vari permessi. (Da notare che per cambiare la password di un
+utente, è necessario cliccare su "Modulo di modifica della password" sotto il
+campo password invece di modificare direttamente il codice hash). Un'altra cosa
+da notare qui è che campi ottengono diversi widgets a seconda del loro tipo --
+per esempio, i campi di data/ora hanno controlli basati su calendario, i campi
+booleani hanno dei checkbox, i campi di carattere sono semplici campi di input
+di testo.
 
-This page lets you change the attributes of the user, like the
-first/last names and various permissions. (Note that to change a user's
-password, you should click "change password form" under the password field
-rather than editing the hashed code.) Another thing to note here is that fields
-of different types get different widgets -- for example, date/time fields have
-calendar controls, boolean fields have checkboxes, character fields have simple
-text input fields.
+È possibile eliminare un record cliccando sul pulsante "Elimina" nella parte
+inferiore sinistra del modulo di modifica. Questo ti reindirizza ad una pagina
+di conferma, la quale, in alcuni casi, visualizza tutti gli oggetti che
+dipendono da esso e che verranno eliminati. (Per esempio, se si elimina un
+editore, qualsiasi libro di quella casa editrice sarà anch'esso cancellato).
 
-You can delete a record by clicking the delete button at the bottom left of its
-edit form. That'll take you to a confirmation page, which, in some cases, will
-display any dependent objects that will be deleted, too. (For example, if you
-delete a publisher, any book with that publisher will be deleted, too!)
+È possibile aggiungere un record cliccando sul link "Aggiungi" presente nella
+colonna. La pagina che ne verrà fuori sarà una versione vuota della pagina di
+modifica, pronta da compilare.
 
-You can add a record by clicking "Add" in the appropriate column of the admin
-home page. This will give you an empty version of the edit page, ready for you
-to fill out.
-
-You'll also notice that the admin interface also handles input validation for
-you. Try leaving a required field blank or putting an invalid date into a date
-field, and you'll see those errors when you try to save, as shown in Figure 6-5.
+Noterai anche che l'interfaccia di amministrazione gestisce la convalida
+dell'input per noi. Prova a lasciare un campo richiesto vuoto o a mettere in un
+campo una data non valida, e riceverai degli errori quando si tenta di salvare,
+come mostrato nella Figura 6-5.
 
 .. figure:: graphics/chapter06/user_editform_errors.png
-   :alt: Screenshot of an edit form displaying errors.
+   :alt: Screenshot di un modulo di modifica che mostra errori.
 
-   Figure 6-5. An edit form displaying errors
+   Figure 6-5. Un modulo di modifica che mostra errori
 
-.. DWP The screenshots are still following a book example.
-
-When you edit an existing object, you'll notice a History link in the
-upper-right corner of the window. Every change made through the admin interface
-is logged, and you can examine this log by clicking the History link (see
-Figure 6-6).
+Quando si modifica un oggetto esistente, viene creato un collegamento
+nell'angolo superiore destro della finestra "Cronologia". Ogni modifica fatta
+attraverso l'interfaccia admin viene registrata ed è possibile esaminare il
+registro cliccando sul collegamento "Cronologia" (vedi Figura 6-6).
 
 .. figure:: graphics/chapter06/user_history.png
-   :alt: Screenshot of an object history page.
+   :alt: Screenshot di un oggetto nella pagina della cronologia.
 
-   Figure 6-6. An object history page
+   Figure 6-6. Un oggetto nella pagina della cronologia.
 
-.. DWP Still using a book in the pictures.
+Aggiungere i proprio Modelli all'interfaccia Admin
+==================================================
 
-Adding Your Models to the Admin Site
-====================================
+C'è una parte cruciale a cui non abbiamo ancora fatto cenno. Andiamo ad
+aggiungere i nostri modelli nell'admin, in modo che si possa aggiungere,
+modificare ed eliminare gli oggetti contenuti nelle tabelle di database
+personalizzati utilizzando questa bella interfaccia. Continueremo l'esempio
+dei ``books`` del capitolo 5, dove abbiamo definito tre modelli: ``Publisher``,
+``Author`` e ``Book``.
 
-There's one crucial part we haven't done yet. Let's add our own models to the
-admin site, so we can add, change and delete objects in our custom database
-tables using this nice interface. We'll continue the ``books`` example from
-Chapter 5, where we defined three models: ``Publisher``, ``Author`` and
-``Book``.
-
-Within the ``books`` directory (``mysite/books``), create a file called
-``admin.py``, and type in the following lines of code::
+All'interno della directory ``books`` (``mysite/books``), crea un file chiamato
+``admin.py``, e digita le seguenti righe di codice::
 
     from django.contrib import admin
     from mysite.books.models import Publisher, Author, Book
@@ -246,27 +247,26 @@ Within the ``books`` directory (``mysite/books``), create a file called
     admin.site.register(Author)
     admin.site.register(Book)
 
-This code tells the Django admin site to offer an interface for each of these
-models.
+Questo codice dice all'admin di aggiungere un'interfaccia per ciascuno di questi
+modelli.
 
-Once you've done this, go to your admin home page in your Web browser
-(``http://127.0.0.1:8000/admin/``), and you should see a "Books" section with
-links for Authors, Books and Publishers. (You might have to stop and start the
-``runserver`` for the changes to take effect.)
+Una volta fatto ciò, apri la pagina di amministrazione nel browser
+(``http://127.0.0.1:8000/admin/``), e dovresti vedere una sezione "Books" con i
+link degli Autori/Authors, Libri/Books ed Editori/Publishers. (Potrebbe essere
+necessario arrestare e avviare il ``runserver`` affinché le modifiche abbiano
+effetto).
 
-.. SL Tested ok
+Abbiamo ora un'interfaccia di amministrazione pienamente funzionale per ciascuno
+di questi tre modelli. E' stato facile!
 
-You now have a fully functional admin interface for each of those three models.
-That was easy!
+Prenditi del tempo per aggiungere e modificare i record, per popolare il
+database con alcuni dati. Se hai seguito gli esempi del Capitolo 5 nela
+creazione di oggetti di ``Publisher`` (e non li hai eliminati), avrai già visto
+quei record nella pagina di elenco.
 
-Take some time to add and change records, to populate your database with some
-data. If you followed Chapter 5's examples of creating ``Publisher`` objects
-(and you didn't delete them), you'll already see those records on the publisher
-change list page.
-
-One feature worth mentioning here is the admin site's handling of foreign keys
-and many-to-many relationships, both of which appear in the ``Book`` model. As
-a reminder, here's what the ``Book`` model looks like::
+Una caratteristica degna di nota è la gestione del sito amministrazione di
+chiavi esterne e di relazioni molti-a-molti, entrambi presenti nel modello ``Book``.
+Come promemoria, ecco come si presenta il modello di ``Book``::
 
     class Book(models.Model):
         title = models.CharField(max_length=100)
@@ -277,61 +277,63 @@ a reminder, here's what the ``Book`` model looks like::
         def __unicode__(self):
             return self.title
 
-On the Django admin site's "Add book" page
-(``http://127.0.0.1:8000/admin/books/book/add/``), the publisher (a
-``ForeignKey``) is represented by a select box, and the authors field
-(a ``ManyToManyField``) is represented by a multiple-select box. Both fields
-sit next to a green plus sign icon that lets you add related records of that
-type. For example, if you click the green plus sign next to the "Publisher"
-field, you'll get a pop-up window that lets you add a publisher. After you
-successfully create the publisher in the pop-up, the "Add book" form will be
-updated with the newly created publisher. Slick.
+Sulla pagina admin di "Aggiungi Libro" (``http://127.0.0.1:8000/admin/books/book/add/``),
+l'editore/publisher (una ``ForeignKey``, chiave esterna) è rappresentato da una
+casella di selezione, mentre il campo degli autori/authors (un relazione molti-a-molti,
+``ManyToManyField``) è rappresentato da un checkbox con selezione multipla.
+Entrambi i campi stanno accanto ad un'icona con all'interno un segno più verde
+che permette di aggiungere nuovi record correlati al tipo. Per esempio, se
+clicchi sul segno più verde accanto al campo "editore/publisher", viene aperta
+una finestra di pop-up che da la possibilità di aggiungere un editore/publisher.
+Dopo aver creato con successo l'editore all'interno del pop-up, il form di
+"Aggiungi Libro" verrà aggiornato con la nuova casa editrice/publisher appena
+creato.
 
-How the Admin Site Works
-========================
+Come funziona l'Interfaccia di amministrazione
+==============================================
 
-Behind the scenes, how does the admin site work? It's pretty straightforward.
+Dietro le quinte, come funziona l'interfaccia di amministrazione? E 'piuttosto
+semplice.
 
-When Django loads your URLconf from ``urls.py`` at server startup, it executes
-the ``admin.autodiscover()`` statement that we added as part of activating the
-admin. This function iterates over your ``INSTALLED_APPS`` setting and looks
-for a file called ``admin.py`` in each installed app. If an ``admin.py``
-exists in a given app, it executes the code in that file.
+Quando Django carica l'URLconf da ``urls.py`` all'avvio del server, esegue
+l'istruzione ``admin.autodiscover()`` che abbiamo aggiunto come parte
+dell'attivazione dell'admin. Questa funzione itera l'impostazione ``INSTALLED_APPS``
+e cerca un file chiamato ``admin.py`` per ed in ogni app installata. Se viene
+trovato ``admin.py`` in una determinata app, esegue il codice presente in quel
+file.
 
-In the ``admin.py`` in our ``books`` app, each call to
-``admin.site.register()`` simply registers the given model with the admin. The
-admin site will only display an edit/change interface for models that have been
-explicitly registered.
+Nell'``admin.py`` della nostra app ``books``, ogni chiamata ad
+``admin.site.register()`` registra semplicemente il modello dato nell'admin.
+All'amministratore del sito viene mostrato solo un'interfaccia per la
+modifica dei modelli che sono stati registrati in modo esplicito.
 
-The app ``django.contrib.auth`` includes its own ``admin.py``, which is why
-Users and Groups showed up automatically in the admin. Other ``django.contrib``
-apps, such as ``django.contrib.redirects``, also add themselves to the admin,
-as do many third-party Django applications you might download from the Web.
+L'app ``django.contrib.auth`` include il proprio ``admin.py``, motivo per cui
+sono mostrati automaticamente 'Utenti' e 'Gruppi' nell'admin. Inoltre vengono
+aggiunte altre app presenti in ``django.contrib``, come ``django.contrib.redirects``,
+così come molte app di terze parti che puoi scaricare su internet.
 
-Beyond that, the Django admin site is just a Django application, with its own
-models, templates, views and URLpatterns. You add it to your application by
-hooking it into your URLconf, just as you hook in your own views. You can
-inspect its templates, views and URLpatterns by poking around in
-``django/contrib/admin`` in your copy of the Django codebase -- but don't be
-tempted to change anything directly in there, as there are plenty of hooks for
-you to customize the way the admin site works. (If you do decide to poke around
-the Django admin application, keep in mind it does some rather complicated
-things in reading metadata about models, so it would probably take a good
-amount of time to read and understand the code.)
+Aldilà di questo fatto, l'admin di Django è solo una app Django, con i suoi
+modelli, template, view e URLpatterns. La puoi aggiungere alla tua applicazione
+includendola nel tuo URLconf, proprio come si includono le proprie view.
+È possibile controllare i suoi modelli, view e URLpatterns rovistando in
+``django/contrib/admin`` -- ma fare modifiche direttamente lì, visto la marea
+di possibilità che offre il pannello di amministrazione. (Se vuoi vedere l'app
+admin di Django, tieni a mente che fa alcune cose piuttosto complicate nel
+leggere i metadati relativi a modelli, quindi è bene prendeti un bel po' di
+tempo per leggere e comprendere il codice).
 
-Making Fields Optional
-======================
+Rendere campi opzionali
+=======================
 
-After you play around with the admin site for a while, you'll probably notice a
-limitation -- the edit forms require every field to be filled out, whereas in
-many cases you'd want certain fields to be optional. Let's say, for example,
-that we want our ``Author`` model's ``email`` field to be optional -- that is,
-a blank string should be allowed. In the real world, you might not have an
-e-mail address on file for every author.
+Dopo aver giocato con l'admin per un po', probabilmente noterai una limitazione
+-- il form di modifica richiede che ogni campo sia compilato, mentre nei casi
+reali molti di essi sono opzionali. Assumiamo, per esempio, di volere rendere
+opzionale il campo ``email`` del nostro modello ``Author`` -- ovvero, consentire
+la possibilità di avere una stringa vuota.
 
-To specify that the ``email`` field is optional, edit the ``Author`` model
-(which, as you'll recall from Chapter 5, lives in ``mysite/books/models.py``).
-Simply add ``blank=True`` to the ``email`` field, like so:
+Per specificare che il campo ``email`` è facoltativo, modifica il modello
+``Author`` (che, come ricorderai dal capitolo 5, sta in ``mysite/books/models.py``).
+Basta aggiungere ``blank=True`` al campo ``email``, in questo modo:
 
 .. parsed-literal::
 
@@ -340,54 +342,54 @@ Simply add ``blank=True`` to the ``email`` field, like so:
         last_name = models.CharField(max_length=40)
         email = models.EmailField(**blank=True**)
 
-.. SL Tested ok
+Questo dice a Django che è consentito un valore vuoto per gli indirizzi e-mail
+degli autori. Per impostazione predefinita, tutti i campi hanno ``blank=False``,
+il che significa che i valori vuoti non sono ammessi.
 
-This tells Django that a blank value is indeed allowed for authors' e-mail
-addresses. By default, all fields have ``blank=False``, which means blank
-values are not allowed.
+C'è qualcosa di interessante che accade qui. Fino ad ora, con l'eccezione del
+metodo ``__unicode__()``, i nostri modelli ci sono serviti come definizione
+delle nostre tabelle -- espressioni 'Pythoneggianci' di istruzioni ``CREATE TABLE``,
+essenzialmente. Aggiungendo ``blank=True``, abbiamo iniziato ad espandere il
+nostro modello al di là di una semplice definizione, spingendola a farla
+diventare a qualcosa di simile alla tabella stessa. Ora, la nostra classe modello
+sta cominciando a diventare una collezione più ricca sulla conoscenza di ciò che
+gli oggetti ``Author`` sono e cosa possono fare. Non solo il campo email è
+rappresentato da una colonna ``VARCHAR`` nel database, ma è anche un campo
+facoltativo in contesti quali l'interfaccia d'amministratore Django.
 
-There's something interesting happening here. Until now, with the exception of
-the ``__unicode__()`` method, our models have served as definitions of our
-database tables -- Pythonic expressions of SQL ``CREATE TABLE`` statements,
-essentially. In adding ``blank=True``, we have begun expanding our model beyond
-a simple definition of what the database table looks like. Now, our model class
-is starting to become a richer collection of knowledge about what ``Author``
-objects are and what they can do. Not only is the ``email`` field represented
-by a ``VARCHAR`` column in the database; it's also an optional field in
-contexts such as the Django admin site.
+Una volta aggiunto che ``blank=True``, ricaricare il modulo "Aggiungi autore"
+di modifica (``http://127.0.0.1:8000/admin/books/author/add/``), e noterai che
+l'etichetta del campo -- "Email" -- non è più in grassetto. Questo significa che
+non è un campo obbligatorio. È ora possibile aggiungere gli autori, senza
+bisogno di specificare indirizzi e-mail, non ottendendo così l'errore rosso
+"Questo campo è richiesto" ("This field is required" ), se il campo è vuoto.
 
-Once you've added that ``blank=True``, reload the "Add author" edit form
-(``http://127.0.0.1:8000/admin/books/author/add/``), and you'll notice the
-field's label -- "Email" -- is no longer bolded. This signifies it's not a
-required field. You can now add authors without needing to provide
-e-mail addresses; you won't get the loud red "This field is required" message
-anymore, if the field is submitted empty.
+Rendere Campi Numerici e Campi relativi a Date Facoltativi
+----------------------------------------------------------
 
-Making Date and Numeric Fields Optional
----------------------------------------
+Un problema comune legata a ``blank=True``, ha a che fare con la data ed i
+campi numerici, ma questo richiede una spiegazione di fondo.
 
-A common gotcha related to ``blank=True`` has to do with date and numeric
-fields, but it requires a fair amount of background explanation.
+SQL ha il suo modo di specificare valori vuoti -- esiste un valore speciale
+chiamato ``NULL``. ``NULL`` potrebbe significare "sconosciuto", o "non valido"
+o qualche altro significato specifico dell'applicazione.
 
-SQL has its own way of specifying blank values -- a special value called
-``NULL``. ``NULL`` could mean "unknown," or "invalid," or some other
-application-specific meaning.
+In SQL, un valore ``NULL`` è diverso da una stringa vuota, proprio come lo
+l'oggetto speciale ``None`` in Python è diverso da una stringa vuota (``""``).
+Questo significa che per un particolare campo di caratteri (ad esempio, una
+colonna ``VARCHAR``) è possibile contenere sia i valori ``NULL`` che valori
+di stringa vuota.
 
-In SQL, a value of ``NULL`` is different than an empty string, just as the
-special Python object ``None`` is different than an empty Python string
-(``""``). This means it's possible for a particular character field (e.g., a
-``VARCHAR`` column) to contain both ``NULL`` values and empty string values.
+Ciò può causare ambiguità indesiderate e confusione: "Perché questo entry ha un
+valore ``NULL``, mentre quest'altro ha una stringa vuota? C'è una differenza, o
+i dati appena inseriti sono incoerenti?". E ancora "Come faccio ad ottenere
+tutti i record che hanno un valore vuoto - devo cercare entrambi i record ``NULL``
+e le stringhe vuote, oppure posso selezionare solo quelli con stringhe vuote?".
 
-This can cause unwanted ambiguity and confusion: "Why does this record have a
-``NULL`` but this other one has an empty string? Is there a difference, or was
-the data just entered inconsistently?" And: "How do I get all the records that
-have a blank value -- should I look for both ``NULL`` records and empty
-strings, or do I only select the ones with empty strings?"
-
-To help avoid such ambiguity, Django's automatically generated ``CREATE TABLE``
-statements (which were covered in Chapter 5) add an explicit ``NOT NULL`` to
-each column definition. For example, here's the generated statement for our
-``Author`` model, from Chapter 5::
+Per evitare tale ambiguità, Django è genera automaticamente istruzioni ``CREATE TABLE``
+(di cui abbiamo parlato nel Capitolo 5) aggiungendo un esplicito ``NOT NULL``
+ad ogni definizione di colonna. Ad esempio, ecco la dichiarazione generata per
+il nostro modello ``Author``, dal capitolo 5::
 
     CREATE TABLE "books_author" (
         "id" serial NOT NULL PRIMARY KEY,
@@ -397,28 +399,29 @@ each column definition. For example, here's the generated statement for our
     )
     ;
 
-In most cases, this default behavior is optimal for your application and will
-save you from data-inconsistency headaches. And it works nicely with the rest
-of Django, such as the Django admin site, which inserts an empty string (*not*
-a ``NULL`` value) when you leave a character field blank.
+Nella maggior parte dei casi, questo comportamento predefinito è ottimale per la
+tua applicazione e ti farà risparmiare mal di testa a causati da dati incoerenti.
+E funziona bene con il resto del Django, come ad esempio l'admin di Django, che
+inserisce una stringa vuota (non un valore ``NULL``) quando un campo di
+caratteri si lascia vuoto.
 
-But there's an exception with database column types that do not accept empty
-strings as valid values -- such as dates, times and numbers. If you try to
-insert an empty string into a date or integer column, you'll likely get a
-database error, depending on which database you're using. (PostgreSQL, which is
-strict, will raise an exception here; MySQL might accept it or might not,
-depending on the version you're using, the time of day and the phase of the
-moon.) In this case, ``NULL`` is the only way to specify an empty
-value. In Django models, you can specify that ``NULL`` is allowed by adding
-``null=True`` to a field.
+Ma c'è un'eccezione con tipi di colonna di database che non accettano stringhe
+vuote come valori validi - come date, orari e numeri. Se si prova ad inserire
+una stringa vuota in una data o ad una colonna di interi, è probabile ottenere
+un errore del database, a seconda del database che si sta utilizzando.
+(PostgreSQL, che è rigoroso, qui genera un'eccezione. MySQL potrebbe accettarlo
+o meno, a seconda della versione che si sta utilizzando, l'ora del giorno e
+della fase della luna). In questo caso, ``NULL`` è l'unico modo per specificare
+un valore vuoto. Nei modelli Django, è possibile specificare che ``NULL`` sia
+consentito con l'aggiunta di ``null=True`` a un campo.
 
-So that's a long way of saying this: if you want to allow blank values in a
-date field (e.g., ``DateField``, ``TimeField``, ``DateTimeField``) or numeric
-field (e.g., ``IntegerField``, ``DecimalField``, ``FloatField``), you'll need
-to use both ``null=True`` *and* ``blank=True``.
+Ecco, questo è un modo lungo di dire: se vuoi permettere di inserire valori
+vuoti ad un campo data (ovvero, ``DateField``, ``TimeField``, ``DateTimeField``)
+o ad un campo numerico (ovver, ``IntegerField``, ``DecimalField``, ``FloatField``),
+hai bisogno di usare sia ``null=True`` *e* ``blank=True``.
 
-For sake of example, let's change our ``Book`` model to allow a blank
-``publication_date``. Here's the revised code:
+Per fare un esempio banale, cambiamo il nostro modello per permettere che il
+campo ``publication_date`` possa essere vuoto. Ecco il codice rivisitato:
 
 .. parsed-literal::
 
@@ -428,43 +431,42 @@ For sake of example, let's change our ``Book`` model to allow a blank
         publisher = models.ForeignKey(Publisher)
         publication_date = models.DateField(**blank=True, null=True**)
 
-.. SL Tested ok
+L'aggiunta di ``null=True`` è più complicata dell'aggiunta del ``blank=True``,
+perché i ``null=True`` cambiano la semantica del database -- ovvero, cambia
+l'istruzione ``CREATE TABLE`` per rimuovere il ``NOT NULL`` dal campo ``publication_date``.
+Per completare questo cambiamento, abbiamo bisogno di aggiornare il database.
 
-Adding ``null=True`` is more complicated than adding ``blank=True``, because
-``null=True`` changes the semantics of the database -- that is, it changes the
-``CREATE TABLE`` statement to remove the ``NOT NULL`` from the
-``publication_date`` field. To complete this change, we'll need to update the
-database.
-
-For a number of reasons, Django does not attempt to automate changes to
-database schemas, so it's your own responsibility to execute the appropriate
-``ALTER TABLE`` statement whenever you make such a change to a model. Recall
-that you can use ``manage.py dbshell`` to enter your database server's shell.
-Here's how to remove the ``NOT NULL`` in this particular case::
+Per una serie di ragioni, Django non tenta di automatizzare le modifiche agli
+schemi del database, quindi è tua responsabilità eseguire l'appropriata
+istruzione ``ALTER TABLE`` ogni volta che si apporta una modifica a un tale
+modello. Ricordiamo che è possibile utilizzare ``manage.py dbshell`` per avere
+la shell del server del database. Ecco come rimuovere il ``NOT NULL`` in questo
+caso particolare::
 
     ALTER TABLE books_book ALTER COLUMN publication_date DROP NOT NULL;
 
-(Note that this SQL syntax is specific to PostgreSQL.)
+(Nota che questa sintassi SQL è specifica per PostgreSQL).
 
-We'll cover schema changes in more depth in Chapter 10.
+Parleremo delle modifiche allo schema in modo più approfondito nel capitolo 10.
 
-Bringing this back to the admin site, now the "Add book" edit form should allow
-for empty publication date values.
+Ritornando all'admin, ora il form di modifica "Aggiungi Libro" dovrebbe
+permettere di inserire date di pubblicazione vuote.
 
-Customizing Field Labels
-========================
+Personalizzare le etichette dei Campi
+=====================================
 
-On the admin site's edit forms, each field's label is generated from its model
-field name. The algorithm is simple: Django just replaces underscores with
-spaces and capitalizes the first character, so, for example, the ``Book``
-model's ``publication_date`` field has the label "Publication date."
+Sulla modifica il form del sito admin, l'etichetta di ciascun campo è generata
+dal nome del campo del modello. L'algoritmo è semplice: Django sostituisce solo
+underscore con spazi e capitalizza il primo carattere, quindi, ad esempio, il
+campo ``publication_date`` del modello ``Book`` ha l'etichetta "Data di pubblicazione"
+("Publication date").
 
-However, field names don't always lend themselves to nice admin field labels,
-so in some cases you might want to customize a label. You can do this by
-specifying ``verbose_name`` in the appropriate model field.
+Tuttavia, i nomi dei campi non sempre si prestano a buone etichette per campi
+d'amministrazione, per cui, in alcuni casi, è bene personalizzare un'etichetta.
+Puoi farlo specificando ``verbose_name`` nel modello appropriato.
 
-For example, here's how we can change the label of the ``Author.email`` field
-to "e-mail," with a hyphen:
+Per esempio, ecco come possiamo cambiare l'etichetta del campo ``Author.email``,
+trasformandolo in "e-mail", con un trattino:
 
 .. parsed-literal::
 
@@ -473,17 +475,17 @@ to "e-mail," with a hyphen:
         last_name = models.CharField(max_length=40)
         email = models.EmailField(blank=True, **verbose_name='e-mail'**)
 
-Make that change and reload the server, and you should see the field's new
-label on the author edit form.
+Assicurati di riavviare il server per vedere la nuova etichetta del campo nella
+pagina di modifica del modello autore/author.
 
-Note that you shouldn't capitalize the first letter of a ``verbose_name``
-unless it should *always* be capitalized (e.g., ``"USA state"``). Django will
-automatically capitalize it when it needs to, and it will use the exact
-``verbose_name`` value in other places that don't require capitalization.
+E' bene evitare di capitalizzare la prima lettera di un ``verbose_name`` a meno
+che non debba essere sempre mostrato in maiuscolo (ad esempio, ``"USA state"``).
+Django capitalizza questa stringa automaticamente quando è necessario, mentre ne
+utilizzerà il valore esatto in altri posti che non richiedono la capitalizzazione.
 
-Finally, note that you can pass the ``verbose_name`` as a positional argument,
-for a slightly more compact syntax. This example is equivalent to the previous
-one:
+Infine, nota che è possibile passare il ``verbose_name`` come un argomento
+posizionale, con una sintassi leggermente più compatta. Questo esempio è
+equivalente a quello precedente:
 
 .. parsed-literal::
 
@@ -492,33 +494,34 @@ one:
         last_name = models.CharField(max_length=40)
         email = models.EmailField(**'e-mail',** blank=True)
 
-.. SL Tested ok
+Questo non funziona con i campi ``ManyToManyField`` o ``ForeignKey``, in quanto
+richiedono che il primo argomento sia una classe modello. In questi casi,
+specificare ``verbose_name`` esplicitamente è la strada da percorrere.
 
-This won't work with ``ManyToManyField`` or ``ForeignKey`` fields, though,
-because they require the first argument to be a model class. In those cases,
-specifying ``verbose_name`` explicitly is the way to go.
+Classi ModelAdmin Personalizzate
+================================
 
-Custom ModelAdmin classes
-=========================
+I cambiamenti che abbiamo fatto finora -- ``blank=True``, ``null=True`` e
+``verbose_name`` -- sono in effetti cambiamenti fatti a livello di modello, non
+al livello admin. Cioè, questi cambiamenti sono fondamentalmente parte del
+modello e quindi vengono usate dall'admin, ma su di loro non c'è nulla di
+admin-specifico.
 
-The changes we've made so far -- ``blank=True``, ``null=True`` and
-``verbose_name`` -- are really model-level changes, not admin-level changes.
-That is, these changes are fundamentally a part of the model and just so happen
-to be used by the admin site; there's nothing admin-specific about them.
+Al di là di questi, l'admin offre una grande ricchezza di opzioni che ti
+consentono di configurare l'admin per lavorare con un modello particolare. Tali
+opzioni stanno in *classi ModelAdmin*, ovvero classi che contengono la
+configurazione di uno specifico modello in una specifica istanza dell'interfaccia
+di admin.
 
-Beyond these, the Django admin site offers a wealth of options that let you
-customize how the admin site works for a particular model. Such options live in
-*ModelAdmin classes*, which are classes that contain configuration for a
-specific model in a specific admin site instance.
+Personalizzare le liste dei cambiamenti
+---------------------------------------
 
-Customizing change lists
-------------------------
-
-Let's dive into admin customization by specifying the fields that are
-displayed on the change list for our ``Author`` model. By default, the change
-list displays the result of ``__unicode__()`` for each object. In Chapter 5, we
-defined the ``__unicode__()`` method for ``Author`` objects to display the
-first name and last name together:
+Tuffiamoci nella personalizzazione dell'admin specificando i campi visualizzati
+nella pagina di elenco per il nostro modello di ``Author``. Per
+impostazione predefinita, l'elenco di modifica visualizza per ogni oggetto il
+risultato di ``__unicode__()`` . Nel capitolo 5, abbiamo definito il metodo
+``__unicode__()`` negli oggetti ``Author`` per visualizzare il nome ed il
+cognome insieme:
 
 .. parsed-literal::
 
@@ -530,25 +533,24 @@ first name and last name together:
         **def __unicode__(self):**
             **return u'%s %s' % (self.first_name, self.last_name)**
 
-As a result, the change list for ``Author`` objects displays each other's
-first name and last name together, as you can see in Figure 6-7.
-
-.. DWP The image is of the change list for a book, not an author.
+Come risultato, la pagina di elenco per gli oggetti ``Author`` visualizza
+ogni nome e cognome insieme, come si può vedere nella Figura 6-7.
 
 .. figure:: graphics/chapter06/author_changelist1.png
-   :alt: Screenshot of the author change list page.
+   :alt: Screenshot della pagina di elenco per l'Autore.
 
-   Figure 6-7. The author change list page
+   Figure 6-7. La pagina di elenco per l'Autore.
 
-We can improve on this default behavior by adding a few other fields to the
-change list display. It'd be handy, for example, to see each author's e-mail
-address in this list, and it'd be nice to be able to sort by first and last
-name.
+Possiamo migliorare questo comportamento predefinito aggiungendo un paio d'altri
+campi per la cambiare l'elenco. Sarebbe utile, per esempio, vedere l'indirizzo
+e-mail di ogni autore in questa lista, e sarebbe bello essere in grado di
+ordinare tutto per nome e cognome.
 
-To make this happen, we'll define a ``ModelAdmin`` class for the ``Author``
-model. This class is the key to customizing the admin, and one of the most
-basic things it lets you do is specify the list of fields to display on change
-list pages. Edit ``admin.py`` to make these changes:
+Per fare ciò, si definisce una classe ``ModelAdmin`` per il modello ``Author``.
+Questa classe è la chiave per la personalizzazione dell'admin, ed una delle cose
+più elementari che permette di fare è specificare l'elenco dei campi da
+mostrare sulla pagina di elenco. Modifica ``admin.py`` per apportare queste
+modifiche:
 
 .. parsed-literal::
 
@@ -562,40 +564,36 @@ list pages. Edit ``admin.py`` to make these changes:
     **admin.site.register(Author, AuthorAdmin)**
     admin.site.register(Book)
 
-.. SL Tested ok
+Ecco cosa abbiamo fatto:
 
-Here's what we've done:
+* Abbiamo creato la classe ``AuthorAdmin``. Questa classe, ha come sottoclassi
+  ``django.contrib.admin.ModelAdmin``, che include la configurazione
+  personalizzata di uno specifico modello admin. Abbiamo solo specificato una
+  personalizzazione -- ``list_display``, che è impostata con una tupla di nomi
+  dei campi da visualizzare nella pagina di elenco. Questi nomi devono essere
+  presenti nel modello, ovviamente.
 
-* We created the class ``AuthorAdmin``. This class, which subclasses
-  ``django.contrib.admin.ModelAdmin``, holds custom configuration
-  for a specific admin model. We've only specified one customization --
-  ``list_display``, which is set to a tuple of field names to display on
-  the change list page. These field names must exist in the model, of
-  course.
+* Abbiamo modificato la chiamata ``admin.site.register()`` per aggiungere ``AuthorAdmin``
+  dopo ``Author``. Puoi interpretarlo com: "Registra il modello ``Author`` con
+  le opzioni ``AuthorAdmin``."
 
-* We altered the ``admin.site.register()`` call to add ``AuthorAdmin`` after
-  ``Author``. You can read this as: "Register the ``Author`` model with the
-  ``AuthorAdmin`` options."
+  L'``admin.site.register()`` prende una sottoclasse ``ModelAdmin`` come secondo
+  argomento facoltativo. Se non si specifica un secondo argomento (come nel caso
+  di ``Publisher`` and ``Book``), Django usa le opzioni di default per quel
+  modello.
 
-  The ``admin.site.register()`` function takes a ``ModelAdmin`` subclass as
-  an optional second argument. If you don't specify a second argument (as
-  is the case for ``Publisher`` and ``Book``), Django will use the default
-  admin options for that model.
-
-With that tweak made, reload the author change list page, and you'll see it's
-now displaying three columns -- the first name, last name and e-mail address.
-In addition, each of those columns is sortable by clicking on the column
-header. (See Figure 6-8.)
+Con questo tweak, abbiamo cambiato la pagina dell'elenco autore, ed ora la
+vedremo tre colonne -- il nome, il cognome e l'indirizzo e-mail. Inoltre,
+ciascuna di queste colonne può essere ordinata cliccando sull'intestazione sulla
+sua intestazione (Vedi Figura 6-8).
 
 .. figure:: graphics/chapter06/author_changelist2.png
-   :alt: Screenshot of the author change list page after list_display.
+   :alt: Screenshot dell'elenco degli autori dopo list_display.
 
-   Figure 6-8. The author change list page after list_display
+   Figure 6-8. Elenco degli autori dopo list_display
 
-.. DWP This figure has the same filename as the last one.
-
-Next, let's add a simple search bar. Add ``search_fields`` to the
-``AuthorAdmin``, like so:
+Adesso, aggiungiamo una semplice barra di ricerca. Aggiungi ``search_fields`` ad
+``AuthorAdmin``, in questo modo:
 
 .. parsed-literal::
 
@@ -603,23 +601,21 @@ Next, let's add a simple search bar. Add ``search_fields`` to the
         list_display = ('first_name', 'last_name', 'email')
         **search_fields = ('first_name', 'last_name')**
 
-.. SL Tested ok
-
-Reload the page in your browser, and you should see a search bar at the top.
-(See Figure 6-9.) We've just told the admin change list page to include a
-search bar that searches against the ``first_name`` and ``last_name`` fields.
-As a user might expect, this is case-insensitive and searches both fields, so
-searching for the string ``"bar"`` would find both an author with the first
-name Barney and an author with the last name Hobarson.
-
-.. DWP Again, same screenshot.
+Ricaricando la pagina nel browser, vedrai una barra di ricerca in alto.
+(Vedi Figura 6-9). Abbiamo appena detto all'admin di aggiungere alla pagina di
+elenco una barra di ricerca che cerca fra i campi ``first_name`` e ``last_name``.
+Come l'utente si potrebbe aspettare, questa ricerca è case-insensitive e si
+ricerca in entrambi i campi, quindi se cerchi la stringa ``"bar"`` viene
+restituito sia un autore con il nome 'Barney' che un autore con il cognome
+'Hobarson'.
 
 .. figure:: graphics/chapter06/author_changelist3.png
-   :alt: Screenshot of the author change list page after search_fields.
+   :alt: Screenshot della pagina di elenco degli autori dopo search_fields.
 
-   Figure 6-9. The author change list page after search_fields
+   Figure 6-9. La pagina di elenco degli autori dopo search_fields
 
-Next, let's add some date filters to our ``Book`` model's change list page:
+Adesso, aggiungiamo alcune date per la pagina d'elenco dei libri del nostro
+modello di ``Book``:
 
 .. parsed-literal::
 
@@ -638,30 +634,27 @@ Next, let's add some date filters to our ``Book`` model's change list page:
     admin.site.register(Author, AuthorAdmin)
     **admin.site.register(Book, BookAdmin)**
 
-.. SL Tested ok
-
-Here, because we're dealing with a different set of options, we created a
-separate ``ModelAdmin`` class -- ``BookAdmin``. First, we defined a
-``list_display`` just to make the change list look a bit nicer. Then, we
-used ``list_filter``, which is set to a tuple of fields to use to create
-filters along the right side of the change list page. For date fields, Django
-provides shortcuts to filter the list to "Today," "Past 7 days," "This month"
-and "This year" -- shortcuts that Django's developers have found hit the
-common cases for filtering by date. Figure 6-10 shows what that looks like.
-
-.. DWP Screenshot needs changing.
+Qui, poiché abbiamo a che fare con un diverso insieme di opzioni, abbiamo creato
+una classe ``ModelAdmin`` separata -- ``BookAdmin``. In primo luogo, abbiamo
+definito un ``list_display`` solo per far sembrare più bella la pagina d'elenco.
+Poi, abbiamo utilizzato ``list_filter`` impostandola con una tupla di campi da
+utilizzare per creare filtri nel lato destro della pagina. Per i campi data,
+Django integra delle scorciatoie per filtrare l'elenco con le opzioni "Oggi",
+"Ultimi 7 giorni", "Questo mese" e "Quest'anno" - scorciatoie che gli sviluppatori
+di Django hanno pensato siano utili nei casi più comuni per filtrare per data.
+La Figura 6-10 mostra a cosa assomiglia tutto questo.
 
 .. figure:: graphics/chapter06/book_changelist1.png
-   :alt: Screenshot of the book change list page after list_filter.
+   :alt: Screenshot della pagina d'elenco dei libri dopo list_filter.
 
-   Figure 6-10. The book change list page after list_filter
+   Figure 6-10. La pagina d'elenco dei libri dopo list_filter
 
-``list_filter`` also works on fields of other types, not just ``DateField``.
-(Try it with ``BooleanField`` and ``ForeignKey`` fields, for example.) The
-filters show up as long as there are at least 2 values to choose from.
+``list_filter`` funziona anche su altri tipi di campi, non solo ``DateField``. (Prova con i campi
+``ForeignKey`` e ``BooleanField``, per esempio). I filtri appaiono finché ci
+sono almeno 2 valori tra cui scegliere.
 
-Another way to offer date filters is to use the ``date_hierarchy`` admin
-option, like this:
+Un altro modo per aggiungere altri filtri relativi alla data è quella di
+utilizzare l'opzione ``date_hierarchy``, come questo:
 
 .. parsed-literal::
 
@@ -670,27 +663,24 @@ option, like this:
         list_filter = ('publication_date',)
         **date_hierarchy = 'publication_date'**
 
-.. SL Tested ok
-
-With this in place, the change list page gets a date drill-down navigation bar
-at the top of the list, as shown in Figure 6-11. It starts with a list of
-available years, then drills down into months and individual days.
-
-.. DWP Screenshot again.
+In questo modo, la pagina dell'elenco aggiunge una barra di navigazione in cima
+alla lista, come mostrato in Figura 6-11. Essa contiene un elenco degli anni
+disponibili, avendo la possibilità di scegliere anche fra mesi e giorni singoli.
 
 .. figure:: graphics/chapter06/book_changelist2.png
-   :alt: Screenshot of the book change list page after date_hierarchy.
+   :alt: Screenshot della pagina d'elenco dei libri dopo date_hierarchy.
 
-   Figure 6-11. The book change list page after date_hierarchy
+   Figure 6-11. La pagina d'elenco dei libri dopo date_hierarchy
 
-Note that ``date_hierarchy`` takes a *string*, not a tuple, because only one
-date field can be used to make the hierarchy.
+Nota che date_hierarchy prende una *stringa*, non una tupla, poiché solo il
+campo data può essere usato per creare una gerarchia.
 
-Finally, let's change the default ordering so that books on the change list
-page are always ordered descending by their publication date. By default,
-the change list orders objects according to their model's ``ordering`` within
-``class Meta`` (which we covered in Chapter 5) -- but you haven't specified
-this ``ordering`` value, then the ordering is undefined.
+Infine, cambiamo l'ordinamento predefinito in modo che i libri nella pagina
+dell'elenco siano sempre ordinati in maniera discendente dalla loro data di
+pubblicazione. Per impostazione predefinita, l'ordinamento scelto di base viene
+preso da ``ordering`` all'interno della ``class Meta`` (che abbiamo trattato nel
+capitolo 5) -- ma, quando non specificato, allora l'ordinamento rimane non
+definito.
 
 .. parsed-literal::
 
@@ -700,27 +690,25 @@ this ``ordering`` value, then the ordering is undefined.
         date_hierarchy = 'publication_date'
         **ordering = ('-publication_date',)**
 
-.. SL Tested ok
+Questa opzione ``ordering`` funziona esattamente come l'``ordering`` della
+``class Meta`` dei modelli, ma utilizza solo il primo nome di campo nella lista.
+Basta passare una lista o una tupla dei nomi dei campi, e aggiungere un segno
+meno a un campo per imporre un ordinamento discendente.
 
-This admin ``ordering`` option works exactly as the ``ordering`` in models'
-``class Meta``, except that it only uses the first field name in the list. Just
-pass a list or tuple of field names, and add a minus sign to a field to use
-descending sort order.
-
-Reload the book change list to see this in action. Note that the
-"Publication date" header now includes a small arrow that indicates which way
-the records are sorted. (See Figure 6-12.)
+Ricarica la pagina d'elenco libro/book per vederlo in azione. Nota che adesso
+l'intestazione "Data di pubblicazione" include una piccola freccia che indica in
+che modo i record vengono ordinati. (Vedi Figura 6-12)
 
 .. DWP Different screenshot needed.
 
 .. figure:: graphics/chapter06/book_changelist3.png
-   :alt: Screenshot of the book change list page after ordering.
+   :alt: Screenshot della pagina d'elenco dei libri dopo l'ordinamento.
 
-   Figure 6-12. The book change list page after ordering
+   Figure 6-12. La pagina d'elenco dei libri dopo l'ordinamento
 
-We've covered the main change list options here. Using these options, you can
-make a very powerful, production-ready data-editing interface with only a few
-lines of code.
+Abbiamo coperto le principali opzioni dell'elenco cambiamento. Utilizzando queste
+opzioni, è possibile creare una robusta interfaccia di amministrazione, in grado
+di elaborare dati in maniera efficiente con poche righe di codice.
 
 Customizing edit forms
 ----------------------
