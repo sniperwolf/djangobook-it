@@ -280,7 +280,7 @@ Come promemoria, ecco come si presenta il modello di ``Book``::
 Sulla pagina admin di "Aggiungi Libro" (``http://127.0.0.1:8000/admin/books/book/add/``),
 l'editore/publisher (una ``ForeignKey``, chiave esterna) è rappresentato da una
 casella di selezione, mentre il campo degli autori/authors (un relazione molti-a-molti,
-``ManyToManyField``) è rappresentato da un checkbox con selezione multipla.
+``ManyToManyField``) è rappresentato da un box a selezione multipla.
 Entrambi i campi stanno accanto ad un'icona con all'interno un segno più verde
 che permette di aggiungere nuovi record correlati al tipo. Per esempio, se
 clicchi sul segno più verde accanto al campo "editore/publisher", viene aperta
@@ -699,8 +699,6 @@ Ricarica la pagina d'elenco libro/book per vederlo in azione. Nota che adesso
 l'intestazione "Data di pubblicazione" include una piccola freccia che indica in
 che modo i record vengono ordinati. (Vedi Figura 6-12)
 
-.. DWP Different screenshot needed.
-
 .. figure:: graphics/chapter06/book_changelist3.png
    :alt: Screenshot della pagina d'elenco dei libri dopo l'ordinamento.
 
@@ -710,15 +708,16 @@ Abbiamo coperto le principali opzioni dell'elenco cambiamento. Utilizzando quest
 opzioni, è possibile creare una robusta interfaccia di amministrazione, in grado
 di elaborare dati in maniera efficiente con poche righe di codice.
 
-Customizing edit forms
-----------------------
+Personalizzare i moduli/form di Modifica
+----------------------------------------
 
-Just as the change list can be customized, edit forms can be customized in many
-ways.
+Proprio come è possibile personalizzare le pagine di elenco, è possibile
+personalizzare in molti modi anche i moduli/form.
 
-First, let's customize the way fields are ordered. By default, the order of
-fields in an edit form corresponds to the order they're defined in the model.
-We can change that using the ``fields`` option in our ``ModelAdmin`` subclass:
+In primis, vediamo la strada per ordinare i campi. Di default, l'ordinamento dei
+campi in un form di modifica corrisponde all'ordinamento definito nel modello.
+Possiamo però cambiare l'opzione ``fields`` nella nostra sottoclasse
+``ModelAdmin``:
 
 .. parsed-literal::
 
@@ -729,19 +728,18 @@ We can change that using the ``fields`` option in our ``ModelAdmin`` subclass:
         ordering = ('-publication_date',)
         **fields = ('title', 'authors', 'publisher', 'publication_date')**
 
-.. SL Tested ok
+Dopo questo cambiamento, i form per la modifica dei libri usano l'ordinamento
+specificato. E' più naturale leggere gli autori dopo il titolo del libro.
+Ovviamente, l'ordine del campo potrebbe dipendere dal flusso dei dati.
+Ogni form è differente.
 
-After this change, the edit form for books will use the given ordering for
-fields. It's slightly more natural to have the authors after the book title.
-Of course, the field order should depend on your data-entry workflow. Every
-form is different.
-
-Another useful thing the ``fields`` option lets you do is to *exclude* certain
-fields from being edited entirely. Just leave out the field(s) you want to
-exclude. You might use this if your admin users are only trusted to edit a
-certain segment of your data, or if part of your fields are changed by some
-outside, automated process. For example, in our book database, we could
-hide the ``publication_date`` field from being editable:
+Un'altra strada utile che permette di seguire l'opzione ``fields`` è quella di
+*escludere* un certo campo dall'essere modificabile. Basta non includere in essa
+il o i campi da escludere. Puoi usare questo metodo per permettere di modificare
+certi campi soltanto ad alcuni tipi di utenti, oppure tralasciare la modifica
+manuale di campi che poi vengono aggiornati automaticamente da altri processi.
+Per esempio, nel nostro database di libri, possiamo nascondere il campo
+``publication_date`` dall'essere modificabile:
 
 .. parsed-literal::
 
@@ -752,28 +750,26 @@ hide the ``publication_date`` field from being editable:
         ordering = ('-publication_date',)
         **fields = ('title', 'authors', 'publisher')**
 
-.. SL Tested ok
+Come risultato, il form di modifica dei libri non permette di specificare una
+data di pubblicazione. Come detto, questo può essere utile se preferisci che un
+manteiner non sia in grado di modificare la data di pubblicazione (questo è un
+esempio ipotetico, ovviamente).
 
-As a result, the edit form for books doesn't offer a way to specify the
-publication date. This could be useful, say, if you're an editor who prefers
-that his authors not push back publication dates. (This is purely a
-hypothetical example, of course.)
+Quando un utente usa questo form incompleto per aggiungere un nuovo libro, Django
+semplicemente setta ``publication_date`` a ``None`` -- perciò accertati che tale
+campo abbia ``null=True``.
 
-When a user uses this incomplete form to add a new book, Django will simply set
-the ``publication_date`` to ``None`` -- so make sure that field has
-``null=True``.
+Un'alta comune esigenza è quella di personalizzare un form di modificare per
+lavorare con campi molti-a-molti. Come visto in precedenza nei libri, l'admin
+rappresenta ogni ``ManyToManyField`` come un box a selezione multipla, che è
+logicamente più vicino -- ma questi box possono essere difficili da usare. Se
+vuoi selezionare più elementi in questo box, devi pigiare il pulsante "CTRL", o
+"Command" nei Mac, e quindi cliccare sulla singola entry. L'admin contiene
+utili memo che informano l'utente come usarli, ma rimane comunque un po'
+inusabile quando si devono modificare centinaia di opzioni.
 
-Another commonly used edit-form customization has to do with many-to-many
-fields. As we've seen on the edit form for books, the admin site represents each
-``ManyToManyField`` as a multiple-select boxes, which is the most logical
-HTML input widget to use -- but multiple-select boxes can be difficult to use.
-If you want to select multiple items, you have to hold down the control key,
-or command on a Mac, to do so. The admin site helpfully inserts a bit of text
-that explains this, but, still, it gets unwieldy when your field contains
-hundreds of options.
-
-The admin site's solution is ``filter_horizontal``. Let's add that to
-``BookAdmin`` and see what it does.
+L'admin ha una soluzione che si chiama ``filter_horizontal``. Aggiungiamolo a
+``BookAdmin`` e vediamo cosa fa.
 
 .. parsed-literal::
 
@@ -784,46 +780,43 @@ The admin site's solution is ``filter_horizontal``. Let's add that to
         ordering = ('-publication_date',)
         **filter_horizontal = ('authors',)**
 
-.. SL Tested ok
+(Se hai seguito tutti i passaggi fin qui, nota che abbiamo rimosso l'opzione
+``fields`` per ripristinare tutti i campi nel form di modifica).
 
-(If you're following along, note that we've also removed the ``fields`` option
-to restore all the fields in the edit form.)
-
-Reload the edit form for books, and you'll see that the "Authors" section now
-uses a fancy JavaScript filter interface that lets you search through the
-options dynamically and move specific authors from "Available authors" to
-the "Chosen authors" box, and vice versa.
-
-.. DWP screenshot!
+Ricarica la pagina e vedrai che la sezione "Autori/Authors" utilizza adesso una
+interfaccia per il filtro mossa da JavaScript che ti permette di cercare fra le
+opzioni dinamicamente e spostare autori specifici fra i box "Autori Disponibili"
+e "Autori Scelti".
 
 .. figure:: graphics/chapter06/book_editform1.png
-   :alt: Screenshot of the book edit form after adding filter_horizontal.
+   :alt: Screenshot del form di modifica dei lirbi dopo aver aggiunto filter_horizontal.
 
-   Figure 6-13. The book edit form after adding filter_horizontal
+   Figure 6-13. Il form di modifica dei lirbi dopo aver aggiunto filter_horizontal
 
-We'd highly recommend using ``filter_horizontal`` for any ``ManyToManyField``
-that has more than 10 items. It's far easier to use than a simple
-multiple-select widget. Also, note you can use ``filter_horizontal``
-for multiple fields -- just specify each name in the tuple.
+Raccomandiamo formetement l'utilizzo di ``filter_horizontal`` per ogni
+``ManyToManyField`` che contiene più di 10 elementi. E' più semplice da usare
+rispetto un semplice box a selezione multipla. Inoltre, puoi usare ``filter_horizontal``
+per i campi multipli -- basta specificare il loro nome nella tupla.
 
-``ModelAdmin`` classes also support a ``filter_vertical`` option. This works
-exactly as ``filter_horizontal``, but the resulting JavaScript interface stacks
-the two boxes vertically instead of horizontally. It's a matter of personal
-taste.
 
-``filter_horizontal`` and ``filter_vertical`` only work on ``ManyToManyField``
-fields, not ``ForeignKey`` fields. By default, the admin site uses simple
-``<select>`` boxes for ``ForeignKey`` fields, but, as for ``ManyToManyField``,
-sometimes you don't want to incur the overhead of having to select all the
-related objects to display in the drop-down. For example, if our book database
-grows to include thousands of publishers, the "Add book" form could take a
-while to load, because it would have to load every publisher for display in the
-``<select>`` box.
 
-The way to fix this is to use an option called ``raw_id_fields``. Set this to
-a tuple of ``ForeignKey`` field names, and those fields will be displayed in
-the admin with a simple text input box (``<input type="text">``) instead of a
-``<select>``. See Figure 6-14.
+La classe ``ModelAdmin`` supporta inoltre una opzione ``filter_vertical``. Questa
+lavora esattamente come ``filter_horizontal``, ma la interfaccia che ne viene
+fuori ha due box verticali, invece che orizzantili. E' una questione di gusti
+personali.
+
+``filter_horizontal`` e ``filter_vertical`` funzionano solo con i campi
+``ManyToManyField``, e non con i campi ``ForeignKey``. Di default, l'admin usa
+semplici box ``<select>`` per i campi ``ForeignKey``, ma, come per ``ManyToManyField``,
+a volte hai così tanti elementi nel menù a cascata che non se ne può più. Ad
+esempio, immagina di voler aggiungere un nuovo libro e di dover scegliere fra un
+sempre crescente numero di editori, che sono tutti caricati in quell'unico ``<select>``
+ box.
+
+Per risolvere questo problema è possibile usare una opzione chiamata
+``raw_id_fields``. Impostala con una tupla contente i nomi dei campi di un ``ForeignKey``,
+e questi campi vengono mostrati nell'admin come semplice box di testo (``<input type="text">``)
+invece che con i ``<select>``. Vedi Figura 6-14.
 
 .. parsed-literal::
 
@@ -835,146 +828,147 @@ the admin with a simple text input box (``<input type="text">``) instead of a
         filter_horizontal = ('authors',)
         **raw_id_fields = ('publisher',)**
 
-.. SL Tested ok
-
-.. DWP Screenshot!
-
 .. figure:: graphics/chapter06/book_editform2.png
-   :alt: Screenshot of edit form after raw_id_fields.
+   :alt: Screenshot del form di modifica dei libri dopo l'aggiunta di raw_id_fields.
 
-   Figure 6-14. The book edit form after adding raw_id_fields
+   Figure 6-14. Il form di modifica dei libri dopo l'aggiunta di raw_id_fields
 
-What do you enter in this input box? The database ID of the publisher. Given
-that humans don't normally memorize database IDs, there's also a
-magnifying-glass icon that you can click to pull up a pop-up window, from which
-you can select the publisher to add.
+Cosa digitare in questi box di input? L'ID presente nel Database degli editori.
+Per dare un aspetto umano a questo aspetto, è presente anche una icona a forma
+di lente di ingrandimento che puoi cliccare per far comparire una finestra pop-up,
+dalla quale è possibile scegliere l'editore da aggiungere.
 
-Users, Groups, and Permissions
-==============================
+Utenti, Gruppi e Permessi
+=========================
 
-Because you're logged in as a superuser, you have access to create, edit, and
-delete any object. Naturally, different environments require different
-permission systems -- not everybody can or should be a superuser. Django's
-admin site uses a permissions system that you can use to give specific users
-access only to the portions of the interface that they need.
+Poiché sei loggato come superuser, hai il permesso per creare, modificare e
+cancellare qualunque oggetto. Naturalmente, in ambienti differenti richiedono
+differenti sistemi di permessi -- non tutti possono o dovrebbero essere un
+superuser. Le interfacce admin di Django usano un sistema di permessi che
+può essere usato per dare a specifici utenti la possibilità di solo accesso a
+porzioni dell'interfaccia di cui hanno bisogno.
 
-These user accounts are meant to be generic enough to be used outside of the
-admin interface, but we'll just treat them as admin user accounts for now. In
-Chapter 14, we'll cover how to integrate user accounts with the rest of your
-site (i.e., not just the admin site).
+Questi account utenti sono intesi per essere generici abbastanza da essere usati
+anche all'esterno dell'interfaccia admin, ma per ora li trattiamo soltanto come
+account utenti di admin. Nel capitolo 14, vedremo come integrare gli account
+utenti con il resto del sito (ovvero, non solo l'admin).
 
-You can edit users and permissions through the admin interface just like any
-other object. We saw this earlier in this chapter, when we played around with
-the User and Group sections of the admin. User objects have the standard
-username, password, e-mail and real name fields you might expect, along with a
-set of fields that define what the user is allowed to do in the admin
-interface. First, there's a set of three boolean flags:
+Puoi modificare gli utenti ed i permessi dall'interno dell'intefaccia proprio
+come fatto per gli altri oggetti. Abbiamo visto in precedenza in questo capitolo,
+quando abbia giocato con le sezioni dell'admin "Utenti" e "Gruppi". Gli oggetti
+utenti hanno i campi standard, username, password, email e nome reale come ti
+potresti aspettare, con la possibilità di definire altri campi che l'utente può
+creare nell'admin. In primi, ci sono 3 flag booleane:
 
-* The "active" flag controls whether the user is active at all.
-  If this flag is off and the user tries to log in, he won't be allowed in,
-  even with a valid password.
+* La flag "active/attivo" controlla se l'utente è attivo completamente.
+  Se questa flag è disattiva e l'utente prova ad effettuare il login, verrà
+  respinto anche se usa una password valida.
 
-* The "staff" flag controls whether the user is allowed to log in to the
-  admin interface (i.e., whether that user is considered a "staff member" in
-  your organization). Since this same user system can be used to control
-  access to public (i.e., non-admin) sites (see Chapter 14), this flag
-  differentiates between public users and administrators.
+* La flag "staff" verifica se l'utente può accedere all'interfaccia admin
+  (ovvero, se l'utente è considerato un "membro dello staff" nella tua
+  organizzazione). Questo stesso sistema di utenti può essere usato per
+  controllare l'accesso ai siti (ovvero, non-admin) pubblici (vedi Capitolo 14),
+  questo flag si fa differenza fra utenti pubblici e amministratori.
 
-* The "superuser" flag gives the user full access to add, create and
-  delete any item in the admin interface. If a user has this flag set, then
-  all regular permissions (or lack thereof) are ignored for that user.
+* La flag "superuser/superutente" da all'utente l'accesso completo per
+  aggiungere, creare e cancellare qualunque oggetto nell'interfaccia admin. Se
+  l'utente ha impostato questo flag, tutti gli altri permessi regolari (o la
+  loro assenza) vengono ignorate per questo utente.
 
-"Normal" admin users -- that is, active, non-superuser staff members -- are
-granted admin access through assigned permissions. Each object editable through
-the admin interface (e.g., books, authors, publishers) has three permissions: a
-*create* permission, an *edit* permission and a *delete* permission. Assigning
-permissions to a user grants the user access to do what is described by those
-permissions.
+Gli utenti admin "Normal" -- che sono attivi, membri dello staff non-superuser
+-- hanno il permesso di accedere senza aver assegnati permessi. Ogni oggetto che
+è modificabile dall'interfaccia admin (ovvero, libri/books, autori/authors,
+editori/publishers) ha 3 permessi: un permessio di *creazione*, un permesso di
+*modifica* ed un permesso di *cancellazione*. Assegnando i permessi ad un utente
+garantisce all'utente la possibilità di fare ciò che è descritto da questi
+permessi.
 
-When you create a user, that user has no permissions, and it's up to you to
-give the user specific permissions. For example, you can give a user permission
-to add and change publishers, but not permission to delete them. Note that
-these permissions are defined per-model, not per-object -- so they let you say
-"John can make changes to any book," but they don't let you say "John can make
-changes to any book published by Apress." The latter functionality, per-object
-permissions, is a bit more complicated and is outside the scope of this book
-but is covered in the Django documentation.
+Quando crei un nuovo utente, questo utente non ha permessi, e tocca a te dargli
+specifici permessi. Per esempio, puoi dare ad un utente il permesso di
+aggiungere e modificare editori/publisher, ma non ha il permesso di cancellarli.
+Nota che questi permessi sono definiti per ogni modello, e non per oggetto --
+ovvero dicono "John può cambiare qualunque libro", ma non dicono "John può
+cambiare qualunque libro dell'editore Apress". Quest'ultima funzionalità, i
+permessi relativi ai singoli oggetti, è un po' più complicata ed è al di
+fuori dello scopo di questo libro, ma è trattata nella documentazione di Django.
 
 .. note::
 
-    Access to edit users and permissions is also controlled by this permission
-    system. If you give someone permission to edit users, she will be able to
-    edit her own permissions, which might not be what you want! Giving a user
-    permission to edit users is essentially turning a user into a superuser.
+    La possibilità di modificare gli utenti ed i permessi è controllata anche
+    dal sistema di permesso. Se dai il permesso a qualunque di modificare gli
+    utenti, egli sarà in grado di modificare i suoi permessi, e questo potrebbe
+    essere un qualcosa di non voluto! Dare un utente il permesso di modificare
+    altri utenti lo porta essenzialmente allo stesso livello di un superuser.
 
-You can also assign users to groups. A *group* is simply a set of permissions to
-apply to all members of that group. Groups are useful for granting identical
-permissions to a subset of users.
+Puoi inoltre assegnare gli utenti a dei gruppi. Un *gruppo* è semplicemente un
+insieme di permessi da applicare a tutti i membri di quel gruppo. I gruppi sono
+utili per garantire pari diritti ad un particolare sottoinsieme di utenti.
 
-When and Why to Use the Admin Interface -- And When Not to
-==========================================================
+Quando e Perché Usare l'interfaccia Admin -- A quando non farlo
+===============================================================
 
-After having worked through this chapter, you should have a good idea of how to
-use Django's admin site. But we want to make a point of covering *when* and
-*why* you might want to use it -- and when *not* to use it.
+Dopo aver giocato un po' con questo capitolo, ti farai una idea del come usare
+l'interfaccia admin di Django. Ma ora vogliamo chiarire *quando* e *perché*
+dovresti usarlo -- e quando *non* dovresti.
 
-Django's admin site especially shines when nontechnical users need to be able
-to enter data; that's the purpose behind the feature, after all. At the
-newspaper where Django was first developed, development of a typical online
-feature -- say, a special report on water quality in the municipal supply --
-would go something like this:
+L'admin di Django brilla specialmente quando degli utenti non-tecnici hanno
+bisogno di aggiungere dati; questa è la caratteristica principale, dopo tutto.
+Al giornale dove è stato per primo Django, per lo sviluppo di una particolare
+caratteristica online -- supponiamo, una relazione speciale sulla qualità
+dell'acqua della fornitura comunale -- sarebbe successo qualcosa di simile:
 
-* The reporter responsible for the project meets with one of the developers
-  and describes the available data.
+* Il reporter responsabile del progetto incontra con uno degli sviluppatori
+  e descrive i dati disponibili.
 
-* The developer designs Django models to fit this data and then opens up
-  the admin site to the reporter.
+* Lo svoluppatore progetta i modelli Django per adattare questi dati ed in
+  seguito sviluppa una interfaccia admin per il reporter.
 
-* The reporter inspects the admin site to point out any missing or
-  extraneous fields -- better now than later. The developer changes the
-  models iteratively.
+* Il reporter controlla l'admin per verificare che non manchi nulla o non ci
+  siano campi particolari -- meglio adesso piuttosto che dopo. Lo sviluppatore
+  cambia il modello iterativamente.
 
-* When the models are agreed upon, the reporter begins entering data using
-  the admin site. At the same time, the programmer can focus on developing
-  the publicly accessible views/templates (the fun part!).
+* Quando il modello viene accettato, il reporter iniza ad inserire i dati usando
+  l'admin. Allo stesso tempo, il programmatore si concentra sullo sviluppo della
+  porzione accessibile pubblicamente, creando view e template (la parte
+  divertente!).
 
-In other words, the raison d'être of Django's admin interface is facilitating
-the simultaneous work of content producers and programmers.
+In altre parole, la ragione d'essere dell'admin di Django è facilitare il lavoro
+similtare sul contenuto del produttore e del programmatore.
 
-However, beyond these obvious data entry tasks, the admin site is useful in a
-few other cases:
+In ogni caso, ci sono queste banali attività di inserimento dati, in cui l'admin
+è utile in alcuni casi:
 
-* *Inspecting data models*: Once you've defined a few models, it can be
-  quite useful to call them up in the admin interface and enter some dummy
-  data. In some cases, this might reveal data-modeling mistakes or other
-  problems with your models.
+* *Controllare i modelli dei dati*: Non appena hai definito alcuni modelli, può
+  rivelarsi utile richiamarli nell'interfaccia admin ed inserire alcuni dati di
+  prova. In alcuni casi, questo rivela errori nella modellazione dei dati o
+  altri problemi relativi ai modelli stessi.
 
-* *Managing acquired data*: For applications that rely on data coming from
-  external sources (e.g., users or Web crawlers), the admin site gives you
-  an easy way to inspect or edit this data. You can think of it as a less
-  powerful, but more convenient, version of your database's command-line
-  utility.
+* *Gestire l'acquisizione dei dati*: Per applicazione che si basano
+  sull'acquisizione di risorse esterne (ovvero utenti o web crawler), l'admin ti
+  da la possibilità di controllare facilmente o modificare questi dati. Puoi
+  pensare a questa possibilità come una versione meno potente, ma più
+  conveniente, della utility via riga di comando del tuo database.
 
-* *Quick and dirty data-management apps*: You can use the admin site to
-  build yourself a very lightweight data management app -- say, to keep
-  track of expenses. If you're just building something for your own needs,
-  not for public consumption, the admin site can take you a long way. In
-  this sense, you can think of it as a beefed up, relational version of a
-  spreadsheet.
+* *App per la gestione veloce e sporca dei dati*: Puoi usare l'admin per
+  costruire una app leggera per gestire i dati -- supponiamo di voler tenere
+  traccia delle spese. Se stai costruendo qualcosa per le tue sole esigenze,
+  e non per il pubblico, l'admin può bastarti per un bel po' di tempo. In questo
+  senso, puoi pensarlo come la versione relazionale di un foglio di calcolo
+  potenziato.
 
-One final point we want to make clear is: the admin site is not an
-end-all-be-all. Over the years, we've seen it hacked and chopped up to serve a
-variety of functions it wasn't intended to serve. It's not intended to be a
-*public* interface to data, nor is it intended to allow for sophisticated
-sorting and searching of your data. As we said early in this chapter, it's for
-trusted site administrators. Keeping this sweet spot in mind is the key to
-effective admin-site usage.
+Ultimo punto che vogliamo mettere in chiaro: l'admin non è tutto, e non è la fine
+di tutto (intraducibile 'end-all-be-all'). Duranti gli anni, lo abbiamo visto
+manipolato e sminuzzato per aggiungere ad esso una varietà di funzioni che non
+era destinato ad avere. Non è pensato come interfaccia *pubblica*, tanto meno
+è inteso per consentire sofisticati meccanismi di ordinamento e ricerca dei tuoi
+dati. Come detto in precedenza, è fatto per amministratori fidati del sito web.
+Mantenerlo una piccola nicchia è la chiave per utilizzarlo al meglio.
 
-What's Next?
-============
+Cosa c'è adesso?
+================
 
-So far we've created a few models and configured a top-notch interface for
-editing data. In the next chapter `Chapter 7`_, we'll move on to the real "meat and potatoes"
-of Web development: form creation and processing.
+Finora abbiamo creato alcuni modelli e configurato una interfaccia fantastica
+per modificare i dati. Nel prossimo capitolo `Capitolo 7`_, andremo sulla "vera
+carne dello sviluppo Web": creazione ed elaborazione di form.
 
-.. _Chapter 7: chapter07.html
+.. _Capitolo 7: chapter07.html
