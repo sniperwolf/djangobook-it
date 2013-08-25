@@ -1,99 +1,101 @@
 ================
-Chapter 7: Forms
+Capitolo 7: Form
 ================
 
-HTML forms are the backbone of interactive Web sites, from the simplicity of
-Google's single search box to ubiquitous blog comment-submission forms to
-complex custom data-entry interfaces. This chapter covers how you can use
-Django to access user-submitted form data, validate it and do something with
-it. Along the way, we'll cover ``HttpRequest`` and ``Form`` objects.
+I form HTML sono l'ossatura di siti web interattivi, dalla semplicità del
+singolo box di ricerca di Google agli ubiqui form per la scrittura dei commenti
+in un blog alle più complesse interfacce personalizzate per l'inserimento dei
+dati. Questo capitolo spiega come puoi usare Django per consentire l'inserimento
+di dati tramite form, convalidarli e farci qualcosa. Durante la strada,
+parleremo degli oggetti ``HttpRequest`` e ``Form``.
 
-Getting Data From the Request Object
-====================================
+Prendere dati dagli oggetti Request
+===================================
 
-We introduced ``HttpRequest`` objects in Chapter 3 when we first covered view
-functions, but we didn't have much to say about them at the time. Recall that
-each view function takes an ``HttpRequest`` object as its first parameter, as
-in our ``hello()`` view::
+Abbiamo introdotto gli oggetti ``HttpRequest`` nel Capitolo 3, quando abbiamo
+parlato delle view, ma non abbiamo detto molto. Ricordando che ogni funzione di
+view richiede un oggetto ``HttpRequest`` come primo parametro, nella nostra view
+``hello()``::
 
     from django.http import HttpResponse
 
     def hello(request):
         return HttpResponse("Hello world")
 
-``HttpRequest`` objects, such as the variable ``request`` here, have a number
-of interesting attributes and methods that you should familiarize yourself
-with, so that you know what's possible. You can use these attributes to get
-information about the current request (i.e., the user/Web browser that's
-loading the current page on your Django-powered site), at the time the view
-function is executed.
+Gli oggetti ``HttpRequest``, come nell'esempio la variabile ``request``, hanno
+un numero di attributi e metodi interessanti con i quali è bene familiarizzare,
+per capire cosa è possibile fare. Puoi usare questi attributi per avere
+informazioni riguardo la richiesta corrente (nel nostro esempio, l'utente che
+sta caricando la pagina Django-powered), al momento in cui la funzione di view
+viene eseguita.
 
-Information About the URL
+Informazioni riguardo l'URL
 -------------------------
 
-``HttpRequest`` objects contain several pieces of information about the
-currently requested URL:
+Gli oggetti ``HttpRequest`` contengono diversi pezzi di informazioni riguardo
+l'URL richiesto attualmente:
 
 ===========================   ====================================  ========================
-Attribute/method              Description                           Example
+Attributo/Metodo              Descrizione                           Esempio
 ===========================   ====================================  ========================
-``request.path``              The full path, not including the      ``"/hello/"``
-                              domain but including the leading
-                              slash.
+``request.path``              Il percorso completo, escluso il      ``"/hello/"``
+                              dominio ma incluso lo slash finale.
 
-``request.get_host()``        The host (i.e., the "domain," in      ``"127.0.0.1:8000"``
-                              common parlance).                     or ``"www.example.com"``
+``request.get_host()``        L'host (ovvero, il "dominio" nel      ``"127.0.0.1:8000"``
+                              comune dire).                         o ``"www.example.com"``
 
-``request.get_full_path()``   The ``path``, plus a query string     ``"/hello/?print=true"``
-                              (if available).
+``request.get_full_path()``   Il ``path``, più una stringa di       ``"/hello/?print=true"``
+                              query (se disponibile).
 
-``request.is_secure()``       ``True`` if the request was made via  ``True`` or ``False``
-                              HTTPS. Otherwise, ``False``.
+``request.is_secure()``       ``True`` se la richiesta è stata      ``True`` or ``False``
+                              fatta via HTTPS. Altrimenti,
+                              ``False``.
 ===========================   ====================================  ========================
 
-Always use these attributes/methods instead of hard-coding URLs in your views.
-This makes for more flexible code that can be reused in other places. A
-simplistic example::
+Usa sempre questi attributi/metodi piuttosto di scrivere URL a mano nelle tue
+view. Questo rende più flessibile il codice e può essere riutilizzato in altri
+casi. Un esempio semplicistico::
 
-    # BAD!
+    # SBAGLIATO!
     def current_url_view_bad(request):
         return HttpResponse("Welcome to the page at /current/")
 
-    # GOOD
+    # BUONO
     def current_url_view_good(request):
         return HttpResponse("Welcome to the page at %s" % request.path)
 
-Other Information About the Request
------------------------------------
+Altre Informazioni Riguardo la Richiesta
+----------------------------------------
 
-``request.META`` is a Python dictionary containing all available HTTP headers
-for the given request -- including the user's IP address and user agent
-(generally the name and version of the Web browser). Note that the full list
-of available headers depends on which headers the user sent and which headers
-your Web server sets. Some commonly available keys in this dictionary are:
+``request.META`` è un dizionario Python contenente tutti gli header della
+richiesta HTTP -- incluso l'indirizzo IP dell'utente e l'user agent (solitamente
+il nome e la versione del browser). Nota che la lista completa degli header
+disponibili dipende da quali header invia l'utente e da quali header processa
+il tuo server. Alcune chiavi comunemente disponibili in questo dizionario sono:
 
-* ``HTTP_REFERER`` -- The referring URL, if any. (Note the misspelling of
-  ``REFERER``.)
-* ``HTTP_USER_AGENT`` -- The user's browser's user-agent string, if any.
-  This looks something like: ``"Mozilla/5.0 (X11; U; Linux i686; fr-FR; rv:1.8.1.17) Gecko/20080829 Firefox/2.0.0.17"``.
-* ``REMOTE_ADDR`` -- The IP address of the client, e.g., ``"12.345.67.89"``.
-  (If the request has passed through any proxies, then this might be a
-  comma-separated list of IP addresses, e.g., ``"12.345.67.89,23.456.78.90"``.)
+* ``HTTP_REFERER`` -- L'URL da cui si proviene, se esite. (Nota l'errore
+  ortografico di ``REFERER``).
+* ``HTTP_USER_AGENT`` -- La stringa che definisce lo user agent del browser
+  dell'utente, se presente. Questa somiglia a qualcosa come:
+  ``"Mozilla/5.0 (X11; U; Linux i686; fr-FR; rv:1.8.1.17) Gecko/20080829 Firefox/2.0.0.17"``.
+* ``REMOTE_ADDR`` -- L'indirizzo IP del client, ad esempio ``"12.345.67.89"``.
+  (Se la richiesta è passata tramite proxy, questa chive potrebbe restituire una
+  lista di indirizzi IP separati da virgola, ad esempio ``"12.345.67.89,23.456.78.90"``).
 
-Note that because ``request.META`` is just a basic Python dictionary, you'll
-get a ``KeyError`` exception if you try to access a key that doesn't exist.
-(Because HTTP headers are *external* data -- that is, they're submitted by your
-users' browsers -- they shouldn't be trusted, and you should always design your
-application to fail gracefully if a particular header is empty or doesn't
-exist.) You should either use a ``try``/``except`` clause or the ``get()``
-method to handle the case of undefined keys::
+Da notare che poiché ``request.META`` è un semplice dizionario Python, ottieni
+l'eccezione ``KeyErrorse provi ad accedere ad una chiave che non esiste.
+(Questo poiché gli HTTP headers sono dati *esterni* -- ovvero, sono passati dal
+browser dell'utente -- non sono affidabili, ed è tuo compito di progettazione
+far fallire la tua applicazione nel caso in cui un particolare header è vuoto o
+non esiste). Puoi comunque usare una istruzione ``try``/``except`` o il metodo
+``get()`` per gestire casi di chiavi indefinite::
 
-    # BAD!
+    # SBAGLIATO!
     def ua_display_bad(request):
         ua = request.META['HTTP_USER_AGENT']  # Might raise KeyError!
         return HttpResponse("Your browser is %s" % ua)
 
-    # GOOD (VERSION 1)
+    # BUONO (VERSIONE 1)
     def ua_display_good1(request):
         try:
             ua = request.META['HTTP_USER_AGENT']
@@ -101,14 +103,13 @@ method to handle the case of undefined keys::
             ua = 'unknown'
         return HttpResponse("Your browser is %s" % ua)
 
-    # GOOD (VERSION 2)
+    # BUONO (VERSIONE 2)
     def ua_display_good2(request):
         ua = request.META.get('HTTP_USER_AGENT', 'unknown')
         return HttpResponse("Your browser is %s" % ua)
 
-We encourage you to write a small view that displays all of the
-``request.META`` data so you can get to know what's in there. Here's what that
-view might look like::
+Ti incoraggiamo a scrivere piccole view che mostrino tutti i dati ``request.META``
+per scoprire cosa conosci qui. Ecco come appare una view del genere::
 
     def display_meta(request):
         values = request.META.items()
@@ -118,59 +119,59 @@ view might look like::
             html.append('<tr><td>%s</td><td>%s</td></tr>' % (k, v))
         return HttpResponse('<table>%s</table>' % '\n'.join(html))
 
-As an exercise, see whether you can convert this view to use Django's template
-system instead of hard-coding the HTML. Also try adding ``request.path`` and
-the other ``HttpRequest`` methods from the previous section.
+Come esercizio, converti questa view per usare il sistema di template di Django
+invece di scrivere brutalmente l'HTML. Prova inoltre ad aggiungere ``request.path`` e
+altri metodi di ``HttpRequest`` visti nella sezione precedente.
 
-.. SL Tested ok (all four view funcs above)
+Informazioni riguardo i Dati inviati
+------------------------------------
 
-Information About Submitted Data
---------------------------------
+Aldilà dei metadata di base della richiesta, gli oggetti ``HttpRequest`` hanno
+due attributi che contengono informazioni riguardo le informazioni inviate
+dall'utente: ``request.GET`` e ``request.POST``. Entrambi sono oggetti simili a
+dizionari che ti permettono di accedere ai dati ``GET`` e ``POST``.
 
-Beyond basic metadata about the request, ``HttpRequest`` objects have two
-attributes that contain information submitted by the user: ``request.GET`` and
-``request.POST``. Both of these are dictionary-like objects that give you
-access to ``GET`` and ``POST`` data.
+.. admonition:: Oggetti simili a dizionari
 
-.. admonition:: Dictionary-like objects
-
-    When we say ``request.GET`` and ``request.POST`` are "dictionary-like"
-    objects, we mean that they behave like standard Python dictionaries but
-    aren't technically dictionaries under the hood. For example,
-    ``request.GET`` and ``request.POST`` both have ``get()``, ``keys()``
-    and ``values()`` methods, and you can iterate over the keys by doing
+    Quando diciamo che ``request.GET`` w ``request.POST`` sono oggetti "simili a
+    dizionari", vogliamo dire che hanno il comportamento standard dei dizionari
+    Python, ma tecnicamente non sono dei veri dizionari. Per esempio,
+    ``request.GET`` e ``request.POST`` hanno entrambi i metodi ``get()``, ``keys()``
+    e ``values()``, e li puoi iterare usando con un ciclo for-in con
     ``for key in request.GET``.
 
-    So why the distinction? Because both ``request.GET`` and ``request.POST``
-    have additional methods that normal dictionaries don't have. We'll get into
-    these in a short while.
+    Perché la distinzione? Poiché entrambi ``request.GET`` e ``request.POST``
+    hanno dei metodi addizionali che i normali dizionari non hanno. Li vedremo
+    tra breve.
 
-    You might have encountered the similar term "file-like objects" -- Python
-    objects that have a few basic methods, like ``read()``, that let them
-    act as stand-ins for "real" file objects.
+    Abbiamo incontrato il termine simile oggetti simili a file -- oggetti
+    Python che hanno i metodi di base, come ``read()``, che agiscono come i
+    "reali" oggetti file.
 
-``POST`` data generally is submitted from an HTML ``<form>``, while ``GET``
-data can come from a ``<form>`` or the query string in the page's URL.
+I dati ``POST`` sono generalmente inviati tramite il tag HTML ``<form>``, mentre
+i dati ``GET`` possono derivare da un form o da una query inviata nell'URL della
+pagina.
 
-A Simple Form-Handling Example
-==============================
+Esempio di un semplice Gestore di Form
+======================================
 
-Continuing this book's ongoing example of books, authors and publishers, let's
-create a simple view that lets users search our book database by title.
+Continuiamo con l'esempio già mostrato durante questo libro, autori ed
+editori/case-editrici, creiamo una semplice view che permette all'utente di
+cercare nel nostro database di libri per titolo.
 
-Generally, there are two parts to developing a form: the HTML user interface
-and the backend view code that processes the submitted data. The first part is
-easy; let's just set up a view that displays a search form::
+In generale, ci sono due parti per lo sviluppo di un form: l'interfaccia utente
+HTML ed il codice per la view di backend che elabora i dati inviati. La prima
+parte è semplice; creiamo una view che mostra i form di ricerca::
 
     from django.shortcuts import render
 
     def search_form(request):
         return render(request, 'search_form.html')
 
-As we learned in Chapter 3, this view can live anywhere on your Python path.
-For sake of argument, put it in ``books/views.py``.
+Come imparato nel Capitolo 3, questi view possono stare ovunque nel tuo percorso
+Python. Per comodità, inseriscile in ``books/views.py``.
 
-The accompanying template, ``search_form.html``, could look like this::
+Il template che lo forma, ``search_form.html``, dovrebbe somigliare a questo::
 
     <html>
     <head>
@@ -184,7 +185,7 @@ The accompanying template, ``search_form.html``, could look like this::
     </body>
     </html>
 
-The URLpattern in ``urls.py`` could look like this::
+L'URLpattern in ``urls.py`` dovrebbe somigliare a questo::
 
     from mysite.books import views
 
@@ -194,19 +195,16 @@ The URLpattern in ``urls.py`` could look like this::
         # ...
     )
 
-(Note that we're importing the ``views`` module directly, instead of something
-like ``from mysite.views import search_form``, because the former is less
-verbose. We'll cover this importing approach in more detail in Chapter 8.)
+(Nota che stiamo importando il modulo ``views`` direttamente, invece di fare
+cose come ``from mysite.views import search_form``, poiché ha una forma meno
+lunga. Spiegheremo l'importanza di questo approccio in dettaglio nel Capitolo 8).
 
-Now, if you run the ``runserver`` and visit
-``http://127.0.0.1:8000/search-form/``, you'll see the search interface. Simple
-enough.
+Or, se eseguiamo il ``runserver`` e visitiamo ``http://127.0.0.1:8000/search-form/``,
+vedremo l'interfaccia per la ricerca. Molto semplice.
 
-.. SL Tested ok
-
-Try submitting the form, though, and you'll get a Django 404 error. The form
-points to the URL ``/search/``, which hasn't yet been implemented. Let's fix
-that with a second view function::
+Provando ad inviare il form, viene restituito un errore 404 di Django. Il form
+rimanda all'URL ``/search/``, che non è stato ancora implementato. Fixiamo il
+problema creando una seconda funzione di view::
 
     # urls.py
 
@@ -226,56 +224,54 @@ that with a second view function::
             message = 'You submitted an empty form.'
         return HttpResponse(message)
 
-.. SL Tested ok
+Per il momento, questa funzione semplicemente mostra all'utente il termine della
+ricerca, per cui possiamo verificare che i dati inviati a Django sono corretti,
+e quindi possiamo meglio studiare come avviene questo processo. In breve:
 
-For the moment, this merely displays the user's search term, so we can make
-sure the data is being submitted to Django properly, and so you can get a feel
-for how the search term flows through the system. In short:
+1. Il ``<form>`` definisce una variabile ``q``. Quando viene inviata, il valore
+   di ``q`` viene inviato via ``GET`` (``method="get"``) all'URL ``/search/``.
 
-1. The HTML ``<form>`` defines a variable ``q``. When it's submitted, the
-   value of ``q`` is sent via ``GET`` (``method="get"``) to the URL
-   ``/search/``.
+2. La view Django che gestisce l'URL ``/search/`` (``search()``) ha l'accesso
+   al valore di ``q`` presente in ``request.GET``.
 
-2. The Django view that handles the URL ``/search/`` (``search()``) has
-   access to the ``q`` value in ``request.GET``.
+Una cosa importante da sottolineare è che abbiamo esplicitamente verificato che
+``'q'`` esiste in ``request.GET``. Come sottolineato nella sezione ``request.META``
+qui sopra, non dobbiamo dare fiducia a nessun dato inviato dagli utenti o
+assumere che abbiamo inviato qualcosa senza averne la certezza. Se non eseguiamo
+questo controllo, l'invio di un form vuoto solleva l'eccezione ``KeyError``
+nella view::
 
-An important thing to point out here is that we explicitly check that ``'q'``
-exists in ``request.GET``. As we pointed out in the ``request.META`` section
-above, you shouldn't trust anything submitted by users or even assume that
-they've submitted anything in the first place. If we didn't add this check, any
-submission of an empty form would raise ``KeyError`` in the view::
-
-    # BAD!
+    # SBAGLIATO!
     def bad_search(request):
         # The following line will raise KeyError if 'q' hasn't
         # been submitted!
         message = 'You searched for: %r' % request.GET['q']
         return HttpResponse(message)
 
-.. SL Tested ok
+.. admonition:: Parametri nella query
 
-.. admonition:: Query string parameters
+    Poiché i dati ``GET`` vengono passati tramite stringhe di richieste (ad esempio,
+    ``/search/?q=django``), puoi usare ``request.GET`` per accedere alle
+    variabili. Nell'introduzione al sistema di URLconf di Django nel Capitolo 3,
+    abbiamo confrontato gli 'URL carini' di Django a più tradizionali URL PHP/Java
+    come ``/time/plus?hours=3`` ed abbiamo detto che ti mostreremo come crearli
+    in questo Capitolo. Adesso sai come accedere ai parametri della query nelle
+    tue view (come ``hours=3`` in questo esempio) -- usando ``request.GET``.
 
-    Because ``GET`` data is passed in the query string (e.g.,
-    ``/search/?q=django``), you can use ``request.GET`` to access query string
-    variables. In Chapter 3's introduction of Django's URLconf system, we
-    compared Django's pretty URLs to more traditional PHP/Java URLs such as
-    ``/time/plus?hours=3`` and said we'd show you how to do the latter in
-    Chapter 7. Now you know how to access query string parameters in your
-    views (like ``hours=3`` in this example) -- use ``request.GET``.
+I dati ``POST`` lavorano allo stesso modo di quelli ``GET`` -- basta usare solo
+``request.POST`` invece di ``request.GET``. Quale è la differenza fra ``GET`` e
+``POST``? Usa ``GET`` quando l'azione di invio del form è solo una richiesta per
+avere ('get') un dato. Usa ``POST`` in tutti i casi in cui l'invio del form avrà
+un qualche effetto collaterale -- *cambiare* dati, o inviare una e-mail, o
+qualcos'altro che sta al di sopra del semplice *mostrare* dati. Nel nostro
+esempio di motore di ricerca di libri, useremo ``GET`` perché la query non
+cambi alcun dato nel nostro server. (Vedi
+http://www.w3.org/2001/tag/doc/whenToUseGet.html se vuoi saperne di più su ``GET``
+e ``POST``).
 
-``POST`` data works the same way as ``GET`` data -- just use ``request.POST``
-instead of ``request.GET``. What's the difference between ``GET`` and ``POST``?
-Use ``GET`` when the act of submitting the form is just a request to "get"
-data. Use ``POST`` whenever the act of submitting the form will have some side
-effect -- *changing* data, or sending an e-mail, or something else that's
-beyond simple *display* of data. In our book-search example, we're using
-``GET`` because the query doesn't change any data on our server. (See
-http://www.w3.org/2001/tag/doc/whenToUseGet.html if you want to learn more
-about ``GET`` and ``POST``.)
-
-Now that we've verified ``request.GET`` is being passed in properly, let's hook
-the user's search query into our book database (again, in ``views.py``)::
+Ora che abbiamo verificato che ``request.GET`` è stata passata correttamente,
+andiamo ad eseguire una ricerca nel nostro database di libri con i dati
+dell'utente(di nuovo, in ``views.py``)::
 
     from django.http import HttpResponse
     from django.shortcuts import render
@@ -290,27 +286,27 @@ the user's search query into our book database (again, in ``views.py``)::
         else:
             return HttpResponse('Please submit a search term.')
 
-A couple of notes on what we did here:
+Ecco alcune cose da notare:
 
-* Aside from checking that ``'q'`` exists in ``request.GET``, we also make
-  sure that ``request.GET['q']`` is a non-empty value before passing it to
-  the database query.
+* Oltre a controllare che ``'q'`` esista in ``request.GET``, abbiamo anche
+  controllato che ``request.GET['q']`` è un valore non vuoto prima di passarlo
+  alla query del database.
 
-* We're using ``Book.objects.filter(title__icontains=q)`` to query our
-  book table for all books whose title includes the given submission. The
-  ``icontains`` is a lookup type (as explained in Chapter 5 and Appendix
-  B), and the statement can be roughly translated as "Get the books whose
-  title contains ``q``, without being case-sensitive."
+* Usiamo ``Book.objects.filter(title__icontains=q)`` per richiedere alla tabella
+  libri di ritornare tutti i libri che hanno un titolo che corrisponde a quello
+  dato dall'utente. ``icontains`` è un tipo di ricerca (come spiegato nel
+  Capitolo 5, appendice B), e l'istruzione può essere tradotta brutalmente come
+  "Prendi i libri che contengono il titolo ``q``, senza distinzioni di maiuscolo
+  o minuscolo".
 
-  This is a very simple way to do a book search. We wouldn't recommend
-  using a simple ``icontains`` query on a large production database, as
-  it can be slow. (In the real world, you'd want to use a custom search
-  system of some sort. Search the Web for *open-source full-text search*
-  to get an idea of the possibilities.)
+  Questo è un modo molto semplice per fare una ricerca. Non raccomandiamo di
+  usare una semplice query ``icontains`` su un database di produzione, poiché
+  può essere davvero lento. (Nel mondo reale, vorremmo usare una ricerca con un
+  certo meccanismo di ordine. Cerca su internet *open-source full-text search*
+  per avere una ide delle possibilità).
 
-* We pass ``books``, a list of ``Book`` objects, to the template. The
-  template code for ``search_results.html`` might include something like
-  this::
+* Passiamo ``books``, una lista di oggetti ``Book``, al template. Il codice del
+  template ``search_results.html`` sarà qualcosa di simile::
 
       <p>You searched for: <strong>{{ query }}</strong></p>
 
@@ -325,10 +321,8 @@ A couple of notes on what we did here:
           <p>No books matched your search criteria.</p>
       {% endif %}
 
-  Note usage of the ``pluralize`` template filter, which outputs an "s"
-  if appropriate, based on the number of books found.
-
-.. SL Tested ok
+  Nota l'uso del filtro dei template ``pluralize``, che restituisce una "s" quando
+  appropriato, in base al numero di libri trovati.
 
 Improving Our Simple Form-Handling Example
 ==========================================
@@ -1011,9 +1005,9 @@ redisplay-with-errors.
 
 Since we're creating a POST form (which can have the effect of modifying data),
 we need to worry about Cross Site Request Forgeries. Thankfully, you don't have
-to worry too hard, because Django comes with a very easy-to-use system for 
-protecting against it. In short, all POST forms that are targeted at internal 
-URLs should use the ``{% csrf_token %}`` template tag. More details about 
+to worry too hard, because Django comes with a very easy-to-use system for
+protecting against it. In short, all POST forms that are targeted at internal
+URLs should use the ``{% csrf_token %}`` template tag. More details about
 ``{% csrf_token %}`` can be found in :doc:`chapter16` and :doc:`chapter20`.
 
 
