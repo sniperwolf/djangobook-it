@@ -324,21 +324,22 @@ Ecco alcune cose da notare:
   Nota l'uso del filtro dei template ``pluralize``, che restituisce una "s" quando
   appropriato, in base al numero di libri trovati.
 
-Improving Our Simple Form-Handling Example
-==========================================
+Migliorare il nostro esempio di Gestione di un Form
+===================================================
 
-As in previous chapters, we've shown you the simplest thing that could possibly
-work. Now we'll point out some problems and show you how to improve it.
+Come nei precedenti capitoli, ti abbiamo mostrato il modo più semplice per far
+funzionare il tutto. Ora sottolineeremo alcuni problemi e ti mostreremo come
+migliorarlo.
 
-First, our ``search()`` view's handling of an empty query is poor -- we're just
-displaying a ``"Please submit a search term."`` message, requiring the user to
-hit the browser's back button. This is horrid and unprofessional, and if you
-ever actually implement something like this in the wild, your Django privileges
-will be revoked.
+In primis, la gestione della nostra view ``search()``  di una query vuota è
+scadente -- mostriamo solo un messaggio ``"Please submit a search term."``,
+richiedendo all'utente di pigiare sul pulsante per tornare indietro. Questo è
+orrido e non professionale, e se hai mai implementato qualcosa del genere nella
+foresta, i tuoi privilegi Django sarebbero revocati.
 
-It would be much better to redisplay the form, with an error above it, so that
-the user can try again immediately. The easiest way to do that would be to
-render the template again, like this:
+Sarebbe meglio mostrare di nuovo il form, con un errore che permetta all'utente
+di riprovare immediatamente. La via migliore per farlo è renderizzare ancora il
+template, ad esempio così:
 
 .. parsed-literal::
 
@@ -358,13 +359,13 @@ render the template again, like this:
         else:
             **return render(request, 'search_form.html', {'error': True})**
 
-(Note that we've included ``search_form()`` here so you can see both views in
-one place.)
+(Nota che abbiamo incluso ``search_form()`` per cui puoi vedere entrambe le view
+in un solo posto).
 
-Here, we've improved ``search()`` to render the ``search_form.html`` template
-again, if the query is empty. And because we need to display an error message
-in that template, we pass a template variable. Now we can edit
-``search_form.html`` to check for the ``error`` variable:
+Abbiamo migliorato ``search()`` renderizzando di nuovo il template ``search_form.html``,
+se la query è vuota. E poiché abbiamo bisogno di mostrare un messaggio di errore
+nel template, gli passiamo una variabile. Possiamo quindi modificare
+``search_form.html`` affinché controlli la variabile ``error``:
 
 .. parsed-literal::
 
@@ -383,19 +384,16 @@ in that template, we pass a template variable. Now we can edit
     </body>
     </html>
 
-.. SL Tested ok
+Possiamo ancora usare il template con dalla view originale, ``search_form()``,
+poiché ``search_form()`` non passa la variabile ``error`` al template -- per cui
+il messaggio di errore non viene mostrato in questo caso.
 
-We can still use this template from our original view, ``search_form()``,
-because ``search_form()`` doesn't pass ``error`` to the template -- so the
-error message won't show up in that case.
-
-With this change in place, it's a better application, but it now begs the
-question: is a dedicated ``search_form()`` view really necessary? As it stands,
-a request to the URL ``/search/`` (without any ``GET`` parameters) will display
-the empty form (but with an error). We can remove the ``search_form()`` view,
-along with its associated URLpattern, as long as we change ``search()`` to
-hide the error message when somebody visits ``/search/`` with no ``GET``
-parameters::
+Con questo cambiamento, abbiamo migliorato l'applicazione, ma ecco la domandona:
+è realmente necessaria una view ``search_form()`` dedicata? Per come è adesso,
+una richiesta all'URL ``/search/`` (senza alcun parametro ``GET``) mostra un
+form vuoto (ma con un errore). Possiamo rimuovere la view ``search_form()``,
+con il suo URLpattern, cambiando semplicemente ``search()`` per nascondere il
+messaggio di errore quando qualcuno visita ``/search/`` senza parametri ``GET``::
 
     def search(request):
         error = False
@@ -410,64 +408,66 @@ parameters::
         return render(request, 'search_form.html',
             {'error': error})
 
-.. SL Tested ok
+In questa view aggiornata, se un utente visita ``/search/`` senza parametri ``GET``,
+vedrà il form di ricerca con nessun messaggio di errore. Se un utente invia il
+form con un valore vuoto di ``'q'``, vedrà un form di ricerca *con* un messaggio
+di errore. E, infine, se un utente invia un form con un valore non vuoto di
+``'q'``, vedrà effettivamente i risultati.
 
-In this updated view, if a user visits ``/search/`` with no ``GET`` parameters,
-he'll see the search form with no error message. If a user submits the form
-with an empty value for ``'q'``, he'll see the search form *with* an error
-message. And, finally, if a user submits the form with a non-empty value for
-``'q'``, he'll see the search results.
-
-We can make one final improvement to this application, to remove a bit of
-redundancy. Now that we've rolled the two views and URLs into one and
-``/search/`` handles both search-form display and result display, the HTML
-``<form>`` in ``search_form.html`` doesn't have to hard-code a URL. Instead
-of this::
+Possiamo dare un ultimo miglioramento all'applicazione, rimuovendo alcune
+ridondanze. Ora che abbiamo unito le due view e gli URL in uno e ``/search/``
+gestisce entrambi i form e mostra gli stessi risultati, il ``<form>`` in
+``search_form.html`` non dovrebbe avere un URL scritto a mano. Invece di questo::
 
     <form action="/search/" method="get">
 
-It can be changed to this::
+Potremmo usare questo::
 
     <form action="" method="get">
 
-The ``action=""`` means "Submit the form to the same URL as the current page."
-With this change in place, you won't have to remember to change the ``action``
-if you ever hook the ``search()`` view to another URL.
+``action=""`` significa "Invia il form alla pagina corrente". Con questi
+cambiamenti, non dovrai più ricordare di cambiare ``action`` tutte le volte che
+usi la view ``search()`` in un altro URL.
 
-Simple validation
-=================
+Semplice Convalida (dei Dati)
+=============================
 
-Our search example is still reasonably simple, particularly in terms of its
-data validation; we're merely checking to make sure the search query isn't
-empty. Many HTML forms include a level of validation that's more complex than
-making sure the value is non-empty. We've all seen the error messages on Web
-sites:
-
-* "Please enter a valid e-mail address. 'foo' is not an e-mail address."
-* "Please enter a valid five-digit U.S. ZIP code. '123' is not a ZIP code."
-* "Please enter a valid date in the format YYYY-MM-DD."
+Il nostro esempio di motore di ricerca rimane ancora ragionevolmente semplice,
+in particolare in termini di convalida dei dati; stiamo semplicemente
+controllando che il nostro termine di ricerca non sia vuoto. Molti form HTML
+includono metodi di convalida più complessi di questo. Abbiamo tutti visto nel
+web errori come:
+* "Please enter a valid e-mail address. 'foo' is not an e-mail address".
+* ("Digitare un indirizzo email valido. 'foo' non è un indirizzo
+  e-mail);
+* "Please enter a valid five-digit U.S. ZIP code. '123' is not a ZIP code".
+* ("Digitare un valido U.S. ZIP code di 5 numeri. '123' non è uno ZIP code
+  valido");
+* "Please enter a valid date in the format YYYY-MM-DD".
+* "Digitare una data valida nel formato YYYY-MM-DD";
 * "Please enter a password that is at least 8 characters long and contains
-  at least one number."
+  at least one number".
+* "Digitare una password che è lunga almeno 8 caratteri e contiene almeno un
+  numero".
 
-.. admonition:: A note on JavaScript validation
+.. admonition:: Una nota riguardo la convalida JavaScript
 
-    This is beyond the scope of this book, but you can use JavaScript to
-    validate data on the client side, directly in the browser. But be warned:
-    even if you do this, you *must* validate data on the server side, too. Some
-    people have JavaScript turned off, and some malicious users might submit
-    raw, unvalidated data directly to your form handler to see whether they can
-    cause mischief.
+    Questo va al di là dello scopo di questo libro, ma puoi usare JavaScript per
+    convalidare i dati a livello client, direttamente sul browser. Ma stai
+    attento: anche se lo fai, *devi* convalidare i dati anche livello server.
+    Alcune persone possono avere JavaScript disattivo, e alcuni utenti malevoli
+    possono inviare dati puri, non convalidati direttamente al gestore del form
+    per vedere se riescono a causare problemi.
 
-    There's nothing you can do about this, other than *always* validate
-    user-submitted data server-side (i.e., in your Django views). You should
-    think of JavaScript validation as a bonus usability feature, not as your
-    only means of validating.
+    Non c'è nulla che puoi fare di diverso, oltre convalidare *sempre* i dati
+    inviati da utente a livello server (in Django, a livello di view). Devi
+    pensare alla convalida JavaScript come un bonus per l'usabilità, non come
+    unica via per la convalida.
 
-Let's tweak our ``search()`` view so that it validates that the search term is
-less than or equal to 20 characters long. (For sake of example, let's say
-anything longer than that might make the query too slow.) How might we do that?
-The simplest possible thing would be to embed the logic directly in the view,
-like this:
+Modifichiamo la nostra view ``search()`` per controllare che il termine di
+ricerca sia inferiore o uguale a 20 caratteri (banalmente, per evitare che
+lunghe query rallentino la ricerca). Come possiamo farlo? La via migliore è
+quella di mettere la logica direttamente nella view, come in questo modo:
 
 .. parsed-literal::
 
@@ -486,10 +486,11 @@ like this:
         return render(request, 'search_form.html',
             {'error': error})
 
-Now, if you try submitting a search query greater than 20 characters long,
-it won't let you search; you'll get an error message. But that error message
-in ``search_form.html`` currently says ``"Please submit a search term."`` --
-so we'll have to change it to be accurate for both cases:
+Ora, se volessimo provare ad inviare una ricerca con un termine più lungo di 20
+caratteri, semplicemente non verrà effettuata la ricerca; riceveremo un
+messaggio di errore. Ma quel messaggio di errore in ``search_form.html`` dice
+attualmente ``"Please submit a search term."`` -- perciò dobbiamo cambiarlo in
+maniera accurata per rispondere ad entrambi i casi:
 
 .. parsed-literal::
 
@@ -508,16 +509,15 @@ so we'll have to change it to be accurate for both cases:
     </body>
     </html>
 
-.. SL Tested ok
+C'è qualcosa di brutto qui. Il nostro messaggio di errore globale può causare
+confusione. Perché viene mostrato un messaggio di errore per un form inviato
+senza termini di ricerca non dice nulla riguardo al limite dei 20 caratteri? I
+messaggi di errore dovrebbero essere specifici, senza possibili ambiguità o
+confusione.
 
-There's something ugly about this. Our one-size-fits-all error message is
-potentially confusing. Why should the error message for an empty form
-submission mention anything about a 20-character limit? Error messages should
-be specific, unambiguous and not confusing.
-
-The problem is in the fact that we're using a simple boolean value for
-``error``, whereas we should be using a *list* of error message strings. Here's
-how we might fix that:
+Il problema è che stiamo usando un semplice valore booleano per ``error``,
+mentre potrebbe essere più utile avere una *lista* dei messaggi di errore. Ecco
+come risolvere il problema:
 
 .. parsed-literal::
 
@@ -536,9 +536,8 @@ how we might fix that:
         return render(request, 'search_form.html',
             {**'errors': errors**})
 
-Then, we need make a small tweak to the ``search_form.html`` template to
-reflect that it's now passed an ``errors`` list instead of an ``error`` boolean
-value:
+Ora, dobbiamo fare una piccola modifica al template ``search_form.html`` per
+mostrare correttamente la lista ``errors`` piuttosto che il valore booleano ``error``:
 
 .. parsed-literal::
 
@@ -561,23 +560,22 @@ value:
     </body>
     </html>
 
-.. SL Tested ok
+Creare un Form di Contatto
+==========================
 
-Making a Contact Form
-=====================
+Anche se abbiamo giocato con il nostro esempio del motore di ricerca diverse
+volte in questo libro e lo abbiamo migliorato, rimane fondamentalmente semplice:
+un singolo campo ``'q'``. Poiché è così semplice, non abbiamo usato alcuna
+libreria dei Form di Django per lavorarci. Per form più complessi, è necessario
+avere un trattamento complesso -- e ora svilupperemo qualcosa di più complesso:
+un form di contatto.
 
-Although we iterated over the book search form example several times and
-improved it nicely, it's still fundamentally simple: just a single field,
-``'q'``. Because it's so simple, we didn't even use Django's form library to
-deal with it. But more complex forms call for more complex treatment -- and now
-we'll develop something more complex: a site contact form.
+Questo form deve permettere agli utenti di un sito web di inviare un qualche
+feedback, e contenere un casella opzionale per avere un indirizzo e-mail di
+ritorno. Dopo che il form viene inviato ed i dati sono convalidati, esso spedirà
+automaticamente il messaggio via e-mail al team del sito web.
 
-This will be a form that lets site users submit a bit of feedback, along with
-an optional e-mail return address. After the form is submitted and the
-data is validated, we'll automatically send the message via e-mail to the site
-staff.
-
-We'll start with our template, ``contact_form.html``.
+Iniziamo partendo dal nostro template, ``contact_form.html``.
 
 .. parsed-literal::
 
@@ -605,15 +603,15 @@ We'll start with our template, ``contact_form.html``.
     </body>
     </html>
 
-We've defined three fields: the subject, e-mail address and message. The second
-is optional, but the other two fields are required. Note we're using
-``method="post"`` here instead of ``method="get"`` because this form submission
-has a side effect -- it sends an e-mail. Also, we copied the error-displaying
-code from our previous template ``search_form.html``.
+Abbiamo definito 3 campi: il soggetto, un indirizzo email ed un messaggio. Il
+secondo è opzionale, ma gli altri due campi sono richiesti. Nota che stiamo
+usando ``method="post"`` qui al posto di ``method="get"`` perché questo form ha
+un effetto collaterale -- invia e-mail. Inoltre, abbiamo copiato il codice di
+errore da mostrare dal template precedente ``search_form.html``.
 
-If we continue down the road established by our ``search()`` view from the
-previous section, a naive version of our ``contact()`` view might look like
-this::
+Se continuiamo giù per la strada stabilita dalla nostra view ``search()`` della
+sezione precedente, una versione semplice della nostra via ``contact()``
+potrebbe essere la seguente::
 
     from django.core.mail import send_mail
     from django.http import HttpResponseRedirect
@@ -639,79 +637,78 @@ this::
         return render(request, 'contact_form.html',
             {'errors': errors})
 
-.. SL Tested ok (modulo email config and lack of thanks view)
 
-(If you're following along, you may be wondering whether to put this view in
-the ``books/views.py`` file. It doesn't have anything to do with the books
-application, so should it live elsewhere? It's totally up to you; Django
-doesn't care, as long as you're able to point to the view from your URLconf.
-Our personal preference would be to create a separate directory, ``contact``,
-at the same level in the directory tree as ``books``. This would contain an
-empty ``__init__.py`` and ``views.py``.)
+(Se stai seguendo l'esempio cardine, potresti voler inserire questa view nel
+file ``books/views.py``). Non ha nulla a che fare con l'applicazione dei libri,
+perciò dove metterla? E' una tua scelta; a Django non importa, fino a che sei in
+grado di far puntare la tua view al tuo URLconf. La nostra personale preferenza
+sarebbe quella di creare un directory separata, ``contact``, allo stesso livello
+della directory ``books``. Questa dovrebbe contenere due file vuoti ``__init__.py``
+e ``views.py``).
 
-A couple of new things are happening here:
+Un paio di cose nuove sono successe qui:
 
-* We're checking that ``request.method`` is ``'POST'``. This will only be
-  true in the case of a form submission; it won't be true if somebody is
-  merely viewing the contact form. (In the latter case,
-  ``request.method will be set to 'GET'``, because in normal Web browsing,
-  browsers use ``GET``, not ``POST``.) This makes it a nice way to isolate
-  the "form display" case from the "form processing" case.
+* Stiamo controllando che ``request.method`` è ``'POST'``. Questo è vero solo
+  nel caso in cui viene inviato il form; non sarà vero se il form viene
+  solamente visto (In quest'ultimo caso, ``request.method`` sarà impostato a
+  ``'GET'``, perché la comune navigazione viene riconosciuta come ``GET``, non
+  ``POST``). Questo permette di isolare bene il caso di "mostrare form" dal caso
+  "elaborare form".
 
-* Instead of ``request.GET``, we're using ``request.POST`` to access the
-  submitted form data. This is necessary because the HTML ``<form>`` in
-  ``contact_form.html`` uses ``method="post"``. If this view is accessed
-  via ``POST``, then ``request.GET`` will be empty.
+* Invece di ``request.GET``, usiamo ``request.POST`` per accedere ai dati inviati
+  dal form. Questo è necessario perché l'HTML ``<form>`` in ``contact_form.html``
+  usa ``method="post"``. Se questa view viene visualizzata via ``POST``, allora
+  ``request.GET`` sarà vuoto.
 
-* This time, we have *two* required fields, ``subject`` and ``message``, so
-  we have to validate both. Note that we're using ``request.POST.get()``
-  and providing a blank string as the default value; this is a nice, short
-  way of handling both the cases of missing keys and missing data.
+* Questa volta, abbiamo *due* campi richiesti, ``subject`` (oggetto) e ``message``
+  (messaggio), per cui dobbiamo controllarli entrambi. Nota che stiamo usando
+  ``request.POST.get()`` e restituendo una stringa vuota come valore di default;
+  questo è un buon modo per gestirli semplicemente entrambi nel caso di chiavi o
+  dati mancanti.
 
-* Although the ``email`` field is not required, we still validate it if it
-  is indeed submitted. Our validation algorithm here is fragile -- we're
-  just checking that the string contains an ``@`` character. In the real
-  world, you'd want more robust validation (and Django provides it, which
-  we'll show you very shortly).
+* Anche se il campo ``email`` non è richiesto, lo controlliamo quando viene
+  inviato. Il nostro algoritmo di controllo è debole -- stiamo solo controllando
+  che la stringa contenga solo un carattere ``@``. Nel mondo reale, potresti
+  voler usare un controllo più robusto (e Django te lo fornisce, come ti
+  mostreremo tra breve).
 
-* We're using the function ``django.core.mail.send_mail`` to send an
-  e-mail. This function has four required arguments: the e-mail subject,
-  the e-mail body, the "from" address, and a list of recipient addresses.
-  ``send_mail`` is a convenient wrapper around Django's ``EmailMessage``
-  class, which provides advanced features such as attachments, multipart
-  e-mails, and full control over e-mail headers.
+* Stimo usando la funzione ``django.core.mail.send_mail`` per inviare una e-mail.
+  Questa funzione richiede 4 argomenti: l'oggetto, il corpo, l'indirizzo da cui
+  si spedisce ed una lista degli indirizzi destinatari. ``send_mail`` è un utile
+  wrapper della classe ``EmailMessage`` di Django, che fornisce impostazioni
+  avanzate come allegati, e-mail multiple e pieno controllo degli header delle
+  email.
 
-  Note that in order to send e-mail using ``send_mail()``, your server must
-  be configured to send mail, and Django must be told about your outbound
-  e-mail server. See http://docs.djangoproject.com/en/dev/topics/email/ for
-  the specifics.
+  Nota che per inviare una e-mail con ``send_mail()``, il tuo server deve essere
+  configurato per inviare mail, e Django deve essere informato riguardo l'email
+  server. Leggi http://docs.djangoproject.com/en/dev/topics/email/ per i
+  dettagli.
 
-* After the e-mail is sent, we redirect to a "success" page by returning an
-  ``HttpResponseRedirect`` object. We'll leave the implementation of that
-  "success" page up to you (it's a simple view/URLconf/template), but we
-  should explain why we initiate a redirect instead of, for example, simply
-  calling ``render()`` with a template right there.
+* Dopo che l'e-mail è stata spedita, re-indirizziamo l'utente ad una pagina di
+  "successo" ritornando un oggetto ``HttpResponseRedirect``. Ti lasceremo
+  l'implementazione della pagina di "successo" (è un semplice view/URLconf/template),
+  ma ti spiegheremo perché effettuiamo un redirect invece, per esempio, di
+  chiamare semplicemente ``render()`` con un template.
 
-  The reason: if a user hits "Refresh" on a page that was loaded via
-  ``POST``, that request will be repeated. This can often lead to undesired
-  behavior, such as a duplicate record being added to the database -- or,
-  in our example, the e-mail being sent twice. If the user is redirected to
-  another page after the ``POST``, then there's no chance of repeating the
-  request.
+  La ragione: se l'utente pigia "Aggiorna" su una pagina carica via ``POST``, la
+  richiesta viene ripetuta. Questo può portare a comportamenti indesiderati,
+  come record duplicati aggiunti al database -- o, nel nostro esempio, ad e-mail
+  inviate due volte. Se l'utente è invece re-indirizzato ad un'altra pagina dopo
+  la richiesta ``POST``, allora non c'è modo per lui di ripetere la richiesta.
 
-  You should *always* issue a redirect for successful ``POST`` requests.
-  It's a Web development best practice.
+  Devi *sempre* fare un redirect per ogni richiesta ``POST`` che abbia successo.
+  E' una best practice dello sviluppo Web.
 
-This view works, but those validation functions are kind of crufty. Imagine
-processing a form with a dozen fields; would you really want to have to write
-all of those ``if`` statements?
+Questa view funziona, ma le funzioni di convalida sono un po' brutali. Immagina
+di dover processare un form con dozzine di campi; vuoi davvero scrivere una
+istruzione ``if`` per ognuno di essi?
 
-Another problem is *form redisplay*. In the case of validation errors, it's
-best practice to redisplay the form *with* the previously submitted data
-already filled in, so the user can see what he did wrong (and also so the user
-doesn't have to reenter data in fields that were submitted correctly). We
-*could* manually pass the ``POST`` data back to the template, but we'd have to
-edit each HTML field to insert the proper value in the proper place:
+Un altro problema è la difficoltà nel *mostrare di nuovo il form*. Nel caso di
+errori di convalida, è una best-practice mostrare di nuovo il form *con* i dati
+precedentemente inviati, in modo che l'utente possa capire dove ha sbagliato (ed
+inoltre re-inserire i dati corretti nei campi segnalati). Potremmo *manualmente*
+passare i dati via ``POST`` al template, ma dovremmo modificare l'HTML in
+maniera che ogni campo possa avere un particolare valore:
 
 .. parsed-literal::
 
@@ -767,11 +764,9 @@ edit each HTML field to insert the proper value in the proper place:
     </body>
     </html>
 
-.. SL Tested ok
-
-This is a lot of cruft, and it introduces a lot of opportunities for human
-error. We hope you're starting to see the opportunity for some higher-level
-library that handles form- and validation-related tasks.
+Qui c'è un sacco di fuffa, che danno diverse opportunità all'errore umano.
+Speriamo che tu stia iniziando a vedere di usare alcune di librerie di più alto
+livello per gestire i compiti relativi ai form ed alla loro convalida.
 
 Your First Form Class
 =====================
