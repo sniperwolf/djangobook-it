@@ -768,35 +768,35 @@ Qui c'è un sacco di fuffa, che danno diverse opportunità all'errore umano.
 Speriamo che tu stia iniziando a vedere di usare alcune di librerie di più alto
 livello per gestire i compiti relativi ai form ed alla loro convalida.
 
-Your First Form Class
-=====================
+La tua prima Classe Form
+========================
 
-Django comes with a form library, called ``django.forms``, that handles many of
-the issues we've been exploring this chapter -- from HTML form display to
-validation. Let's dive in and rework our contact form application using the
-Django forms framework.
+Django include alcune librerie relative ai form, chiamate ``django.forms``, che
+gestiscono molte problematiche che abbiamo esplorato in questo capitolo -- dal
+mostra il form HTML alla convalida dei dati. Entriamo nel dettglio e vediamo
+come rivedere la nostra applicazione di form di contatto usando il framework dei
+form di Django.
 
-.. admonition:: Django's "newforms" library
+.. admonition:: La libreria "newforms" di Django
 
-    Throughout the Django community, you might see chatter about something
-    called ``django.newforms``. When people speak of ``django.newforms``,
-    they're talking about what is now ``django.forms`` -- the library covered by
-    this chapter.
+    Girando per la comunità Django, potresti vedere qualcosa chiamato
+    ``django.newforms``. Quando alcuni parlano di ``django.newforms``, intendono
+    ciò che adesso è ``django.forms`` -- la libreria trattata da questo capitolo.
 
-    The reason for this name change is historic. When Django was first released
-    to the public, it had a complicated, confusing forms system,
-    ``django.forms``. It was completely rewritten, and the new version was
-    called ``django.newforms`` so that people could still use the old system.
-    When Django 1.0 was released, the old ``django.forms`` went away, and
-    ``django.newforms`` became ``django.forms``.
+    La ragione di questo nome è storica. Quando Django è stato rilasciato al
+    pubblico, aveva un complicato e confuso sistema di gestione dei Form,
+    ``django.forms``. E' stato completamente riscritto, e le nuove versioni lo
+    hanno chiamato ``django.newforms``, per qualcuno potrebbe usare il vecchio
+    sistema. Quando Django 1.0 è stato rilasciato, il vecchio ``django.forms``
+    è scomparso, e ``django.newforms`` è diventato ``django.forms``.
 
-The primary way to use the forms framework is to define a ``Form`` class for
-each HTML ``<form>`` you're dealing with. In our case, we only have one
-``<form>``, so we'll have one ``Form`` class. This class can live anywhere you
-want -- including directly in your ``views.py`` file -- but community
-convention is to keep ``Form`` classes in a separate file called ``forms.py``.
-Create this file in the same directory as your ``views.py``, and enter the
-following::
+Il modo principale per usare il framework dei form è definire una classe ``Form``
+per ogni ``<form>`` HTML con cui stai lavorando. Nel nostro caso, abbiamo un
+solo ``<form>``, per cui dobbiamo creare una classe ``Form``. Questa classe può
+stare ovunque tu voglia -- incluso direttamente nel tuo file ``views.py`` -- ma
+una convenzione adottata dalla comunità è tenere le classi ``Form`` separate in
+un file chiamato ``forms.py``. Crea questo file nella stessa directory in cui
+sta ``views.py``, ed incolla il seguente codice::
 
     from django import forms
 
@@ -805,14 +805,14 @@ following::
         email = forms.EmailField(required=False)
         message = forms.CharField()
 
-This is pretty intuitive, and it's similar to Django's model syntax. Each field
-in the form is represented by a type of ``Field`` class -- ``CharField`` and
-``EmailField`` are the only types of fields used here -- as attributes of a
-``Form`` class. Each field is required by default, so to make ``email``
-optional, we specify ``required=False``.
+E' molto intuitivo, e simile alla sintassi dei Modelli di Django. Ogni campo del
+form è rappresentato da un tipo di classe ``Field`` -- `CharField`` e ``EmailField``
+sono gli unici campi usati qui -- come attributi della classe ``Form``. Ogni
+campo è richiesto di default, per cui, per rendere opzionale ``email``, bisogna
+specificare ``required=False``.
 
-Let's hop into the Python interactive interpreter and see what this class can
-do. The first thing it can do is display itself as HTML::
+Saltiamo nella shell interattiva di Python e vediamo cosa può fare questa classe.
+La prima cosa da fare è mostrare l'HTML stesso::
 
     >>> from contact.forms import ContactForm
     >>> f = ContactForm()
@@ -821,13 +821,12 @@ do. The first thing it can do is display itself as HTML::
     <tr><th><label for="id_email">Email:</label></th><td><input type="text" name="email" id="id_email" /></td></tr>
     <tr><th><label for="id_message">Message:</label></th><td><input type="text" name="message" id="id_message" /></td></tr>
 
-.. SL Tested ok
+Django aggiunge un label ad ogni campo, usando i tag ``<label>`` per una
+questione di accessibilità. L'idea è rendere il comportamento di default più
+ottimale possibile.
 
-Django adds a label to each field, along with ``<label>`` tags for
-accessibility. The idea is to make the default behavior as optimal as possible.
-
-This default output is in the format of an HTML ``<table>``, but there are a
-few other built-in outputs::
+Questo output di default è formato da tag ``<table>``, ma ci sono alcuni output
+integrati::
 
     >>> print f.as_ul()
     <li><label for="id_subject">Subject:</label> <input type="text" name="subject" id="id_subject" /></li>
@@ -838,56 +837,45 @@ few other built-in outputs::
     <p><label for="id_email">Email:</label> <input type="text" name="email" id="id_email" /></p>
     <p><label for="id_message">Message:</label> <input type="text" name="message" id="id_message" /></p>
 
-.. SL Tested ok
+Nota che i tag di chiusura ed apertura ``<table>``, ``<ul>`` e ``<form>`` non
+sono inclusi nell'output, per cui puoi aggiungere righe facoltative e
+personalizzazioni particolari se necessario.
 
-Note that the opening and closing ``<table>``, ``<ul>`` and ``<form>`` tags
-aren't included in the output, so that you can add any additional rows and
-customization if necessary.
-
-These methods are just shortcuts for the common case of "display the entire
-form." You can also display the HTML for a particular field::
+Questi metodi sono solo scorciatoie per i casi comuni in cui è necessario
+"mostrare l'intero form". Puoi inoltre mostrare l'HTML di un particolare campo::
 
     >>> print f['subject']
     <input type="text" name="subject" id="id_subject" />
     >>> print f['message']
     <input type="text" name="message" id="id_message" />
 
-.. SL Tested ok
-
-The second thing ``Form`` objects can do is validate data. To validate data,
-create a new ``Form`` object and pass it a dictionary of data that maps field
-names to data::
+La seconda cosa che può fare un oggetto ``Form`` è convalidare i dati. Per
+convalidare i dati, crea un nuovo oggetto ``Form`` e passagli un dizionario di
+dati mappato con i nomi di ogni singolo campo::
 
     >>> f = ContactForm({'subject': 'Hello', 'email': 'adrian@example.com', 'message': 'Nice site!'})
 
-Once you've associated data with a ``Form`` instance, you've created a "bound"
-form::
+Una volta associato data con una istanza di ``Form``, hai creato un form
+"bound" (N.d.T. ovvero un oggetto form che contiene i reali valori)::
 
     >>> f.is_bound
     True
 
-.. SL Tested ok
-
-Call the ``is_valid()`` method on any bound ``Form`` to find out whether its
-data is valid. We've passed a valid value for each field, so the ``Form`` in
-its entirety is valid::
+Chiama il metodo ``is_valid()`` su ogni ``Form`` creato per trovare i dati
+validi. Abbiamo passato un valore valido per ogni campo, per cui ``Form`` è
+intermente valido::
 
     >>> f.is_valid()
     True
 
-.. SL Tested ok
-
-If we don't pass the ``email`` field, it's still valid, because we've specified
-``required=False`` for that field::
+Se non passi il campo ``email``, tutto rimane valido, perché abbiamo specificato
+``required=False`` per quel campo::
 
     >>> f = ContactForm({'subject': 'Hello', 'message': 'Nice site!'})
     >>> f.is_valid()
     True
 
-.. SL Tested ok
-
-But, if we leave off either ``subject`` or ``message``, the ``Form`` is no
-longer valid::
+Ma, se lasci fuori ``subject`` o ``message``, il ``Form`` non è più valido::
 
     >>> f = ContactForm({'subject': 'Hello'})
     >>> f.is_valid()
@@ -896,9 +884,7 @@ longer valid::
     >>> f.is_valid()
     False
 
-.. SL Tested ok
-
-You can drill down to get field-specific error messages::
+Puoi anche specificare il campo per ottenere relativi messaggi di errori::
 
     >>> f = ContactForm({'subject': 'Hello', 'message': ''})
     >>> f['message'].errors
@@ -908,21 +894,17 @@ You can drill down to get field-specific error messages::
     >>> f['email'].errors
     []
 
-.. SL Tested ok
-
-Each bound ``Form`` instance has an ``errors`` attribute that gives you a
-dictionary mapping field names to error-message lists::
+Ogni istanza ``Form`` creata ha un attributo ``errors`` che ti da la possibilità
+di mostrare una lista di messaggi di errori::
 
     >>> f = ContactForm({'subject': 'Hello', 'message': ''})
     >>> f.errors
     {'message': [u'This field is required.']}
 
-.. SL Tested ok
-
-Finally, for ``Form`` instances whose data has been found to be valid, a
-``cleaned_data`` attribute is available. This is a dictionary of the
-submitted data, "cleaned up." Django's forms framework not only validates
-data, it cleans it up by converting values to the appropriate Python types.
+Finalmente, per ogni istanza ``Form`` che viene trovata valida, è disponibile un
+attributo ``cleaned_data``. Questo è un dizionario dei dati inviati, "puliti".
+Il framework dei form di Django non solo convalida i dati, ma li pulisce
+convertendoli in appropriati valori Python.
 
     >>> f = ContactForm({'subject': 'Hello', 'email': 'adrian@example.com', 'message': 'Nice site!'})
     >>> f.is_valid()
@@ -930,19 +912,17 @@ data, it cleans it up by converting values to the appropriate Python types.
     >>> f.cleaned_data
     {'message': u'Nice site!', 'email': u'adrian@example.com', 'subject': u'Hello'}
 
-.. SL Tested ok
+Il nostro modulo di contatto si occupa solo di stringhe, che sono "pulite" in
+oggetti Unicode -- ma se usiamo ``IntegerField`` o ``DateField``, il framework
+dei form assicura che ``cleaned_data`` usi i giusti interi Python o gli oggetti
+``datetime.date`` per i campi opportuni.
 
-Our contact form only deals with strings, which are "cleaned" into Unicode
-objects -- but if we were to use an ``IntegerField`` or ``DateField``, the
-forms framework would ensure that ``cleaned_data`` used proper Python
-integers or ``datetime.date`` objects for the given fields.
+Inserire Oggetti Form nelle View
+================================
 
-Tying Form Objects Into Views
-=============================
-
-With some basic knowledge about ``Form`` classes, you might see how we can use
-this infrastructure to replace some of the cruft in our ``contact()`` view.
-Here's how we can rewrite ``contact()`` to use the forms framework::
+Con alcune conoscenze di base riguardo le classi ``Form``, puoi già capire come
+usare questa infrastruttura per sostituire parte della nostra view ``contact()``.
+Ecco come possiamo riscrivere ``contact()`` per usare il framework dei form::
 
     # views.py
 
@@ -992,31 +972,30 @@ Here's how we can rewrite ``contact()`` to use the forms framework::
     </body>
     </html>
 
-.. SL Tested ok
+Guarda quanta fuffa siamo stati in grado di rimuovere! Il framework dei form
+integrato in Django si occupa del mostrare l'HTML, della convalida, della pulizia
+dei dati e del mostrare di nuovo il form con degli errori.
 
-Look at how much cruft we've been able to remove! Django's forms framework
-handles the HTML display, the validation, data cleanup and form
-redisplay-with-errors.
+Poiché abbiamo creato un form POST (che ha l'effetto di modificare dati),
+dobbiamo preoccuparci del Cross-site request forgery. Fortunatamente, non dovrai
+preoccupartene troppo, perché Django include un sistema semplice da usare per
+proteggerti. In breve, tutti i form POST che si trovano all'interno di URL,
+dovrebbero usare il tag dei template ``{% csrf_token %}``. Puoi trovare più
+dettagli su ``{% csrf_token %}`` al :doc:`chapter16` e :doc:`chapter20`.
 
-Since we're creating a POST form (which can have the effect of modifying data),
-we need to worry about Cross Site Request Forgeries. Thankfully, you don't have
-to worry too hard, because Django comes with a very easy-to-use system for
-protecting against it. In short, all POST forms that are targeted at internal
-URLs should use the ``{% csrf_token %}`` template tag. More details about
-``{% csrf_token %}`` can be found in :doc:`chapter16` and :doc:`chapter20`.
+Prova ad avviare il tutto localmente. Il caricamento del form, l'invio senza
+riempire alcun campo, l'invio con un indirizzo e-mail invalido, e poi l'invio
+con i dati corretti (Ovviamente, a seconda delle configurazioni del suo server
+e-mail, potresti ottenere un errore quando ``send_mail()``, ma questo è un
+altro problema).
 
+Cambiare il modo in cui sono renderizzati i Campi
+=================================================
 
-Try running this locally. Load the form, submit it with none of the fields
-filled out, submit it with an invalid e-mail address, then finally submit it
-with valid data. (Of course, depending on your mail-server configuration, you
-might get an error when ``send_mail()`` is called, but that's another issue.)
-
-Changing How Fields Are Rendered
-================================
-
-Probably the first thing you'll notice when you render this form locally is
-that the ``message`` field is displayed as an ``<input type="text">``, and it
-ought to be a ``<textarea>``. We can fix that by setting the field's *widget*:
+Probabilmente, hai già notato che quando l'utente renderizza questo form
+localmente, il campo ``message`` è mostrato come un ``<input type="text">``,
+mentre potrebbe essere un ``<textarea>``. Possiamo fixare il problema cambiando
+le impostazioni *widget* del campo:
 
 .. parsed-literal::
 
@@ -1027,22 +1006,20 @@ ought to be a ``<textarea>``. We can fix that by setting the field's *widget*:
         email = forms.EmailField(required=False)
         message = forms.CharField(**widget=forms.Textarea**)
 
-.. SL Tested ok
+Il framework dei form separa la logica della presentazione di ogni campo in un
+insieme di widget. Ogni tipo campo ha un widget di default, ma puoi facilmente
+cambiare il comportamento predefinito o dare un widget personalizzato.
 
-The forms framework separates out the presentation logic for each field into a
-set of widgets. Each field type has a default widget, but you can easily
-override the default, or provide a custom widget of your own.
+Pensa alle classi ``Field`` come rappresentazione della *logica di convalida*,
+mentre i widget rappresentano la *logica della presentazione*.
 
-Think of the ``Field`` classes as representing *validation logic*, while
-widgets represent *presentation logic*.
+Impostare una lunghezza Massima
+===============================
 
-Setting a Maximum Length
-========================
-
-One of the most common validation needs is to check that a field is of a
-certain size. For good measure, we should improve our ``ContactForm`` to limit
-the ``subject`` to 100 characters. To do that, just supply a ``max_length`` to
-the ``CharField``, like this:
+Uno degli aspetti più comuni della convalida richiede il controllo che un campo
+sia di una certa dimensione. Per un buon controllo, miglioreremo il nostro
+``ContactForm`` per limitare il ``subject`` (oggetto) a 100 caratteri. Per farlo,
+basta dare un ``max_length`` a ``CharField``, in questo modo:
 
 .. parsed-literal::
 
@@ -1053,7 +1030,42 @@ the ``CharField``, like this:
         email = forms.EmailField(required=False)
         message = forms.CharField(widget=forms.Textarea)
 
-An optional ``min_length`` argument is also available.
+E' valido anche un argomento opzionale ``min_length``.
+
+Impostare un Valore Iniziale
+============================
+
+Per migliorare a questo form, andiamo ad aggiungere un *valore iniziale* per il
+campo ``subject``: ``"I love your site!"`` ("Amo il tuo sito!" - Un piccolo
+suggerimento non può ferire nessuno). Per farlo, possiamo usare l'argomento
+``initial`` quando creiamo una istanza di ``Form``:
+
+.. parsed-literal::
+
+    def contact(request):
+        if request.method == 'POST':
+            form = ContactForm(request.POST)
+            if form.is_valid():
+                cd = form.cleaned_data
+                send_mail(
+                    cd['subject'],
+                    cd['message'],
+                    cd.get('email', 'noreply@example.com'),
+                    ['siteowner@example.com'],
+                )
+                return HttpResponseRedirect('/contact/thanks/')
+        else:
+            form = ContactForm(
+                **initial={'subject': 'I love your site!'}**
+            )
+        return render(request, 'contact_form.html', {'form': form})
+
+Ora, il campo ``subject`` sarà mostrato con una istruzione già compilata.
+
+Nota che c'è differenza fra passare un dato *iniziale* e passare un dato che
+*riempie* il form. La più grande differenza è che se stiamo solo passando un
+valore *iniziale*, allora il form non sarà *realmente costruito*, ovvero non
+vedremo alcun messaggio di errore.
 
 Setting Initial Values
 ======================
