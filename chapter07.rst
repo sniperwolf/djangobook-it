@@ -1067,59 +1067,23 @@ Nota che c'è differenza fra passare un dato *iniziale* e passare un dato che
 valore *iniziale*, allora il form non sarà *realmente costruito*, ovvero non
 vedremo alcun messaggio di errore.
 
-Setting Initial Values
-======================
+Regole personalizzate di Convalida
+==================================
 
-As an improvement to this form, let's add an *initial value* for the
-``subject`` field: ``"I love your site!"`` (A little power of suggestion can't
-hurt.) To do this, we can use the ``initial`` argument when we create a
-``Form`` instance:
+Immagina di aver lanciato il nostro form di contatto e le e-mail stanno iniziando
+ad arrivare. C'è solo un problema: alcuni dei messaggi inviati sono formati solo
+da una o due parole, che non sono lunghe abbastanza per dargli un senso.
+Decidiamo quindi di adottare una nuova politica di convalida: ci vogliono almeno
+quattro parole.
 
-.. parsed-literal::
+Questi sono numeri per vedere come creare una convalida personalizzata
+all'interno del nostro Django form. Se la nostra regola è qualcosa che potremmo
+usare ancora ed ancora, allora possiamo creare un tipo di campo detto 'custom'.
+Molte convalide personalizzate si occupano di un solo elemento, e possono essere
+quindi incluse direttamente nella classe ``Form``.
 
-    def contact(request):
-        if request.method == 'POST':
-            form = ContactForm(request.POST)
-            if form.is_valid():
-                cd = form.cleaned_data
-                send_mail(
-                    cd['subject'],
-                    cd['message'],
-                    cd.get('email', 'noreply@example.com'),
-                    ['siteowner@example.com'],
-                )
-                return HttpResponseRedirect('/contact/thanks/')
-        else:
-            form = ContactForm(
-                **initial={'subject': 'I love your site!'}**
-            )
-        return render(request, 'contact_form.html', {'form': form})
-
-.. SL Tested ok
-
-Now, the ``subject`` field will be displayed prepopulated with that kind
-statement.
-
-Note that there is a difference between passing *initial* data and passing
-data that *binds* the form. The biggest difference is that if you're just
-passing *initial* data, then the form will be *unbound*, which means it won't
-have any error messages.
-
-Custom Validation Rules
-=======================
-
-Imagine we've launched our feedback form, and the e-mails have started tumbling
-in. There's just one problem: some of the submitted messages are just one or
-two words, which isn't long enough for us to make sense of. We decide to adopt
-a new validation policy: four words or more, please.
-
-There are a number of ways to hook custom validation into a Django form. If our
-rule is something we will reuse again and again, we can create a custom field
-type. Most custom validations are one-off affairs, though, and can be tied
-directly to the ``Form`` class.
-
-We want additional validation on the ``message`` field, so we add a
-``clean_message()`` method to our ``Form`` class:
+Aggiungiamo quindi la convalida addizionale per il campo ``message``, per cui
+aggiungiamo un metodo ``clean_message()`` alla nostra classe ``Form``:
 
 .. parsed-literal::
 
@@ -1137,41 +1101,38 @@ We want additional validation on the ``message`` field, so we add a
                 raise forms.ValidationError("Not enough words!")
             return message
 
-.. SL Tested ok
+Il sistema di form di Django cerca automaticamente ogni metodo che inizia con
+``clean_`` e finisce con il nome di un campo. Se esiste un metodo con questo
+nome, viene invocato durante la convalida.
 
-Django's form system automatically looks for any method whose name starts with
-``clean_`` and ends with the name of a field. If any such method exists, it's
-called during validation.
+Più in particolare, il metodo ``clean_message()`` sarà chiamato *dopo* la
+logica di convalida di un dato campo (in questo caso, la logica di convalida
+richiesta per ``CharField``). Poiché i dati del campo sono già stati
+parzialmente elaborati, vengono messi in ``self.cleaned_data``. Inoltre, non
+devi preoccuparti di controllare che il valore esiste ed è non vuoto; tutto
+questo è fatto dal controllore predefinito.
 
-Specifically, the ``clean_message()`` method will be called *after* the default
-validation logic for a given field (in this case, the validation logic for a
-required ``CharField``). Because the field data has already been partially
-processed, we pull it out of ``self.cleaned_data``. Also, we don't have to
-worry about checking that the value exists and is non-empty; that's done by the
-default validator.
+Per contare il numero di parole, usiamo nativamente una combinazione di
+``len()`` e ``split()``. Se l'utente ha inserito troppe poche parole, solleviamo
+un errore ``forms.ValidationError``. La stringa collegata a questa eccezione
+verrà mostrata all'utente come oggetti nella lista degli errori.
 
-We naively use a combination of ``len()`` and ``split()`` to count the number
-of words. If the user has entered too few words, we raise a
-``forms.ValidationError``. The string attached to this exception will be
-displayed to the user as an item in the error list.
+E' importante esplicitare il ritorno del valore pulito del campo alla fine del
+metodo. Questo ci permette di modificare il valore (o convertirlo in un tipo
+Python differente) con il nostro metodo di convalida. Se dimentichi l'istruzione
+return, allora viene restituito ``None`` ed il valore originale viene perso.
 
-It's important that we explicitly return the cleaned value for the field at the
-end of the method. This allows us to modify the value (or convert it to a
-different Python type) within our custom validation method. If we forget the
-return statement, then ``None`` will be returned, and the original value will
-be lost.
-
-Specifying labels
+Specificare label
 =================
 
-By default, the labels on Django's auto-generated form HTML are created by
-replacing underscores with spaces and capitalizing the first letter -- so the
-label for the ``email`` field is ``"Email"``. (Sound familiar? It's the same
-simple algorithm that Django's models use to calculate default ``verbose_name``
-values for fields. We covered this in Chapter 5.)
+Di default, i label (etichette) di Django sono HTML auto-generato creato
+sostituendo i trattini bassi (underscore '_') con degli spazi e capitalizzando
+la prima lettera -- per cui il campo ``email`` diventa ``"Email"`` (ti suona
+familiare? E' lo stesso algoritmo usato per calcolare il valore di default
+``verbose_name`` per i campi. Ne abbiamo parlato nel Capitolo 5).
 
-But, as with Django's models, we can customize the label for a given field.
-Just use ``label``, like so:
+Ma, come nei modelli Django, possiamo personalizzare i label con un campo scelto.
+Basta usare ``label``, in questo modo:
 
 .. parsed-literal::
 
@@ -1180,19 +1141,18 @@ Just use ``label``, like so:
         email = forms.EmailField(required=False, **label='Your e-mail address'**)
         message = forms.CharField(widget=forms.Textarea)
 
-.. SL Tested ok
+Personalizzare il Design del Form
+=================================
 
-Customizing Form Design
-=======================
+Il nostro template ``contact_form.html`` usa ``{{ form.as_table }}`` per
+mostrare il form, ma vorremmo mostrare il form in altri modi per avere un
+controllo modulare di tutto.
 
-Our ``contact_form.html`` template uses ``{{ form.as_table }}`` to display the
-form, but we can display the form in other ways to get more granular control
-over display.
-
-The quickest way to customize forms' presentation is with CSS. Error lists, in
-particular, could do with some visual enhancement, and the auto-generated error
-lists use ``<ul class="errorlist">`` precisely so that you can target them with
-CSS. The following CSS really makes our errors stand out::
+Il modo più veloce per personalizzare la rappresentazione del form è usare i CSS.
+Le liste degli errori, in particolare, possono essere oggetto di miglioramenti
+visuali ed il codice auto-generato di queste liste usa sempre il codice
+``<ul class="errorlist">``, che si presta a questo tipo di modifiche. Ecco delle
+modifiche CSS per rendere migliori gli errori::
 
     <style type="text/css">
         ul.errorlist {
@@ -1209,19 +1169,19 @@ CSS. The following CSS really makes our errors stand out::
         }
     </style>
 
-.. SL Tested ok
+Se è spesso utile avere un form generato in HTML per noi, in alcuni casi
+potresti aver bisogno di sovrascrivere il rendering di default. ``{{ form.as_table }}``
+e simili sono utili scorciatoie usate dagli sviluppatori per costruire le
+applicazioni, ma tutto ciò che riguarda il mostrare un form può essere
+sovrascritto, spesso con il template stesso, e probabilmente troverai un tuo
+modo per farlo.
 
-While it's convenient to have our form's HTML generated for us, in many
-cases you'll want to override the default rendering. ``{{ form.as_table }}``
-and friends are useful shortcuts while you develop your application, but
-everything about the way a form is displayed can be overridden, mostly within
-the template itself, and you'll probably find yourself doing this.
-
-Each field's widget (``<input type="text">``, ``<select>``, ``<textarea>``,
-etc.) can be rendered individually by accessing ``{{ form.fieldname }}`` in the
-template, and any errors associated with a field are available as
-``{{ form.fieldname.errors }}``. With this in mind, we can construct a custom
-template for our contact form with the following template code::
+Ogni widget dei campi (``<input type="text">``, ``<select>``, ``<textarea>``,
+etc..) può essere renderizzato individualmente accedendo al ``{{ form.fieldname }}``
+nel template, e tutti gli errori associati ad un particolare campo sono
+disponibili in ``{{ form.fieldname.errors }}``. Sapendo questo, possiamo
+costruire un template personalizzato per il nostro form di contatto con il
+seguente codice::
 
     <html>
     <head>
@@ -1257,10 +1217,10 @@ template for our contact form with the following template code::
     </body>
     </html>
 
-``{{ form.message.errors }}`` displays a ``<ul class="errorlist">`` if errors
-are present and a blank string if the field is valid (or the form is unbound).
-We can also treat ``form.message.errors`` as a Boolean or even iterate
-over it as a list. For example::
+``{{ form.message.errors }}`` mostra un ``<ul class="errorlist">`` se sono
+presenti degli errori, mentre una stringa vuota se il campo è valido (o non
+è stato ancora inviato). Possiamo inoltre trattare ``form.message.errors`` come
+un Booleano o iterarlo come se fosse una lista. Per esempio::
 
     <div class="field{% if form.message.errors %} errors{% endif %}">
         {% if form.message.errors %}
@@ -1274,24 +1234,23 @@ over it as a list. For example::
         {{ form.message }}
     </div>
 
-.. SL Tested ok
+Nel caso di errori di validazione, viene aggiunta una classe "errors" al
+``<div>`` che lo contiene e viene mostrata la lista degli errori in una lista
+non ordinata.
 
-In the case of validation errors, this will add an "errors" class to the
-containing ``<div>`` and display the list of errors in an unordered list.
+Cosa c'è adesso?
+================
 
-What's Next?
-============
+Questo capitolo conclude il materiale introduttivo in questo libro -- il
+cosiddetto "core curriculum". Nelle prossime sezioni del libro, dal capitoli 8
+al 12, andremo a vedere nel dettaglio usi più avanzati di Django, incluso la
+produzione di una applicazione Django (Capitolo 12).
 
-This chapter concludes the introductory material in this book -- the so-called
-"core curriculum." The next section of the book, Chapters 8 to 12, goes into
-more detail about advanced Django usage, including how to deploy a Django
-application (Chapter 12).
+Dopo questi 7 capitolo, dovresti saperne abbastanza per iniziare a scrivere i
+tuoi progetti Django. Il resto del materiale in questo libro ti sarà utile per
+riempire i buchi quando ne avrai bisogno.
 
-After these first seven chapters, you should know enough to start writing your
-own Django projects. The rest of the material in this book will help fill in the
-missing pieces as you need them.
+Partiamo con il `Capitolo 8`_, tornando indietro e guardando più da vicino view
+e URLconf (introdotti prima nel `capitolo03`).
 
-We'll start in `Chapter 8`_, by doubling back and taking a closer look at views
-and URLconfs (introduced first in `chapter03`).
-
-.. _chapter 8: chapter08.html
+.. _Capitolo 8: chapter08.html
