@@ -24,3 +24,5 @@ d'aiuto ad altre persone oltre al sottoscritto, si accettano consigli e/o
 critiche e/o pull request!
 
 *Fabrizio Fallico (aka Sniper Wolf)*
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/sniperwolf/djangobook-it/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
